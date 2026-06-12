@@ -8,7 +8,6 @@ const port = process.env.PORT || 4173;
 const publicDir = path.join(__dirname, "outputs");
 const dataDir = path.join(__dirname, "data");
 const localStatePath = path.join(dataDir, "state.json");
-const stateTable = "chicken_plus_inventory_state";
 const stateKey = "inventory";
 
 const sampleItems = [
@@ -90,7 +89,7 @@ app.listen(port, () => {
 async function readState() {
   if (pool) {
     await ensureDatabase();
-    const result = await pool.query(`select value, updated_at from ${stateTable} where key = $1`, [stateKey]);
+    const result = await pool.query("select value, updated_at from app_state where key = $1", [stateKey]);
     if (!result.rowCount) return { ...sampleState, isSeed: true, updatedAt: null };
     return {
       ...normalizeState(result.rows[0].value),
@@ -111,7 +110,7 @@ async function writeState(state) {
   if (pool) {
     await ensureDatabase();
     await pool.query(
-      `insert into ${stateTable} (key, value, updated_at)
+      `insert into app_state (key, value, updated_at)
        values ($1, $2, now())
        on conflict (key)
        do update set value = excluded.value, updated_at = now()`,
@@ -127,7 +126,7 @@ async function writeState(state) {
 async function ensureDatabase() {
   if (dbReady) return;
   await pool.query(`
-    create table if not exists ${stateTable} (
+    create table if not exists app_state (
       key text primary key,
       value jsonb not null,
       updated_at timestamptz not null default now()

@@ -10,4 +10,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: chicken-plus-inventory-db
+          property: connectionString
+
+databases:
+  - name: chicken-plus-inventory-db
+    plan: free

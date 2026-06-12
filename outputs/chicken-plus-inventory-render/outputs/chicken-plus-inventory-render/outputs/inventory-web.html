@@ -31,11 +31,9 @@
     body {
       margin: 0;
       background:
-        linear-gradient(180deg, rgba(255, 238, 148, 0.74), rgba(255, 251, 233, 0.95)),
-        repeating-linear-gradient(90deg, rgba(143, 91, 0, 0.055) 0 1px, transparent 1px 28px),
-        repeating-linear-gradient(0deg, rgba(143, 91, 0, 0.045) 0 1px, transparent 1px 28px),
+        linear-gradient(135deg, rgba(255,196,0,0.18) 0 25%, transparent 25% 50%, rgba(255,196,0,0.12) 50% 75%, transparent 75%),
         var(--bg);
-      background-size: auto, 28px 28px, 28px 28px, auto;
+      background-size: 34px 34px;
       color: var(--ink);
       font-family: "Times New Roman", Times, serif;
       min-height: 100vh;
@@ -473,20 +471,6 @@
       margin-top: 14px;
     }
 
-    .quick-adjust-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .btn.stock-out {
-      background: #fff0d6;
-      color: var(--brand-red);
-      border-color: #e06038;
-      box-shadow: 3px 3px 0 var(--brand-black);
-      font-weight: 800;
-    }
-
     .audit {
       padding: 16px;
     }
@@ -771,25 +755,24 @@
             <h3>Nhập / xuất nhanh</h3>
             <form id="adjustForm" class="form-grid">
               <div class="field">
-                <label for="adjustCategory">Nhóm hàng</label>
-                <select id="adjustCategory">
-                  <option value="all">Tất cả nhóm</option>
-                </select>
-              </div>
-              <div class="field">
                 <label for="adjustItem">Mặt hàng</label>
                 <select id="adjustItem"></select>
               </div>
-              <div class="field">
-                <label for="adjustQty">Số lượng</label>
-                <input id="adjustQty" type="number" min="0" step="1" value="1" required>
+              <div class="two">
+                <div class="field">
+                  <label for="adjustType">Loại</label>
+                  <select id="adjustType">
+                    <option value="in">Nhập kho</option>
+                    <option value="out">Xuất kho</option>
+                    <option value="count">Chốt kiểm</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="adjustQty">Số lượng</label>
+                  <input id="adjustQty" type="number" min="0" step="1" value="1" required>
+                </div>
               </div>
-              <input id="adjustType" type="hidden" value="count">
-              <div class="quick-adjust-actions">
-                <button class="btn primary" id="quickInBtn" type="button">+ Nhập kho nhanh</button>
-                <button class="btn stock-out" id="quickOutBtn" type="button">− Xuất kho nhanh</button>
-              </div>
-              <button class="btn" id="countStockBtn" type="submit">Chốt kiểm số lượng</button>
+              <button class="btn primary" type="submit">Cập nhật tồn</button>
             </form>
           </div>
 
@@ -844,13 +827,9 @@
       location: document.getElementById("locationInput"),
       cancelEdit: document.getElementById("cancelEditBtn"),
       adjustForm: document.getElementById("adjustForm"),
-      adjustCategory: document.getElementById("adjustCategory"),
       adjustItem: document.getElementById("adjustItem"),
       adjustType: document.getElementById("adjustType"),
       adjustQty: document.getElementById("adjustQty"),
-      quickIn: document.getElementById("quickInBtn"),
-      quickOut: document.getElementById("quickOutBtn"),
-      countStock: document.getElementById("countStockBtn"),
       auditList: document.getElementById("auditList"),
       jsonFileInput: document.getElementById("jsonFileInput"),
       toast: document.getElementById("toast")
@@ -882,12 +861,6 @@
     els.cancelEdit.addEventListener("click", clearForm);
     els.form.addEventListener("submit", saveItem);
     els.adjustForm.addEventListener("submit", adjustStock);
-    els.adjustCategory.addEventListener("change", renderAdjustOptions);
-    els.quickIn.addEventListener("click", () => runQuickAdjust("in"));
-    els.quickOut.addEventListener("click", () => runQuickAdjust("out"));
-    els.countStock.addEventListener("click", () => {
-      els.adjustType.value = "count";
-    });
     els.jsonFileInput.addEventListener("change", importJson);
 
     init();
@@ -1026,22 +999,11 @@
     }
 
     function renderAdjustOptions() {
-      const selectedCategory = els.adjustCategory.value || "all";
-      const selectedItem = els.adjustItem.value;
-      const categories = [...new Set(items.map(item => item.category))].sort((a, b) => a.localeCompare(b, "vi"));
-      els.adjustCategory.innerHTML = '<option value="all">Tất cả nhóm</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
-      els.adjustCategory.value = categories.includes(selectedCategory) ? selectedCategory : "all";
-
-      const filteredItems = els.adjustCategory.value === "all"
-        ? items
-        : items.filter(item => item.category === els.adjustCategory.value);
-
-      if (!filteredItems.length) {
+      if (!items.length) {
         els.adjustItem.innerHTML = '<option value="">Chưa có mặt hàng</option>';
         return;
       }
-      els.adjustItem.innerHTML = filteredItems.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (${escapeHtml(item.sku)})</option>`).join("");
-      els.adjustItem.value = filteredItems.some(item => item.id === selectedItem) ? selectedItem : filteredItems[0].id;
+      els.adjustItem.innerHTML = items.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (${escapeHtml(item.sku)})</option>`).join("");
     }
 
     function renderTable() {
@@ -1149,11 +1111,6 @@
       pushAudit(actionText, `${item.name}: ${oldQty} → ${item.qty}.`);
       render();
       showToast("Đã cập nhật số lượng tồn.");
-    }
-
-    function runQuickAdjust(type) {
-      els.adjustType.value = type;
-      adjustStock(new Event("submit", { cancelable: true }));
     }
 
     function handleRowAction(event) {
