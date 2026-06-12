@@ -239,9 +239,9 @@
 
     .topbar {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 240px auto;
-      gap: 16px;
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
       margin-bottom: 18px;
       padding: 18px;
       border-radius: 8px;
@@ -270,13 +270,19 @@
       z-index: 1;
     }
 
+    .topbar > div:first-child {
+      min-width: 0;
+    }
+
     .topbar h2 {
       margin: 0;
-      font-size: 36px;
+      font-size: 34px;
       line-height: 1.15;
       letter-spacing: 0;
       color: #ffffff;
       text-transform: uppercase;
+      overflow-wrap: normal;
+      word-break: normal;
     }
 
     .topbar p {
@@ -289,6 +295,7 @@
     .operator-card {
       display: grid;
       gap: 6px;
+      width: min(320px, 100%);
       padding: 10px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.18);
@@ -322,7 +329,8 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      align-items: center;
     }
 
     .btn {
@@ -708,6 +716,28 @@
       transform: translateY(0);
     }
 
+    @media (min-width: 980px) {
+      .topbar {
+        grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+        grid-template-areas:
+          "title title"
+          "operator actions";
+      }
+
+      .topbar > div:first-child {
+        grid-area: title;
+      }
+
+      .operator-card {
+        grid-area: operator;
+      }
+
+      .actions {
+        grid-area: actions;
+        justify-content: flex-end;
+      }
+    }
+
     @media (max-width: 1080px) {
       .app {
         grid-template-columns: 1fr;
@@ -790,7 +820,7 @@
   <section class="warehouse-gate" id="warehouseGate">
     <div class="warehouse-card">
       <h1>Chọn kho Chicken Plus</h1>
-      <p>Chú ý chọn đúng cửa hàng.</p>
+      <p>Mỗi kho có dữ liệu riêng và đồng bộ riêng.</p>
       <div class="warehouse-choices">
         <button class="warehouse-choice" type="button" data-warehouse="hau-nghia">
           <img src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
@@ -838,13 +868,13 @@
         </div>
         <div class="operator-card">
           <label for="operatorInput">Người thao tác</label>
-          <input id="operatorInput" placeholder="NHẬP TÊN" autocomplete="name">
+          <input id="operatorInput" placeholder="NHẬP TÊN NHÂN VIÊN" autocomplete="name">
         </div>
         <div class="actions">
           <button class="btn" id="switchWarehouseTopBtn" type="button">⇄ Đổi kho</button>
-          <button class="btn" id="exportBtn" type="button">⇩ Xuất EXCEL</button>
+          <button class="btn" id="exportBtn" type="button">⇩ Xuất CSV</button>
           <button class="btn" id="exportJsonBtn" type="button">⇩ Sao lưu</button>
-          <button class="btn danger" id="resetBtn" type="button">↺ DỮ LIỆU CŨ</button>
+          <button class="btn danger" id="resetBtn" type="button">↺ Dữ liệu mẫu</button>
           <button class="btn primary" id="focusAddBtn" type="button">+ Thêm hàng</button>
         </div>
       </header>
@@ -1035,7 +1065,7 @@
       }
     };
     const sampleItems = [
-      { id: makeId(), name: "Mề gà", sku: "M", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Mè gà", sku: "M", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
       { id: makeId(), name: "Đùi gà", sku: "D", category: "Gà", qty: 34, min: 5, price: 0, location: "Tủ gà" },
       { id: makeId(), name: "Không xương", sku: "KX", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
       { id: makeId(), name: "Nửa con", sku: "1/5", category: "Gà", qty: 11, min: 5, price: 0, location: "Tủ gà" },
@@ -1308,7 +1338,7 @@
       els.brandSubtitle.textContent = warehouse.shortName;
       els.brandLogo.src = warehouse.logo;
       els.brandLogo.alt = warehouse.name;
-      els.sideNote.textContent = `${warehouse.name}. Hãy đảm bảo nhập số lượng chính xác.`;
+      els.sideNote.textContent = `${warehouse.name}. Dữ liệu kho này được đồng bộ riêng và không trộn với kho khác.`;
     }
 
     function syncActiveWarehouse() {
