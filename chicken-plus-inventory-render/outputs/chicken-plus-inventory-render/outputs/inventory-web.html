@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kho Chicken Plus Hậu Nghĩa</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fff8df;
+      --panel: #ffffff;
+      --ink: #22170a;
+      --muted: #725f35;
+      --line: #ead9a8;
+      --line-strong: #d7b947;
+      --accent: #ffc400;
+      --accent-dark: #d89b00;
+      --brand-red: #d82121;
+      --brand-black: #19130b;
+      --warning: #a76500;
+      --danger: #c91f1f;
+      --ok: #227447;
+      --blue: #8b5b00;
+      --shadow: 0 14px 28px rgba(84, 58, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(255,196,0,0.18) 0 25%, transparent 25% 50%, rgba(255,196,0,0.12) 50% 75%, transparent 75%),
+        var(--bg);
+      background-size: 34px 34px;
+      color: var(--ink);
+      font-family: "Times New Roman", Times, serif;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 282px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #ffcf21 0%, #f7b900 58%, #d98b00 100%);
+      color: #211500;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 72px;
+      padding: 12px;
+      border: 2px solid rgba(25, 19, 11, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.35);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28);
+    }
+
+    .brand-logo {
+      width: 94px;
+      height: 64px;
+      border-radius: 8px;
+      background: #ffd400;
+      object-fit: contain;
+      padding: 6px;
+      border: 2px solid rgba(25, 19, 11, 0.18);
+      box-shadow: 3px 3px 0 rgba(25, 19, 11, 0.85);
+    }
+
+    .brand h1 {
+      font-size: 27px;
+      line-height: 1.1;
+      margin: 0;
+      letter-spacing: 0;
+      color: var(--brand-black);
+      text-transform: uppercase;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: #5a3600;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      height: 42px;
+      border-radius: 8px;
+      color: #291900;
+      background: rgba(255, 255, 255, 0.24);
+      text-align: left;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: var(--brand-black);
+      color: #ffdd3b;
+    }
+
+    .side-note {
+      margin-top: auto;
+      border-top: 2px solid rgba(25,19,11,0.18);
+      padding-top: 16px;
+      color: #432900;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    main {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 18px;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(25, 19, 11, 0.96), rgba(64, 39, 0, 0.94)),
+        #22170a;
+      border: 2px solid #e0a900;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topbar::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 14px auto;
+      width: 152px;
+      height: 10px;
+      background: #ffcf21;
+      border-radius: 999px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.16);
+    }
+
+    .topbar > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: #ffe58d;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      margin-left: 10px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: rgba(255, 207, 33, 0.16);
+      color: #ffffff;
+      border: 1px solid rgba(255, 207, 33, 0.5);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 8px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #fff7d6;
+      color: var(--ink);
+      border: 1px solid #d8ad1a;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .btn:hover {
+      border-color: var(--line-strong);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: var(--brand-black);
+      border-color: var(--brand-black);
+      box-shadow: 3px 3px 0 var(--brand-black);
+    }
+
+    .btn.primary:hover {
+      background: #ffe05b;
+    }
+
+    .btn.danger {
+      background: #fff1d6;
+      color: var(--danger);
+      border-color: #e06038;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      background: linear-gradient(180deg, #ffffff 0%, #fff7da 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: 98px;
+      border-top: 5px solid var(--accent);
+    }
+
+    .stat span {
+      color: #6b4700;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 32px;
+      line-height: 1;
+      color: var(--brand-red);
+    }
+
+    .stat small {
+      display: block;
+      margin-top: 8px;
+      color: #7b5b12;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #e6c34e;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 180px 160px;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #fff1af, #fff9df);
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      color: #5f3d00;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fffdf4;
+      color: var(--ink);
+      padding: 0 11px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--brand-red);
+      box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.28);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #5f3d00;
+      font-size: 12px;
+      text-transform: uppercase;
+      background: #fff2aa;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:hover {
+      background: #fff8dc;
+    }
+
+    .sku {
+      color: #7a5a16;
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .qty {
+      font-weight: 800;
+      font-size: 21px;
+      color: var(--brand-black);
+    }
+
+    .tag {
+      display: inline-flex;
+      min-height: 26px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.ok {
+      color: #155c35;
+      background: #e9f8d9;
+      border: 1px solid #b7dd96;
+    }
+
+    .tag.low {
+      color: #8c4e00;
+      background: #fff0b2;
+      border: 1px solid #e8bf40;
+    }
+
+    .tag.out {
+      color: var(--danger);
+      background: #ffe4df;
+      border: 1px solid #f3a098;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #fff0b6;
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      font-weight: 800;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--line-strong);
+      background: #ffcf21;
+    }
+
+    .icon-btn.remove {
+      color: var(--danger);
+      background: #ffe8d8;
+    }
+
+    .drawer {
+      display: grid;
+      gap: 16px;
+    }
+
+    .form-panel {
+      padding: 16px;
+    }
+
+    .form-panel h3 {
+      margin: 0 0 14px;
+      font-size: 21px;
+      color: var(--brand-black);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .audit {
+      padding: 16px;
+    }
+
+    .audit h3 {
+      margin: 0 0 12px;
+      font-size: 21px;
+    }
+
+    .audit-list {
+      display: grid;
+      gap: 10px;
+      max-height: 310px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .audit-item {
+      border-left: 4px solid var(--brand-red);
+      background: #fff8df;
+      border-radius: 6px;
+      padding: 10px 10px 10px 12px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .audit-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .audit-item time {
+      color: var(--muted);
+    }
+
+    .empty {
+      padding: 30px 16px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #17202a;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 180ms ease;
+      max-width: min(420px, calc(100vw - 36px));
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: block;
+        padding: 14px 16px;
+      }
+
+      .brand {
+        margin-bottom: 12px;
+      }
+
+      .nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .side-note {
+        display: none;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      main {
+        padding: 16px;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions .btn {
+        flex: 1;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .two {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 470px) {
+      .stats,
+      .nav {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar h2 {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
+        <div>
+          <h1>Chicken Plus</h1>
+          <p>Kho Hậu Nghĩa</p>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Điều hướng">
+        <button class="active" type="button"><span>▦</span> Tổng quan kho</button>
+        <button type="button" id="navLow"><span>!</span> Sắp hết</button>
+        <button type="button" id="navAll"><span>⌕</span> Tất cả hàng</button>
+      </nav>
+      <div class="side-note">
+        Kho Chicken Plus Hậu Nghĩa. Dữ liệu được lưu trên trình duyệt này và có thể xuất CSV khi cần đối soát.
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h2>Kho Chicken Plus Hậu Nghĩa</h2>
+          <p><span id="todayText">Cập nhật hôm nay</span><span id="syncStatus" class="sync-status">Đang kết nối</span></p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="exportBtn" type="button">⇩ Xuất CSV</button>
+          <button class="btn" id="exportJsonBtn" type="button">⇩ Sao lưu</button>
+          <button class="btn" id="importJsonBtn" type="button">⇧ Nhập</button>
+          <button class="btn danger" id="resetBtn" type="button">↺ Dữ liệu mẫu</button>
+          <button class="btn primary" id="focusAddBtn" type="button">+ Thêm hàng</button>
+          <input id="jsonFileInput" type="file" accept="application/json" hidden>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="Chỉ số tồn kho">
+        <div class="stat">
+          <span>Tổng mặt hàng</span>
+          <strong id="totalItems">0</strong>
+          <small>Đang theo dõi</small>
+        </div>
+        <div class="stat">
+          <span>Tổng số lượng</span>
+          <strong id="totalQty">0</strong>
+          <small>Trong kho</small>
+        </div>
+        <div class="stat">
+          <span>Sắp hết</span>
+          <strong id="lowItems">0</strong>
+          <small>Dưới mức tối thiểu</small>
+        </div>
+        <div class="stat">
+          <span>Giá trị tồn</span>
+          <strong id="stockValue">0đ</strong>
+          <small>Theo giá vốn</small>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel">
+          <div class="toolbar">
+            <div class="field">
+              <label for="searchInput">Tìm kiếm</label>
+              <input id="searchInput" placeholder="Tên hàng, mã SKU, vị trí..." autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="categoryFilter">Nhóm hàng</label>
+              <select id="categoryFilter">
+                <option value="all">Tất cả</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="statusFilter">Trạng thái</label>
+              <select id="statusFilter">
+                <option value="all">Tất cả</option>
+                <option value="low">Sắp hết</option>
+                <option value="out">Hết hàng</option>
+                <option value="ok">Đủ hàng</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mặt hàng</th>
+                  <th>Nhóm</th>
+                  <th>Vị trí</th>
+                  <th>Tồn</th>
+                  <th>Tối thiểu</th>
+                  <th>Trạng thái</th>
+                  <th style="text-align:right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody"></tbody>
+            </table>
+          </div>
+          <div id="emptyState" class="empty" hidden>Không tìm thấy mặt hàng phù hợp.</div>
+        </div>
+
+        <aside class="drawer">
+          <div class="panel form-panel">
+            <h3 id="formTitle">Thêm mặt hàng</h3>
+            <form id="itemForm" class="form-grid">
+              <input type="hidden" id="editId">
+              <div class="field">
+                <label for="nameInput">Tên hàng</label>
+                <input id="nameInput" required placeholder="Ví dụ: Mè gà">
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="skuInput">SKU</label>
+                  <input id="skuInput" required placeholder="CF-500">
+                </div>
+                <div class="field">
+                  <label for="categoryInput">Nhóm</label>
+                  <input id="categoryInput" required placeholder="Gà">
+                </div>
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="qtyInput">Số lượng</label>
+                  <input id="qtyInput" required type="number" min="0" step="1" value="0">
+                </div>
+                <div class="field">
+                  <label for="minInput">Tối thiểu</label>
+                  <input id="minInput" required type="number" min="0" step="1" value="5">
+                </div>
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="priceInput">Giá vốn</label>
+                  <input id="priceInput" required type="number" min="0" step="1000" value="0">
+                </div>
+                <div class="field">
+                  <label for="locationInput">Vị trí</label>
+                  <input id="locationInput" required placeholder="Tủ gà">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn primary" type="submit">Lưu</button>
+                <button class="btn" id="cancelEditBtn" type="button">Hủy</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel form-panel">
+            <h3>Nhập / xuất nhanh</h3>
+            <form id="adjustForm" class="form-grid">
+              <div class="field">
+                <label for="adjustItem">Mặt hàng</label>
+                <select id="adjustItem"></select>
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="adjustType">Loại</label>
+                  <select id="adjustType">
+                    <option value="in">Nhập kho</option>
+                    <option value="out">Xuất kho</option>
+                    <option value="count">Chốt kiểm</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="adjustQty">Số lượng</label>
+                  <input id="adjustQty" type="number" min="0" step="1" value="1" required>
+                </div>
+              </div>
+              <button class="btn primary" type="submit">Cập nhật tồn</button>
+            </form>
+          </div>
+
+          <div class="panel audit">
+            <h3>Lịch sử gần đây</h3>
+            <div id="auditList" class="audit-list"></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const storageKey = "inventory-checker-v2";
+    const auditKey = "inventory-checker-audit-v2";
+    const apiStateUrl = "/api/state";
+    const sampleItems = [
+      { id: makeId(), name: "Mè gà", sku: "M", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Đùi gà", sku: "D", category: "Gà", qty: 34, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Không xương", sku: "KX", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Nửa con", sku: "1/5", category: "Gà", qty: 11, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Cánh gà", sku: "C", category: "Gà", qty: 68, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Sốt Chicken Plus", sku: "SOT", category: "Sốt", qty: 12, min: 4, price: 0, location: "Kệ sốt" }
+    ];
+
+    let items = [];
+    let audit = [];
+    let syncMode = "local";
+    let saveTimer;
+
+    const els = {
+      body: document.getElementById("inventoryBody"),
+      empty: document.getElementById("emptyState"),
+      search: document.getElementById("searchInput"),
+      category: document.getElementById("categoryFilter"),
+      status: document.getElementById("statusFilter"),
+      totalItems: document.getElementById("totalItems"),
+      totalQty: document.getElementById("totalQty"),
+      lowItems: document.getElementById("lowItems"),
+      stockValue: document.getElementById("stockValue"),
+      syncStatus: document.getElementById("syncStatus"),
+      form: document.getElementById("itemForm"),
+      formTitle: document.getElementById("formTitle"),
+      editId: document.getElementById("editId"),
+      name: document.getElementById("nameInput"),
+      sku: document.getElementById("skuInput"),
+      categoryInput: document.getElementById("categoryInput"),
+      qty: document.getElementById("qtyInput"),
+      min: document.getElementById("minInput"),
+      price: document.getElementById("priceInput"),
+      location: document.getElementById("locationInput"),
+      cancelEdit: document.getElementById("cancelEditBtn"),
+      adjustForm: document.getElementById("adjustForm"),
+      adjustItem: document.getElementById("adjustItem"),
+      adjustType: document.getElementById("adjustType"),
+      adjustQty: document.getElementById("adjustQty"),
+      auditList: document.getElementById("auditList"),
+      jsonFileInput: document.getElementById("jsonFileInput"),
+      toast: document.getElementById("toast")
+    };
+
+    document.getElementById("todayText").textContent = "Cập nhật " + new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date());
+    document.getElementById("focusAddBtn").addEventListener("click", () => {
+      clearForm();
+      els.name.focus();
+    });
+    document.getElementById("exportBtn").addEventListener("click", exportCsv);
+    document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
+    document.getElementById("importJsonBtn").addEventListener("click", () => els.jsonFileInput.click());
+    document.getElementById("resetBtn").addEventListener("click", resetSampleData);
+    document.getElementById("navLow").addEventListener("click", () => {
+      els.status.value = "low";
+      render();
+    });
+    document.getElementById("navAll").addEventListener("click", () => {
+      els.search.value = "";
+      els.category.value = "all";
+      els.status.value = "all";
+      render();
+    });
+
+    els.search.addEventListener("input", renderTable);
+    els.category.addEventListener("change", renderTable);
+    els.status.addEventListener("change", renderTable);
+    els.cancelEdit.addEventListener("click", clearForm);
+    els.form.addEventListener("submit", saveItem);
+    els.adjustForm.addEventListener("submit", adjustStock);
+    els.jsonFileInput.addEventListener("change", importJson);
+
+    init();
+
+    async function init() {
+      setSyncStatus("Đang kết nối");
+      const localState = loadLocalState();
+
+      try {
+        const response = await fetch(apiStateUrl, { headers: { Accept: "application/json" } });
+        if (!response.ok) throw new Error("Không đọc được dữ liệu server");
+        const state = await response.json();
+        syncMode = "server";
+
+        if (state.isSeed && localState.items.length) {
+          items = normalizeItems(localState.items);
+          audit = normalizeAudit(localState.audit);
+          render({ skipPersist: true });
+          await saveRemoteNow();
+          setSyncStatus("Đã đưa dữ liệu cũ lên server");
+          showToast("Đã đồng bộ dữ liệu đang có lên server.");
+          return;
+        }
+
+        items = normalizeItems(state.items && state.items.length ? state.items : sampleItems);
+        audit = normalizeAudit(state.audit);
+        render({ skipPersist: true });
+        persistLocal();
+        setSyncStatus("Đồng bộ server");
+      } catch {
+        syncMode = "local";
+        items = normalizeItems(localState.items.length ? localState.items : sampleItems);
+        audit = normalizeAudit(localState.audit.length ? localState.audit : [
+          { title: "Khởi tạo dữ liệu mẫu", detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.", at: new Date().toISOString() }
+        ]);
+        render({ skipPersist: true });
+        persistLocal();
+        setSyncStatus("Lưu trên máy này");
+      }
+    }
+
+    function loadLocalState() {
+      return {
+        items: readArray(storageKey),
+        audit: readArray(auditKey)
+      };
+    }
+
+    function readArray(key) {
+      try {
+        const saved = localStorage.getItem(key);
+        if (!saved) return [];
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function persistLocal() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(items));
+        localStorage.setItem(auditKey, JSON.stringify(audit.slice(0, 30)));
+      } catch {
+        // Private browsing or locked storage: the server copy still keeps data when available.
+      }
+    }
+
+    function persist() {
+      persistLocal();
+      if (syncMode !== "server") {
+        setSyncStatus("Lưu trên máy này");
+        return;
+      }
+      scheduleRemoteSave();
+    }
+
+    function scheduleRemoteSave() {
+      clearTimeout(saveTimer);
+      setSyncStatus("Đang lưu");
+      saveTimer = setTimeout(saveRemoteNow, 350);
+    }
+
+    async function saveRemoteNow() {
+      try {
+        const response = await fetch(apiStateUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items, audit })
+        });
+        if (!response.ok) throw new Error("Không lưu được server");
+        setSyncStatus("Đã đồng bộ");
+      } catch {
+        setSyncStatus("Mất kết nối, lưu tạm máy này");
+      }
+    }
+
+    function render(options = {}) {
+      renderStats();
+      renderFilters();
+      renderAdjustOptions();
+      renderTable();
+      renderAudit();
+      if (!options.skipPersist) persist();
+    }
+
+    function getStatus(item) {
+      if (item.qty === 0) return "out";
+      if (item.qty <= item.min) return "low";
+      return "ok";
+    }
+
+    function statusLabel(status) {
+      return { ok: "Đủ hàng", low: "Sắp hết", out: "Hết hàng" }[status];
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
+    }
+
+    function renderStats() {
+      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      const lowCount = items.filter(item => getStatus(item) !== "ok").length;
+      const value = items.reduce((sum, item) => sum + item.qty * item.price, 0);
+      els.totalItems.textContent = items.length;
+      els.totalQty.textContent = totalQty.toLocaleString("vi-VN");
+      els.lowItems.textContent = lowCount;
+      els.stockValue.textContent = formatMoney(value);
+    }
+
+    function renderFilters() {
+      const selected = els.category.value || "all";
+      const categories = [...new Set(items.map(item => item.category))].sort((a, b) => a.localeCompare(b, "vi"));
+      els.category.innerHTML = '<option value="all">Tất cả</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
+      els.category.value = categories.includes(selected) ? selected : "all";
+    }
+
+    function renderAdjustOptions() {
+      if (!items.length) {
+        els.adjustItem.innerHTML = '<option value="">Chưa có mặt hàng</option>';
+        return;
+      }
+      els.adjustItem.innerHTML = items.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (${escapeHtml(item.sku)})</option>`).join("");
+    }
+
+    function renderTable() {
+      const query = els.search.value.trim().toLowerCase();
+      const category = els.category.value;
+      const status = els.status.value;
+      const filtered = items.filter(item => {
+        const haystack = [item.name, item.sku, item.category, item.location].join(" ").toLowerCase();
+        const matchesSearch = !query || haystack.includes(query);
+        const matchesCategory = category === "all" || item.category === category;
+        const itemStatus = getStatus(item);
+        const matchesStatus = status === "all" || itemStatus === status || (status === "low" && itemStatus === "out");
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+
+      els.body.innerHTML = filtered.map(item => {
+        const status = getStatus(item);
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name)}</strong>
+              <div class="sku">${escapeHtml(item.sku)}</div>
+            </td>
+            <td>${escapeHtml(item.category)}</td>
+            <td>${escapeHtml(item.location)}</td>
+            <td><span class="qty">${item.qty.toLocaleString("vi-VN")}</span></td>
+            <td>${item.min.toLocaleString("vi-VN")}</td>
+            <td><span class="tag ${status}">${statusLabel(status)}</span></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" type="button" title="Nhập thêm 1" data-action="plus" data-id="${item.id}">+</button>
+                <button class="icon-btn" type="button" title="Xuất bớt 1" data-action="minus" data-id="${item.id}">−</button>
+                <button class="icon-btn" type="button" title="Sửa" data-action="edit" data-id="${item.id}">✎</button>
+                <button class="icon-btn remove" type="button" title="Xóa" data-action="delete" data-id="${item.id}">×</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      els.empty.hidden = filtered.length > 0;
+      els.body.querySelectorAll("button").forEach(button => button.addEventListener("click", handleRowAction));
+    }
+
+    function renderAudit() {
+      els.auditList.innerHTML = audit.length
+        ? audit.slice(0, 12).map(entry => `
+            <div class="audit-item">
+              <strong>${escapeHtml(entry.title)}</strong>
+              <div>${escapeHtml(entry.detail)}</div>
+              <time>${new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.at))}</time>
+            </div>
+          `).join("")
+        : '<div class="empty">Chưa có thay đổi nào.</div>';
+    }
+
+    function saveItem(event) {
+      event.preventDefault();
+      const item = normalizeItem({
+        id: els.editId.value || makeId(),
+        name: els.name.value.trim(),
+        sku: els.sku.value.trim(),
+        category: els.categoryInput.value.trim(),
+        qty: Number(els.qty.value),
+        min: Number(els.min.value),
+        price: Number(els.price.value),
+        location: els.location.value.trim()
+      });
+
+      if (!item.name || !item.sku || !item.category || !item.location) {
+        showToast("Vui lòng nhập đủ thông tin mặt hàng.");
+        return;
+      }
+
+      const existingIndex = items.findIndex(current => current.id === item.id);
+      if (existingIndex >= 0) {
+        items[existingIndex] = item;
+        pushAudit("Cập nhật mặt hàng", `${item.name} đang còn ${item.qty} đơn vị.`);
+      } else {
+        items.unshift(item);
+        pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho.`);
+      }
+      clearForm();
+      render();
+      showToast("Đã lưu mặt hàng.");
+    }
+
+    function adjustStock(event) {
+      event.preventDefault();
+      const item = items.find(current => current.id === els.adjustItem.value);
+      if (!item) return;
+
+      const amount = Number(els.adjustQty.value);
+      if (amount < 0) {
+        showToast("Số lượng không hợp lệ.");
+        return;
+      }
+
+      const oldQty = item.qty;
+      if (els.adjustType.value === "in") item.qty += amount;
+      if (els.adjustType.value === "out") item.qty = Math.max(0, item.qty - amount);
+      if (els.adjustType.value === "count") item.qty = amount;
+
+      const actionText = { in: "Nhập kho", out: "Xuất kho", count: "Chốt kiểm" }[els.adjustType.value];
+      pushAudit(actionText, `${item.name}: ${oldQty} → ${item.qty}.`);
+      render();
+      showToast("Đã cập nhật số lượng tồn.");
+    }
+
+    function handleRowAction(event) {
+      const button = event.currentTarget;
+      const id = button.dataset.id;
+      const item = items.find(current => current.id === id);
+      if (!item) return;
+
+      if (button.dataset.action === "plus") {
+        item.qty += 1;
+        pushAudit("Nhập nhanh", `${item.name}: tăng lên ${item.qty}.`);
+        render();
+      }
+
+      if (button.dataset.action === "minus") {
+        item.qty = Math.max(0, item.qty - 1);
+        pushAudit("Xuất nhanh", `${item.name}: còn ${item.qty}.`);
+        render();
+      }
+
+      if (button.dataset.action === "edit") {
+        els.formTitle.textContent = "Sửa mặt hàng";
+        els.editId.value = item.id;
+        els.name.value = item.name;
+        els.sku.value = item.sku;
+        els.categoryInput.value = item.category;
+        els.qty.value = item.qty;
+        els.min.value = item.min;
+        els.price.value = item.price;
+        els.location.value = item.location;
+        els.name.focus();
+      }
+
+      if (button.dataset.action === "delete") {
+        const confirmed = confirm(`Xóa "${item.name}" khỏi danh sách tồn kho?`);
+        if (!confirmed) return;
+        items = items.filter(current => current.id !== id);
+        pushAudit("Xóa mặt hàng", `${item.name} đã được xóa khỏi kho.`);
+        render();
+        showToast("Đã xóa mặt hàng.");
+      }
+    }
+
+    function clearForm() {
+      els.form.reset();
+      els.editId.value = "";
+      els.qty.value = 0;
+      els.min.value = 5;
+      els.price.value = 0;
+      els.formTitle.textContent = "Thêm mặt hàng";
+    }
+
+    function pushAudit(title, detail) {
+      audit.unshift({ title, detail, at: new Date().toISOString() });
+      audit = audit.slice(0, 30);
+    }
+
+    function exportCsv() {
+      const headers = ["Ten hang", "SKU", "Nhom", "Vi tri", "So luong", "Toi thieu", "Gia von", "Trang thai"];
+      const rows = items.map(item => [
+        item.name,
+        item.sku,
+        item.category,
+        item.location,
+        item.qty,
+        item.min,
+        item.price,
+        statusLabel(getStatus(item))
+      ]);
+      const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ton-kho-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Đã xuất file CSV.");
+    }
+
+    function exportJson() {
+      const backup = {
+        app: "chicken-plus-inventory",
+        exportedAt: new Date().toISOString(),
+        items,
+        audit
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ton-kho-chicken-plus-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Đã xuất file sao lưu JSON.");
+    }
+
+    function importJson(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || ""));
+          const importedItems = normalizeItems(parsed.items);
+          if (!importedItems.length) throw new Error("Không có mặt hàng");
+          const confirmed = confirm(`Nhập ${importedItems.length} mặt hàng từ file sao lưu và ghi đè danh sách hiện tại?`);
+          if (!confirmed) return;
+          items = importedItems;
+          audit = normalizeAudit(parsed.audit);
+          pushAudit("Nhập dữ liệu", `${importedItems.length} mặt hàng đã được nhập từ file sao lưu.`);
+          render();
+          showToast("Đã nhập dữ liệu sao lưu.");
+        } catch {
+          showToast("File sao lưu không hợp lệ.");
+        } finally {
+          els.jsonFileInput.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetSampleData() {
+      const confirmed = confirm("Khôi phục dữ liệu mẫu và ghi đè danh sách hiện tại?");
+      if (!confirmed) return;
+      items = sampleItems.map(item => ({ ...item, id: makeId() }));
+      audit = [{ title: "Khôi phục dữ liệu mẫu", detail: "Danh sách mẫu đã được nạp lại.", at: new Date().toISOString() }];
+      clearForm();
+      render();
+      showToast("Đã khôi phục dữ liệu mẫu.");
+    }
+
+    function normalizeItems(value) {
+      return Array.isArray(value) ? value.map(normalizeItem) : [];
+    }
+
+    function normalizeItem(item) {
+      return {
+        id: item.id || makeId(),
+        name: String(item.name || "").trim(),
+        sku: String(item.sku || "").trim(),
+        category: String(item.category || "").trim(),
+        qty: Math.max(0, Number(item.qty) || 0),
+        min: Math.max(0, Number(item.min) || 0),
+        price: Math.max(0, Number(item.price) || 0),
+        location: String(item.location || "").trim()
+      };
+    }
+
+    function normalizeAudit(value) {
+      return Array.isArray(value) ? value.slice(0, 30).map(entry => ({
+        title: String(entry.title || "Cập nhật"),
+        detail: String(entry.detail || ""),
+        at: entry.at || new Date().toISOString()
+      })) : [];
+    }
+
+    function setSyncStatus(message) {
+      els.syncStatus.textContent = message;
+    }
+
+    function makeId() {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+      return "item-" + Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? "");
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+  </script>
+</body>
+</html>
