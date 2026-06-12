@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: chicken-plus-inventory
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chicken-plus-inventory-db
+          property: connectionString
+
+databases:
+  - name: chicken-plus-inventory-db
+    plan: free
