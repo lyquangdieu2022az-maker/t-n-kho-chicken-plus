@@ -1,0 +1,21 @@
+Upload the CONTENTS of this folder to the GitHub repository root.
+
+Correct GitHub tree:
+
+t-n-kho-chicken-plus/
+  .gitignore
+  README.md
+  package.json
+  render.yaml
+  server.js
+  outputs/
+    inventory-web.html
+    assets/
+      logo.png
+      logo-cropped.png
+
+Delete these if they exist on GitHub:
+
+outputs/chicken-plus-inventory-render/
+outputs/chicken-plus-inventory-render.zip
+outputs/outputs/
