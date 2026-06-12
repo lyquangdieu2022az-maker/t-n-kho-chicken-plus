@@ -10,6 +10,20 @@ const dataDir = path.join(__dirname, "data");
 const localStatePath = path.join(dataDir, "state.json");
 const stateTable = "chicken_plus_inventory_state";
 const stateKey = "inventory";
+const warehouseConfigs = {
+  "hau-nghia": {
+    id: "hau-nghia",
+    name: "Kho Chicken Plus Hậu Nghĩa",
+    shortName: "Kho Hậu Nghĩa",
+    logo: "assets/logo-cropped.png"
+  },
+  "duc-hoa": {
+    id: "duc-hoa",
+    name: "Kho Chicken Plus Đức Hòa",
+    shortName: "Kho Đức Hòa",
+    logo: "assets/logo-duc-hoa.jpg"
+  }
+};
 
 const sampleItems = [
   { id: "m-ga", name: "Mè gà", sku: "M", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
@@ -20,16 +34,15 @@ const sampleItems = [
   { id: "sot-chicken-plus", name: "Sốt Chicken Plus", sku: "SOT", category: "Sốt", qty: 12, min: 4, price: 0, location: "Kệ sốt" }
 ];
 
-const sampleState = {
-  items: sampleItems,
-  audit: [
-    {
-      title: "Khởi tạo dữ liệu mẫu",
-      detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.",
-      at: new Date().toISOString()
-    }
-  ]
-};
+const sampleAudit = [
+  {
+    title: "Khởi tạo dữ liệu mẫu",
+    detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.",
+    at: new Date().toISOString()
+  }
+];
+
+const sampleState = buildStateFromSingleWarehouse(sampleItems, sampleAudit);
 
 const pool = process.env.DATABASE_URL
   ? new Pool({
@@ -137,12 +150,79 @@ async function ensureDatabase() {
 }
 
 function normalizeState(value) {
+  if (value && value.warehouses && typeof value.warehouses === "object") {
+    const hauNghia = normalizeWarehouse("hau-nghia", value.warehouses["hau-nghia"]);
+    const hadDucHoa = Boolean(value.warehouses["duc-hoa"]);
+    const ducHoa = hadDucHoa
+      ? normalizeWarehouse("duc-hoa", value.warehouses["duc-hoa"])
+      : cloneWarehouse("duc-hoa", hauNghia);
+
+    return {
+      version: 2,
+      activeWarehouseId: value.activeWarehouseId || "hau-nghia",
+      copiedHauNghiaToDucHoa: value.copiedHauNghiaToDucHoa || !hadDucHoa,
+      warehouses: {
+        "hau-nghia": hauNghia,
+        "duc-hoa": ducHoa
+      }
+    };
+  }
+
   const items = Array.isArray(value && value.items) ? value.items : [];
-  const audit = Array.isArray(value && value.audit) ? value.audit : [];
+  const audit = Array.isArray(value && value.audit) ? value.audit : sampleAudit;
+  return buildStateFromSingleWarehouse(items, audit);
+}
+
+function buildStateFromSingleWarehouse(items, audit) {
+  const hauNghia = normalizeWarehouse("hau-nghia", { items, audit });
+  const ducHoa = cloneWarehouse("duc-hoa", hauNghia);
   return {
-    items: items.map(normalizeItem),
-    audit: audit.slice(0, 30).map(normalizeAuditEntry)
+    version: 2,
+    activeWarehouseId: "hau-nghia",
+    copiedHauNghiaToDucHoa: true,
+    warehouses: {
+      "hau-nghia": hauNghia,
+      "duc-hoa": ducHoa
+    }
   };
+}
+
+function normalizeWarehouse(id, value) {
+  const source = value || {};
+  const items = Array.isArray(source.items) ? source.items.map(normalizeItem) : [];
+  const audit = Array.isArray(source.audit) ? source.audit.slice(0, 30).map(normalizeAuditEntry) : [];
+  return {
+    ...warehouseConfigs[id],
+    items,
+    audit,
+    categoryOptions: deriveOptions(items, "category", source.categoryOptions),
+    locationOptions: deriveOptions(items, "location", source.locationOptions)
+  };
+}
+
+function cloneWarehouse(id, sourceWarehouse) {
+  const clonedItems = sourceWarehouse.items.map(item => ({ ...item }));
+  return {
+    ...warehouseConfigs[id],
+    items: clonedItems,
+    audit: [
+      {
+        title: "Sao chép mặt hàng ban đầu",
+        detail: `Đã sao chép ${clonedItems.length} mặt hàng từ kho Hậu Nghĩa.`,
+        at: new Date().toISOString()
+      }
+    ],
+    categoryOptions: deriveOptions(clonedItems, "category", sourceWarehouse.categoryOptions),
+    locationOptions: deriveOptions(clonedItems, "location", sourceWarehouse.locationOptions)
+  };
+}
+
+function deriveOptions(items, field, existingOptions) {
+  const options = new Set(Array.isArray(existingOptions) ? existingOptions.map(String) : []);
+  items.forEach(item => {
+    if (item[field]) options.add(String(item[field]));
+  });
+  return [...options].map(option => option.trim()).filter(Boolean).sort((a, b) => a.localeCompare(b, "vi"));
 }
 
 function normalizeItem(item) {

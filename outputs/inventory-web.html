@@ -7,21 +7,21 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #fff8df;
+      --bg: #f4f9ff;
       --panel: #ffffff;
-      --ink: #22170a;
-      --muted: #725f35;
-      --line: #ead9a8;
-      --line-strong: #d7b947;
-      --accent: #ffc400;
-      --accent-dark: #d89b00;
-      --brand-red: #d82121;
-      --brand-black: #19130b;
-      --warning: #a76500;
-      --danger: #c91f1f;
+      --ink: #10233f;
+      --muted: #5d708a;
+      --line: #d8e7f7;
+      --line-strong: #8bbbe8;
+      --accent: #4fb3ff;
+      --accent-dark: #1f76d2;
+      --brand-red: #df3e4b;
+      --brand-black: #0f2b46;
+      --warning: #b57400;
+      --danger: #c63b3b;
       --ok: #227447;
-      --blue: #8b5b00;
-      --shadow: 0 14px 28px rgba(84, 58, 0, 0.12);
+      --blue: #1d73c9;
+      --shadow: 0 16px 34px rgba(29, 98, 157, 0.13);
     }
 
     * {
@@ -31,11 +31,10 @@
     body {
       margin: 0;
       background:
-        linear-gradient(180deg, rgba(255, 238, 148, 0.74), rgba(255, 251, 233, 0.95)),
-        repeating-linear-gradient(90deg, rgba(143, 91, 0, 0.055) 0 1px, transparent 1px 28px),
-        repeating-linear-gradient(0deg, rgba(143, 91, 0, 0.045) 0 1px, transparent 1px 28px),
+        radial-gradient(circle at 12% 8%, rgba(92, 180, 255, 0.22), transparent 30%),
+        radial-gradient(circle at 82% 0%, rgba(170, 219, 255, 0.38), transparent 26%),
+        linear-gradient(180deg, #f7fbff 0%, #eef7ff 100%),
         var(--bg);
-      background-size: auto, 28px 28px, 28px 28px, auto;
       color: var(--ink);
       font-family: "Times New Roman", Times, serif;
       min-height: 100vh;
@@ -52,15 +51,107 @@
       cursor: pointer;
     }
 
+    @keyframes buttonFloat {
+      0% { transform: translateY(-1px) rotate(0deg); }
+      45% { transform: translateY(-3px) rotate(-0.7deg); }
+      100% { transform: translateY(-2px) rotate(0deg); }
+    }
+
     .app {
       min-height: 100vh;
       display: grid;
       grid-template-columns: 282px minmax(0, 1fr);
     }
 
+    .app[hidden],
+    .warehouse-gate[hidden] {
+      display: none !important;
+    }
+
+    .warehouse-gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .warehouse-card {
+      width: min(920px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .warehouse-card h1 {
+      margin: 0;
+      font-size: 34px;
+      text-transform: uppercase;
+    }
+
+    .warehouse-card p {
+      margin: 8px 0 20px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .warehouse-choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .gate-actions {
+      margin: 0 0 18px;
+    }
+
+    .warehouse-choice {
+      min-height: 168px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #edf7ff);
+      color: var(--ink);
+      padding: 16px;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .warehouse-choice:hover {
+      border-color: var(--accent-dark);
+      box-shadow: 0 12px 24px rgba(31, 118, 210, 0.18);
+      animation: buttonFloat 420ms ease both;
+    }
+
+    .warehouse-choice img {
+      width: 120px;
+      height: 96px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: #ffd400;
+      border: 1px solid var(--line);
+    }
+
+    .warehouse-choice strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.08;
+      text-transform: uppercase;
+    }
+
+    .warehouse-choice span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
     .sidebar {
-      background: linear-gradient(180deg, #ffcf21 0%, #f7b900 58%, #d98b00 100%);
-      color: #211500;
+      background: linear-gradient(180deg, #ffffff 0%, #eaf6ff 58%, #d9edff 100%);
+      color: var(--ink);
       padding: 24px 18px;
       display: flex;
       flex-direction: column;
@@ -73,10 +164,10 @@
       gap: 13px;
       min-height: 72px;
       padding: 12px;
-      border: 2px solid rgba(25, 19, 11, 0.18);
+      border: 1px solid var(--line);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.35);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.64);
     }
 
     .brand-logo {
@@ -86,8 +177,8 @@
       background: #ffd400;
       object-fit: contain;
       padding: 6px;
-      border: 2px solid rgba(25, 19, 11, 0.18);
-      box-shadow: 3px 3px 0 rgba(25, 19, 11, 0.85);
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 8px 16px rgba(29, 98, 157, 0.16);
     }
 
     .brand h1 {
@@ -101,7 +192,7 @@
 
     .brand p {
       margin: 4px 0 0;
-      color: #5a3600;
+      color: var(--muted);
       font-size: 16px;
       font-weight: 700;
     }
@@ -114,26 +205,29 @@
     .nav button {
       height: 42px;
       border-radius: 8px;
-      color: #291900;
-      background: rgba(255, 255, 255, 0.24);
+      color: var(--brand-black);
+      background: rgba(255, 255, 255, 0.72);
       text-align: left;
       padding: 0 12px;
       display: flex;
       align-items: center;
       gap: 10px;
+      transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
     }
 
     .nav button.active,
     .nav button:hover {
-      background: var(--brand-black);
-      color: #ffdd3b;
+      background: var(--accent-dark);
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(31, 118, 210, 0.18);
+      animation: buttonFloat 420ms ease both;
     }
 
     .side-note {
       margin-top: auto;
-      border-top: 2px solid rgba(25,19,11,0.18);
+      border-top: 1px solid var(--line-strong);
       padding-top: 16px;
-      color: #432900;
+      color: var(--muted);
       font-size: 15px;
       line-height: 1.45;
     }
@@ -144,17 +238,17 @@
     }
 
     .topbar {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 240px auto;
       gap: 16px;
       align-items: center;
       margin-bottom: 18px;
       padding: 18px;
       border-radius: 8px;
       background:
-        linear-gradient(90deg, rgba(25, 19, 11, 0.96), rgba(64, 39, 0, 0.94)),
-        #22170a;
-      border: 2px solid #e0a900;
+        linear-gradient(90deg, rgba(29, 115, 201, 0.98), rgba(93, 178, 255, 0.94)),
+        #1d73c9;
+      border: 1px solid var(--line-strong);
       box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
@@ -166,7 +260,7 @@
       inset: auto 18px 14px auto;
       width: 152px;
       height: 10px;
-      background: #ffcf21;
+      background: rgba(255,255,255,0.42);
       border-radius: 999px;
       box-shadow: 0 0 0 2px rgba(255,255,255,0.16);
     }
@@ -187,9 +281,27 @@
 
     .topbar p {
       margin: 6px 0 0;
-      color: #ffe58d;
+      color: #eaf6ff;
       font-size: 17px;
       font-weight: 700;
+    }
+
+    .operator-card {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+    }
+
+    .operator-card label {
+      color: #ffffff;
+    }
+
+    .operator-card input {
+      background: #ffffff;
+      border-color: rgba(255, 255, 255, 0.7);
     }
 
     .sync-status {
@@ -199,9 +311,9 @@
       margin-left: 10px;
       padding: 0 9px;
       border-radius: 999px;
-      background: rgba(255, 207, 33, 0.16);
+      background: rgba(255, 255, 255, 0.18);
       color: #ffffff;
-      border: 1px solid rgba(255, 207, 33, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.45);
       font-size: 14px;
       white-space: nowrap;
     }
@@ -221,43 +333,54 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      background: #fff7d6;
+      background: #ffffff;
       color: var(--ink);
-      border: 1px solid #d8ad1a;
+      border: 1px solid var(--line-strong);
       white-space: nowrap;
       font-weight: 700;
+      box-shadow: 0 8px 16px rgba(29, 98, 157, 0.08);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
     }
 
     .btn:hover {
-      border-color: var(--line-strong);
+      border-color: var(--accent-dark);
+      box-shadow: 0 12px 22px rgba(31, 118, 210, 0.18);
+      animation: buttonFloat 420ms ease both;
+    }
+
+    .btn:active,
+    .icon-btn:active,
+    .warehouse-choice:active,
+    .nav button:active {
+      transform: translateY(1px) scale(0.99);
     }
 
     .btn.primary {
       background: var(--accent);
-      color: var(--brand-black);
-      border-color: var(--brand-black);
-      box-shadow: 3px 3px 0 var(--brand-black);
+      color: #ffffff;
+      border-color: var(--accent-dark);
+      box-shadow: 0 10px 20px rgba(31, 118, 210, 0.2);
     }
 
     .btn.primary:hover {
-      background: #ffe05b;
+      background: var(--accent-dark);
     }
 
     .btn.danger {
-      background: #fff1d6;
+      background: #fff2f2;
       color: var(--danger);
-      border-color: #e06038;
+      border-color: #f0b4b4;
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
       gap: 12px;
       margin-bottom: 16px;
     }
 
     .stat {
-      background: linear-gradient(180deg, #ffffff 0%, #fff7da 100%);
+      background: linear-gradient(180deg, #ffffff 0%, #edf7ff 100%);
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 16px;
@@ -267,7 +390,7 @@
     }
 
     .stat span {
-      color: #6b4700;
+      color: var(--muted);
       font-size: 14px;
       font-weight: 700;
     }
@@ -277,13 +400,13 @@
       margin-top: 8px;
       font-size: 32px;
       line-height: 1;
-      color: var(--brand-red);
+      color: var(--blue);
     }
 
     .stat small {
       display: block;
       margin-top: 8px;
-      color: #7b5b12;
+      color: var(--muted);
     }
 
     .workspace {
@@ -295,7 +418,7 @@
 
     .panel {
       background: rgba(255, 255, 255, 0.96);
-      border: 1px solid #e6c34e;
+      border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow);
       overflow: hidden;
@@ -303,11 +426,11 @@
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) 180px 160px;
+      grid-template-columns: minmax(220px, 1fr) 170px 170px 150px;
       gap: 10px;
       padding: 14px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(90deg, #fff1af, #fff9df);
+      background: linear-gradient(90deg, #edf7ff, #ffffff);
     }
 
     .field {
@@ -316,7 +439,7 @@
     }
 
     label {
-      color: #5f3d00;
+      color: var(--brand-black);
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
@@ -328,7 +451,7 @@
       height: 40px;
       border: 1px solid var(--line-strong);
       border-radius: 8px;
-      background: #fffdf4;
+      background: #ffffff;
       color: var(--ink);
       padding: 0 11px;
       outline: none;
@@ -336,8 +459,8 @@
 
     input:focus,
     select:focus {
-      border-color: var(--brand-red);
-      box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.28);
+      border-color: var(--accent-dark);
+      box-shadow: 0 0 0 3px rgba(79, 179, 255, 0.22);
     }
 
     .table-wrap {
@@ -347,7 +470,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 780px;
+      min-width: 720px;
     }
 
     th,
@@ -359,21 +482,21 @@
     }
 
     th {
-      color: #5f3d00;
+      color: var(--brand-black);
       font-size: 12px;
       text-transform: uppercase;
-      background: #fff2aa;
+      background: #eaf6ff;
       position: sticky;
       top: 0;
       z-index: 1;
     }
 
     tbody tr:hover {
-      background: #fff8dc;
+      background: #f2f9ff;
     }
 
     .sku {
-      color: #7a5a16;
+      color: var(--muted);
       font-size: 13px;
       margin-top: 3px;
     }
@@ -416,29 +539,33 @@
     .row-actions {
       display: flex;
       gap: 6px;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      min-width: 154px;
     }
 
     .icon-btn {
       width: 34px;
       height: 34px;
       border-radius: 8px;
-      background: #fff0b6;
+      background: #eaf6ff;
       color: var(--ink);
       display: grid;
       place-items: center;
-      border: 1px solid transparent;
+      border: 1px solid var(--line);
       font-weight: 800;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
     }
 
     .icon-btn:hover {
-      border-color: var(--line-strong);
-      background: #ffcf21;
+      border-color: var(--accent-dark);
+      background: #d7edff;
+      box-shadow: 0 8px 14px rgba(31, 118, 210, 0.15);
+      animation: buttonFloat 420ms ease both;
     }
 
     .icon-btn.remove {
       color: var(--danger);
-      background: #ffe8d8;
+      background: #fff0f0;
     }
 
     .drawer {
@@ -480,11 +607,27 @@
     }
 
     .btn.stock-out {
-      background: #fff0d6;
-      color: var(--brand-red);
-      border-color: #e06038;
-      box-shadow: 3px 3px 0 var(--brand-black);
+      background: #fff2f2;
+      color: var(--danger);
+      border-color: #f0b4b4;
+      box-shadow: 0 10px 20px rgba(198, 59, 59, 0.1);
       font-weight: 800;
+    }
+
+    .option-tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .option-tools input {
+      min-width: 0;
+    }
+
+    .option-tools .icon-btn {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
     }
 
     .audit {
@@ -505,8 +648,8 @@
     }
 
     .audit-item {
-      border-left: 4px solid var(--brand-red);
-      background: #fff8df;
+      border-left: 4px solid var(--accent-dark);
+      background: #f2f9ff;
       border-radius: 6px;
       padding: 10px 10px 10px 12px;
       font-size: 13px;
@@ -523,6 +666,19 @@
       color: var(--muted);
     }
 
+    .audit-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .audit-actor {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
     .empty {
       padding: 30px 16px;
       text-align: center;
@@ -533,8 +689,9 @@
       position: fixed;
       right: 18px;
       bottom: 18px;
-      background: #17202a;
+      background: var(--brand-black);
       color: #ffffff;
+      border: 1px solid var(--line-strong);
       border-radius: 8px;
       padding: 12px 14px;
       box-shadow: var(--shadow);
@@ -576,6 +733,10 @@
       .workspace {
         grid-template-columns: 1fr;
       }
+
+      .warehouse-choices {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 760px) {
@@ -585,6 +746,7 @@
 
       .topbar {
         display: grid;
+        grid-template-columns: 1fr;
       }
 
       .actions {
@@ -606,6 +768,10 @@
       .two {
         grid-template-columns: 1fr;
       }
+
+      .warehouse-choice {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 470px) {
@@ -621,21 +787,45 @@
   </style>
 </head>
 <body>
-  <div class="app">
+  <section class="warehouse-gate" id="warehouseGate">
+    <div class="warehouse-card">
+      <h1>Chọn kho Chicken Plus</h1>
+      <p>Mỗi kho có dữ liệu riêng và đồng bộ riêng.</p>
+      <div class="warehouse-choices">
+        <button class="warehouse-choice" type="button" data-warehouse="hau-nghia">
+          <img src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
+          <span>
+            <strong>Chicken Plus Hậu Nghĩa</strong>
+            <span>Mở kho Hậu Nghĩa</span>
+          </span>
+        </button>
+        <button class="warehouse-choice" type="button" data-warehouse="duc-hoa">
+          <img src="assets/logo-duc-hoa.jpg" alt="Chicken Plus Đức Hòa">
+          <span>
+            <strong>Chicken Plus Đức Hòa</strong>
+            <span>Mở kho Đức Hòa</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="app" id="appShell" hidden>
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo" src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
+        <img class="brand-logo" id="brandLogo" src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
         <div>
           <h1>Chicken Plus</h1>
-          <p>Kho Hậu Nghĩa</p>
+          <p id="brandSubtitle">Kho Hậu Nghĩa</p>
         </div>
       </div>
       <nav class="nav" aria-label="Điều hướng">
         <button class="active" type="button"><span>▦</span> Tổng quan kho</button>
         <button type="button" id="navLow"><span>!</span> Sắp hết</button>
-        <button type="button" id="navAll"><span>⌕</span> Tất cả hàng</button>
+        <button type="button" id="navAll"><span>⌕</span> Bỏ lọc</button>
       </nav>
-      <div class="side-note">
+      <button class="btn" id="switchWarehouseBtn" type="button">Đổi kho</button>
+      <div class="side-note" id="sideNote">
         Kho Chicken Plus Hậu Nghĩa. Dữ liệu được lưu trên trình duyệt này và có thể xuất CSV khi cần đối soát.
       </div>
     </aside>
@@ -643,16 +833,19 @@
     <main>
       <header class="topbar">
         <div>
-          <h2>Kho Chicken Plus Hậu Nghĩa</h2>
+          <h2 id="warehouseTitle">Kho Chicken Plus Hậu Nghĩa</h2>
           <p><span id="todayText">Cập nhật hôm nay</span><span id="syncStatus" class="sync-status">Đang kết nối</span></p>
         </div>
+        <div class="operator-card">
+          <label for="operatorInput">Người thao tác</label>
+          <input id="operatorInput" placeholder="NHẬP TÊN NHÂN VIÊN" autocomplete="name">
+        </div>
         <div class="actions">
+          <button class="btn" id="switchWarehouseTopBtn" type="button">⇄ Đổi kho</button>
           <button class="btn" id="exportBtn" type="button">⇩ Xuất CSV</button>
           <button class="btn" id="exportJsonBtn" type="button">⇩ Sao lưu</button>
-          <button class="btn" id="importJsonBtn" type="button">⇧ Nhập</button>
           <button class="btn danger" id="resetBtn" type="button">↺ Dữ liệu mẫu</button>
           <button class="btn primary" id="focusAddBtn" type="button">+ Thêm hàng</button>
-          <input id="jsonFileInput" type="file" accept="application/json" hidden>
         </div>
       </header>
 
@@ -672,11 +865,6 @@
           <strong id="lowItems">0</strong>
           <small>Dưới mức tối thiểu</small>
         </div>
-        <div class="stat">
-          <span>Giá trị tồn</span>
-          <strong id="stockValue">0đ</strong>
-          <small>Theo giá vốn</small>
-        </div>
       </section>
 
       <section class="workspace">
@@ -689,13 +877,19 @@
             <div class="field">
               <label for="categoryFilter">Nhóm hàng</label>
               <select id="categoryFilter">
-                <option value="all">Tất cả</option>
+                <option value="all">Chọn nhóm</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="locationFilter">Vị trí</label>
+              <select id="locationFilter">
+                <option value="all">Chọn vị trí</option>
               </select>
             </div>
             <div class="field">
               <label for="statusFilter">Trạng thái</label>
               <select id="statusFilter">
-                <option value="all">Tất cả</option>
+                <option value="all">Chọn trạng thái</option>
                 <option value="low">Sắp hết</option>
                 <option value="out">Hết hàng</option>
                 <option value="ok">Đủ hàng</option>
@@ -707,12 +901,12 @@
               <thead>
                 <tr>
                   <th>Mặt hàng</th>
+                  <th>Thao tác</th>
                   <th>Nhóm</th>
                   <th>Vị trí</th>
                   <th>Tồn</th>
                   <th>Tối thiểu</th>
                   <th>Trạng thái</th>
-                  <th style="text-align:right">Thao tác</th>
                 </tr>
               </thead>
               <tbody id="inventoryBody"></tbody>
@@ -728,7 +922,7 @@
               <input type="hidden" id="editId">
               <div class="field">
                 <label for="nameInput">Tên hàng</label>
-                <input id="nameInput" required placeholder="Ví dụ: Mè gà">
+                <input id="nameInput" required placeholder="VÍ DỤ: MÈ GÀ">
               </div>
               <div class="two">
                 <div class="field">
@@ -737,7 +931,12 @@
                 </div>
                 <div class="field">
                   <label for="categoryInput">Nhóm</label>
-                  <input id="categoryInput" required placeholder="Gà">
+                  <div class="option-tools">
+                    <input id="categoryInput" required list="categoryOptions" placeholder="GÀ">
+                    <button class="icon-btn" id="addCategoryOptionBtn" type="button" title="Lưu nhóm này">+</button>
+                    <button class="icon-btn remove" id="removeCategoryOptionBtn" type="button" title="Xóa nhóm này">×</button>
+                  </div>
+                  <datalist id="categoryOptions"></datalist>
                 </div>
               </div>
               <div class="two">
@@ -757,7 +956,12 @@
                 </div>
                 <div class="field">
                   <label for="locationInput">Vị trí</label>
-                  <input id="locationInput" required placeholder="Tủ gà">
+                  <div class="option-tools">
+                    <input id="locationInput" required list="locationOptions" placeholder="TỦ GÀ">
+                    <button class="icon-btn" id="addLocationOptionBtn" type="button" title="Lưu vị trí này">+</button>
+                    <button class="icon-btn remove" id="removeLocationOptionBtn" type="button" title="Xóa vị trí này">×</button>
+                  </div>
+                  <datalist id="locationOptions"></datalist>
                 </div>
               </div>
               <div class="form-actions">
@@ -774,6 +978,12 @@
                 <label for="adjustCategory">Nhóm hàng</label>
                 <select id="adjustCategory">
                   <option value="all">Tất cả nhóm</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="adjustLocation">Vị trí</label>
+                <select id="adjustLocation">
+                  <option value="all">Tất cả vị trí</option>
                 </select>
               </div>
               <div class="field">
@@ -804,9 +1014,26 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const storageKey = "inventory-checker-v2";
-    const auditKey = "inventory-checker-audit-v2";
+    const legacyStorageKey = "inventory-checker-v2";
+    const legacyAuditKey = "inventory-checker-audit-v2";
+    const storageKey = "inventory-checker-v3";
+    const activeWarehouseKey = "inventory-active-warehouse-v1";
+    const operatorKey = "inventory-operator-name-v1";
     const apiStateUrl = "/api/state";
+    const warehouseConfigs = {
+      "hau-nghia": {
+        id: "hau-nghia",
+        name: "Kho Chicken Plus Hậu Nghĩa",
+        shortName: "Kho Hậu Nghĩa",
+        logo: "assets/logo-cropped.png"
+      },
+      "duc-hoa": {
+        id: "duc-hoa",
+        name: "Kho Chicken Plus Đức Hòa",
+        shortName: "Kho Đức Hòa",
+        logo: "assets/logo-duc-hoa.jpg"
+      }
+    };
     const sampleItems = [
       { id: makeId(), name: "Mè gà", sku: "M", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
       { id: makeId(), name: "Đùi gà", sku: "D", category: "Gà", qty: 34, min: 5, price: 0, location: "Tủ gà" },
@@ -816,21 +1043,33 @@
       { id: makeId(), name: "Sốt Chicken Plus", sku: "SOT", category: "Sốt", qty: 12, min: 4, price: 0, location: "Kệ sốt" }
     ];
 
+    let appState = buildStateFromSingleWarehouse(sampleItems, [
+      { title: "Khởi tạo dữ liệu mẫu", detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.", actor: "HỆ THỐNG", at: new Date().toISOString() }
+    ]);
+    let activeWarehouseId = readTextStorage(activeWarehouseKey) || "";
+    let hasActivatedWarehouse = false;
     let items = [];
     let audit = [];
     let syncMode = "local";
     let saveTimer;
 
     const els = {
+      warehouseGate: document.getElementById("warehouseGate"),
+      appShell: document.getElementById("appShell"),
+      warehouseTitle: document.getElementById("warehouseTitle"),
+      operator: document.getElementById("operatorInput"),
+      brandLogo: document.getElementById("brandLogo"),
+      brandSubtitle: document.getElementById("brandSubtitle"),
+      sideNote: document.getElementById("sideNote"),
       body: document.getElementById("inventoryBody"),
       empty: document.getElementById("emptyState"),
       search: document.getElementById("searchInput"),
       category: document.getElementById("categoryFilter"),
+      locationFilter: document.getElementById("locationFilter"),
       status: document.getElementById("statusFilter"),
       totalItems: document.getElementById("totalItems"),
       totalQty: document.getElementById("totalQty"),
       lowItems: document.getElementById("lowItems"),
-      stockValue: document.getElementById("stockValue"),
       syncStatus: document.getElementById("syncStatus"),
       form: document.getElementById("itemForm"),
       formTitle: document.getElementById("formTitle"),
@@ -838,13 +1077,20 @@
       name: document.getElementById("nameInput"),
       sku: document.getElementById("skuInput"),
       categoryInput: document.getElementById("categoryInput"),
+      categoryOptions: document.getElementById("categoryOptions"),
+      addCategoryOption: document.getElementById("addCategoryOptionBtn"),
+      removeCategoryOption: document.getElementById("removeCategoryOptionBtn"),
       qty: document.getElementById("qtyInput"),
       min: document.getElementById("minInput"),
       price: document.getElementById("priceInput"),
       location: document.getElementById("locationInput"),
+      locationOptions: document.getElementById("locationOptions"),
+      addLocationOption: document.getElementById("addLocationOptionBtn"),
+      removeLocationOption: document.getElementById("removeLocationOptionBtn"),
       cancelEdit: document.getElementById("cancelEditBtn"),
       adjustForm: document.getElementById("adjustForm"),
       adjustCategory: document.getElementById("adjustCategory"),
+      adjustLocation: document.getElementById("adjustLocation"),
       adjustItem: document.getElementById("adjustItem"),
       adjustType: document.getElementById("adjustType"),
       adjustQty: document.getElementById("adjustQty"),
@@ -852,18 +1098,21 @@
       quickOut: document.getElementById("quickOutBtn"),
       countStock: document.getElementById("countStockBtn"),
       auditList: document.getElementById("auditList"),
-      jsonFileInput: document.getElementById("jsonFileInput"),
       toast: document.getElementById("toast")
     };
 
     document.getElementById("todayText").textContent = "Cập nhật " + new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date());
+    document.querySelectorAll("[data-warehouse]").forEach(button => {
+      button.addEventListener("click", () => selectWarehouse(button.dataset.warehouse));
+    });
+    document.getElementById("switchWarehouseBtn").addEventListener("click", showWarehouseGate);
+    document.getElementById("switchWarehouseTopBtn").addEventListener("click", showWarehouseGate);
     document.getElementById("focusAddBtn").addEventListener("click", () => {
       clearForm();
       els.name.focus();
     });
     document.getElementById("exportBtn").addEventListener("click", exportCsv);
     document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
-    document.getElementById("importJsonBtn").addEventListener("click", () => els.jsonFileInput.click());
     document.getElementById("resetBtn").addEventListener("click", resetSampleData);
     document.getElementById("navLow").addEventListener("click", () => {
       els.status.value = "low";
@@ -872,23 +1121,40 @@
     document.getElementById("navAll").addEventListener("click", () => {
       els.search.value = "";
       els.category.value = "all";
+      els.locationFilter.value = "all";
       els.status.value = "all";
       render();
     });
 
     els.search.addEventListener("input", renderTable);
     els.category.addEventListener("change", renderTable);
+    els.locationFilter.addEventListener("change", renderTable);
     els.status.addEventListener("change", renderTable);
     els.cancelEdit.addEventListener("click", clearForm);
+    els.addCategoryOption.addEventListener("click", () => addOption("category", els.categoryInput.value));
+    els.addLocationOption.addEventListener("click", () => addOption("location", els.location.value));
+    els.removeCategoryOption.addEventListener("click", () => removeOption("category", els.categoryInput.value));
+    els.removeLocationOption.addEventListener("click", () => removeOption("location", els.location.value));
     els.form.addEventListener("submit", saveItem);
     els.adjustForm.addEventListener("submit", adjustStock);
     els.adjustCategory.addEventListener("change", renderAdjustOptions);
+    els.adjustLocation.addEventListener("change", renderAdjustOptions);
     els.quickIn.addEventListener("click", () => runQuickAdjust("in"));
     els.quickOut.addEventListener("click", () => runQuickAdjust("out"));
     els.countStock.addEventListener("click", () => {
       els.adjustType.value = "count";
     });
-    els.jsonFileInput.addEventListener("change", importJson);
+    els.operator.value = normalizeText(readTextStorage(operatorKey));
+    [els.operator, els.name, els.sku, els.categoryInput, els.location].forEach(input => {
+      input.addEventListener("input", () => uppercaseInput(input));
+    });
+    els.operator.addEventListener("input", () => {
+      try {
+        localStorage.setItem(operatorKey, els.operator.value.trim());
+      } catch {
+        // The audit log still records the typed name for the current session.
+      }
+    });
 
     init();
 
@@ -897,48 +1163,66 @@
       const localState = loadLocalState();
 
       try {
-        const response = await fetch(apiStateUrl, { headers: { Accept: "application/json" } });
+        const response = await fetch(`${apiStateUrl}?t=${Date.now()}`, { cache: "no-store", headers: { Accept: "application/json" } });
         if (!response.ok) throw new Error("Không đọc được dữ liệu server");
-        const state = await response.json();
+        const state = JSON.parse((await response.text()).replace(/^\uFEFF/, ""));
         syncMode = "server";
 
-        if (state.isSeed && localState.items.length) {
-          items = normalizeItems(localState.items);
-          audit = normalizeAudit(localState.audit);
-          render({ skipPersist: true });
+        if (state.isSeed && hasWarehouseData(localState)) {
+          appState = normalizeAppState(localState);
+          activateInitialWarehouse();
           await saveRemoteNow();
           setSyncStatus("Đã đưa dữ liệu cũ lên server");
           showToast("Đã đồng bộ dữ liệu đang có lên server.");
           return;
         }
 
-        items = normalizeItems(state.items && state.items.length ? state.items : sampleItems);
-        audit = normalizeAudit(state.audit);
-        render({ skipPersist: true });
+        appState = normalizeAppState(state);
+        activateInitialWarehouse();
         persistLocal();
         setSyncStatus("Đồng bộ server");
       } catch {
         syncMode = "local";
-        items = normalizeItems(localState.items.length ? localState.items : sampleItems);
-        audit = normalizeAudit(localState.audit.length ? localState.audit : [
-          { title: "Khởi tạo dữ liệu mẫu", detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.", at: new Date().toISOString() }
-        ]);
-        render({ skipPersist: true });
+        appState = normalizeAppState(hasWarehouseData(localState) ? localState : buildStateFromSingleWarehouse(sampleItems, [
+          { title: "Khởi tạo dữ liệu mẫu", detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.", actor: "HỆ THỐNG", at: new Date().toISOString() }
+        ]));
+        activateInitialWarehouse();
         persistLocal();
         setSyncStatus("Lưu trên máy này");
       }
     }
 
     function loadLocalState() {
-      return {
-        items: readArray(storageKey),
-        audit: readArray(auditKey)
+      const multi = readJson(storageKey);
+      const legacy = {
+        items: readArray(legacyStorageKey),
+        audit: readArray(legacyAuditKey)
       };
+      if (multi && multi.warehouses && hasWarehouseData(multi)) return multi;
+      if (legacy.items.length) return legacy;
+      return multi && multi.warehouses ? multi : legacy;
+    }
+
+    function readTextStorage(key) {
+      try {
+        return typeof localStorage === "undefined" ? "" : localStorage.getItem(key);
+      } catch {
+        return "";
+      }
+    }
+
+    function readJson(key) {
+      try {
+        const saved = readTextStorage(key);
+        return saved ? JSON.parse(saved.replace(/^\uFEFF/, "")) : null;
+      } catch {
+        return null;
+      }
     }
 
     function readArray(key) {
       try {
-        const saved = localStorage.getItem(key);
+        const saved = readTextStorage(key);
         if (!saved) return [];
         const parsed = JSON.parse(saved);
         return Array.isArray(parsed) ? parsed : [];
@@ -949,8 +1233,9 @@
 
     function persistLocal() {
       try {
-        localStorage.setItem(storageKey, JSON.stringify(items));
-        localStorage.setItem(auditKey, JSON.stringify(audit.slice(0, 30)));
+        syncActiveWarehouse();
+        localStorage.setItem(storageKey, JSON.stringify(appState));
+        localStorage.setItem(activeWarehouseKey, activeWarehouseId);
       } catch {
         // Private browsing or locked storage: the server copy still keeps data when available.
       }
@@ -973,10 +1258,11 @@
 
     async function saveRemoteNow() {
       try {
+        syncActiveWarehouse();
         const response = await fetch(apiStateUrl, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items, audit })
+          body: JSON.stringify(appState)
         });
         if (!response.ok) throw new Error("Không lưu được server");
         setSyncStatus("Đã đồng bộ");
@@ -985,13 +1271,78 @@
       }
     }
 
+    function activateInitialWarehouse() {
+      const savedWarehouse = readTextStorage(activeWarehouseKey);
+      if (savedWarehouse && appState.warehouses[savedWarehouse]) {
+        selectWarehouse(savedWarehouse);
+        return;
+      }
+      showWarehouseGate();
+    }
+
+    function showWarehouseGate() {
+      if (hasActivatedWarehouse) syncActiveWarehouse();
+      els.appShell.hidden = true;
+      els.warehouseGate.hidden = false;
+    }
+
+    function selectWarehouse(id) {
+      if (!appState.warehouses[id]) return;
+      if (hasActivatedWarehouse) syncActiveWarehouse();
+      activeWarehouseId = id;
+      const warehouse = appState.warehouses[id];
+      items = warehouse.items;
+      audit = warehouse.audit;
+      hasActivatedWarehouse = true;
+      applyWarehouseBrand(warehouse);
+      els.warehouseGate.hidden = true;
+      els.appShell.hidden = false;
+      clearForm();
+      render({ skipPersist: true });
+      persistLocal();
+    }
+
+    function applyWarehouseBrand(warehouse) {
+      document.title = warehouse.name;
+      els.warehouseTitle.textContent = warehouse.name;
+      els.brandSubtitle.textContent = warehouse.shortName;
+      els.brandLogo.src = warehouse.logo;
+      els.brandLogo.alt = warehouse.name;
+      els.sideNote.textContent = `${warehouse.name}. Dữ liệu kho này được đồng bộ riêng và không trộn với kho khác.`;
+    }
+
+    function syncActiveWarehouse() {
+      if (!activeWarehouseId || !appState.warehouses[activeWarehouseId]) return;
+      appState.activeWarehouseId = activeWarehouseId;
+      appState.warehouses[activeWarehouseId] = {
+        ...appState.warehouses[activeWarehouseId],
+        items: normalizeItems(items),
+        audit: normalizeAudit(audit),
+        categoryOptions: mergeOptions(appState.warehouses[activeWarehouseId].categoryOptions, items.map(item => item.category)),
+        locationOptions: mergeOptions(appState.warehouses[activeWarehouseId].locationOptions, items.map(item => item.location))
+      };
+    }
+
+    function currentWarehouse() {
+      return appState.warehouses[activeWarehouseId] || appState.warehouses["hau-nghia"];
+    }
+
     function render(options = {}) {
+      updateDebugDataset();
       renderStats();
       renderFilters();
       renderAdjustOptions();
+      renderDatalists();
       renderTable();
       renderAudit();
       if (!options.skipPersist) persist();
+    }
+
+    function updateDebugDataset() {
+      document.body.dataset.activeWarehouse = activeWarehouseId || "";
+      document.body.dataset.itemsCount = String(items.length);
+      document.body.dataset.hauNghiaCount = String(appState.warehouses["hau-nghia"] ? appState.warehouses["hau-nghia"].items.length : 0);
+      document.body.dataset.ducHoaCount = String(appState.warehouses["duc-hoa"] ? appState.warehouses["duc-hoa"].items.length : 0);
     }
 
     function getStatus(item) {
@@ -1004,57 +1355,81 @@
       return { ok: "Đủ hàng", low: "Sắp hết", out: "Hết hàng" }[status];
     }
 
-    function formatMoney(value) {
-      return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
-    }
-
     function renderStats() {
       const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
       const lowCount = items.filter(item => getStatus(item) !== "ok").length;
-      const value = items.reduce((sum, item) => sum + item.qty * item.price, 0);
       els.totalItems.textContent = items.length;
       els.totalQty.textContent = totalQty.toLocaleString("vi-VN");
       els.lowItems.textContent = lowCount;
-      els.stockValue.textContent = formatMoney(value);
     }
 
     function renderFilters() {
-      const selected = els.category.value || "all";
-      const categories = [...new Set(items.map(item => item.category))].sort((a, b) => a.localeCompare(b, "vi"));
-      els.category.innerHTML = '<option value="all">Tất cả</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
-      els.category.value = categories.includes(selected) ? selected : "all";
+      const selectedCategory = els.category.value || "all";
+      const selectedLocation = els.locationFilter.value || "all";
+      const categories = mergeOptions(currentWarehouse().categoryOptions, items.map(item => item.category));
+      const locations = mergeOptions(currentWarehouse().locationOptions, items.map(item => item.location));
+      els.category.innerHTML = '<option value="all">Chọn nhóm</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
+      els.category.value = categories.includes(selectedCategory) ? selectedCategory : "all";
+      els.locationFilter.innerHTML = '<option value="all">Chọn vị trí</option>' + locations.map(location => `<option value="${escapeHtml(location)}">${escapeHtml(location)}</option>`).join("");
+      els.locationFilter.value = locations.includes(selectedLocation) ? selectedLocation : "all";
+    }
+
+    function renderDatalists() {
+      const warehouse = currentWarehouse();
+      const categories = mergeOptions(warehouse.categoryOptions, items.map(item => item.category));
+      const locations = mergeOptions(warehouse.locationOptions, items.map(item => item.location));
+      els.categoryOptions.innerHTML = categories.map(category => `<option value="${escapeHtml(category)}"></option>`).join("");
+      els.locationOptions.innerHTML = locations.map(location => `<option value="${escapeHtml(location)}"></option>`).join("");
     }
 
     function renderAdjustOptions() {
       const selectedCategory = els.adjustCategory.value || "all";
+      const selectedLocation = els.adjustLocation.value || "all";
       const selectedItem = els.adjustItem.value;
-      const categories = [...new Set(items.map(item => item.category))].sort((a, b) => a.localeCompare(b, "vi"));
+      const categories = mergeOptions(currentWarehouse().categoryOptions, items.map(item => item.category));
+      const locations = mergeOptions(currentWarehouse().locationOptions, items.map(item => item.location));
       els.adjustCategory.innerHTML = '<option value="all">Tất cả nhóm</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
       els.adjustCategory.value = categories.includes(selectedCategory) ? selectedCategory : "all";
+      els.adjustLocation.innerHTML = '<option value="all">Tất cả vị trí</option>' + locations.map(location => `<option value="${escapeHtml(location)}">${escapeHtml(location)}</option>`).join("");
+      els.adjustLocation.value = locations.includes(selectedLocation) ? selectedLocation : "all";
 
       const filteredItems = els.adjustCategory.value === "all"
         ? items
         : items.filter(item => item.category === els.adjustCategory.value);
+      const filteredByLocation = els.adjustLocation.value === "all"
+        ? filteredItems
+        : filteredItems.filter(item => item.location === els.adjustLocation.value);
 
-      if (!filteredItems.length) {
+      if (!filteredByLocation.length) {
         els.adjustItem.innerHTML = '<option value="">Chưa có mặt hàng</option>';
         return;
       }
-      els.adjustItem.innerHTML = filteredItems.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (${escapeHtml(item.sku)})</option>`).join("");
-      els.adjustItem.value = filteredItems.some(item => item.id === selectedItem) ? selectedItem : filteredItems[0].id;
+      els.adjustItem.innerHTML = filteredByLocation.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (${escapeHtml(item.sku)})</option>`).join("");
+      els.adjustItem.value = filteredByLocation.some(item => item.id === selectedItem) ? selectedItem : filteredByLocation[0].id;
     }
 
     function renderTable() {
       const query = els.search.value.trim().toLowerCase();
       const category = els.category.value;
+      const location = els.locationFilter.value;
       const status = els.status.value;
+      const hasFocusedFilter = Boolean(query) || category !== "all" || location !== "all" || status !== "all";
+
+      if (!hasFocusedFilter) {
+        els.body.innerHTML = "";
+        els.empty.textContent = "Chọn nhóm, vị trí, trạng thái hoặc tìm kiếm để xem mặt hàng.";
+        els.empty.hidden = false;
+        return;
+      }
+
       const filtered = items.filter(item => {
         const haystack = [item.name, item.sku, item.category, item.location].join(" ").toLowerCase();
         const matchesSearch = !query || haystack.includes(query);
         const matchesCategory = category === "all" || item.category === category;
+        const matchesLocation = location === "all" || item.location === location;
         const itemStatus = getStatus(item);
         const matchesStatus = status === "all" || itemStatus === status || (status === "low" && itemStatus === "out");
-        return matchesSearch && matchesCategory && matchesStatus;
+        return matchesSearch && matchesCategory && matchesLocation && matchesStatus;
       });
 
       els.body.innerHTML = filtered.map(item => {
@@ -1065,11 +1440,6 @@
               <strong>${escapeHtml(item.name)}</strong>
               <div class="sku">${escapeHtml(item.sku)}</div>
             </td>
-            <td>${escapeHtml(item.category)}</td>
-            <td>${escapeHtml(item.location)}</td>
-            <td><span class="qty">${item.qty.toLocaleString("vi-VN")}</span></td>
-            <td>${item.min.toLocaleString("vi-VN")}</td>
-            <td><span class="tag ${status}">${statusLabel(status)}</span></td>
             <td>
               <div class="row-actions">
                 <button class="icon-btn" type="button" title="Nhập thêm 1" data-action="plus" data-id="${item.id}">+</button>
@@ -1078,10 +1448,16 @@
                 <button class="icon-btn remove" type="button" title="Xóa" data-action="delete" data-id="${item.id}">×</button>
               </div>
             </td>
+            <td>${escapeHtml(item.category)}</td>
+            <td>${escapeHtml(item.location)}</td>
+            <td><span class="qty">${item.qty.toLocaleString("vi-VN")}</span></td>
+            <td>${item.min.toLocaleString("vi-VN")}</td>
+            <td><span class="tag ${status}">${statusLabel(status)}</span></td>
           </tr>
         `;
       }).join("");
 
+      els.empty.textContent = "Không tìm thấy mặt hàng phù hợp.";
       els.empty.hidden = filtered.length > 0;
       els.body.querySelectorAll("button").forEach(button => button.addEventListener("click", handleRowAction));
     }
@@ -1092,7 +1468,10 @@
             <div class="audit-item">
               <strong>${escapeHtml(entry.title)}</strong>
               <div>${escapeHtml(entry.detail)}</div>
-              <time>${new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.at))}</time>
+              <div class="audit-meta">
+                <span class="audit-actor">${escapeHtml(entry.actor || "CHƯA GHI TÊN")}</span>
+                <time>${new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.at))}</time>
+              </div>
             </div>
           `).join("")
         : '<div class="empty">Chưa có thay đổi nào.</div>';
@@ -1116,17 +1495,85 @@
         return;
       }
 
+      const actor = requireOperator("lưu thay đổi kho");
+      if (!actor) return;
+
       const existingIndex = items.findIndex(current => current.id === item.id);
       if (existingIndex >= 0) {
+        const previous = items[existingIndex];
         items[existingIndex] = item;
-        pushAudit("Cập nhật mặt hàng", `${item.name} đang còn ${item.qty} đơn vị.`);
+        pushAudit("Cập nhật mặt hàng", describeItemChange(previous, item), actor);
       } else {
         items.unshift(item);
-        pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho.`);
+        pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho, số lượng ${item.qty}, vị trí ${item.location}.`, actor);
       }
+      addOption("category", item.category, { silent: true });
+      addOption("location", item.location, { silent: true });
       clearForm();
       render();
-      showToast("Đã lưu mặt hàng.");
+      showToast(`${actor} đã lưu mặt hàng.`);
+    }
+
+    function addOption(type, rawValue, options = {}) {
+      const value = normalizeText(rawValue);
+      if (!value || !activeWarehouseId) {
+        if (!options.silent) showToast("Nhập nội dung trước khi lưu.");
+        return;
+      }
+      const actor = options.silent ? "" : requireOperator(type === "location" ? "lưu vị trí" : "lưu nhóm");
+      if (!options.silent && !actor) return;
+      const warehouse = currentWarehouse();
+      const key = type === "location" ? "locationOptions" : "categoryOptions";
+      warehouse[key] = mergeOptions(warehouse[key], [value]);
+      if (type === "location") els.location.value = value;
+      if (type === "category") els.categoryInput.value = value;
+      syncActiveWarehouse();
+      renderDatalists();
+      renderFilters();
+      renderAdjustOptions();
+      if (!options.silent) {
+        pushAudit(type === "location" ? "Thêm vị trí chọn nhanh" : "Thêm nhóm chọn nhanh", `${value} đã được lưu để chọn lại.`, actor);
+        persist();
+        showToast(type === "location" ? `${actor} đã lưu vị trí.` : `${actor} đã lưu nhóm.`);
+      }
+    }
+
+    function removeOption(type, rawValue) {
+      const value = normalizeText(rawValue);
+      const label = type === "location" ? "vị trí" : "nhóm";
+      const labelTitle = type === "location" ? "Vị trí" : "Nhóm";
+
+      if (!value || !activeWarehouseId) {
+        showToast(`Nhập ${label} cần xóa trước.`);
+        return;
+      }
+
+      const actor = requireOperator(`xóa ${label}`);
+      if (!actor) return;
+
+      const itemKey = type === "location" ? "location" : "category";
+      const usedCount = items.filter(item => normalizeText(item[itemKey]) === value).length;
+      if (usedCount) {
+        showToast(`${labelTitle} "${value}" đang dùng cho ${usedCount} mặt hàng. Sửa các mặt hàng đó trước.`);
+        return;
+      }
+
+      const warehouse = currentWarehouse();
+      const optionKey = type === "location" ? "locationOptions" : "categoryOptions";
+      const before = Array.isArray(warehouse[optionKey]) ? warehouse[optionKey] : [];
+      const next = before.filter(option => normalizeText(option) !== value);
+
+      if (next.length === before.length) {
+        showToast(`${labelTitle} "${value}" không có trong danh sách chọn nhanh.`);
+        return;
+      }
+
+      warehouse[optionKey] = next;
+      if (type === "location" && els.locationFilter.value === value) els.locationFilter.value = "all";
+      if (type === "category" && els.category.value === value) els.category.value = "all";
+      pushAudit(type === "location" ? "Xóa vị trí chọn nhanh" : "Xóa nhóm chọn nhanh", `${value} đã được xóa khỏi danh sách chọn nhanh.`, actor);
+      render();
+      showToast(`${actor} đã xóa ${label} ${value}.`);
     }
 
     function adjustStock(event) {
@@ -1140,15 +1587,18 @@
         return;
       }
 
+      const actor = requireOperator("cập nhật số lượng");
+      if (!actor) return;
+
       const oldQty = item.qty;
       if (els.adjustType.value === "in") item.qty += amount;
       if (els.adjustType.value === "out") item.qty = Math.max(0, item.qty - amount);
       if (els.adjustType.value === "count") item.qty = amount;
 
       const actionText = { in: "Nhập kho", out: "Xuất kho", count: "Chốt kiểm" }[els.adjustType.value];
-      pushAudit(actionText, `${item.name}: ${oldQty} → ${item.qty}.`);
+      pushAudit(actionText, `${item.name}: ${oldQty} → ${item.qty}.`, actor);
       render();
-      showToast("Đã cập nhật số lượng tồn.");
+      showToast(`${actor} đã cập nhật số lượng tồn.`);
     }
 
     function runQuickAdjust(type) {
@@ -1163,15 +1613,23 @@
       if (!item) return;
 
       if (button.dataset.action === "plus") {
+        const actor = requireOperator("nhập kho nhanh");
+        if (!actor) return;
+        const oldQty = item.qty;
         item.qty += 1;
-        pushAudit("Nhập nhanh", `${item.name}: tăng lên ${item.qty}.`);
+        pushAudit("Nhập nhanh", `${item.name}: ${oldQty} → ${item.qty}.`, actor);
         render();
+        showToast(`${actor} đã nhập nhanh ${item.name}.`);
       }
 
       if (button.dataset.action === "minus") {
+        const actor = requireOperator("xuất kho nhanh");
+        if (!actor) return;
+        const oldQty = item.qty;
         item.qty = Math.max(0, item.qty - 1);
-        pushAudit("Xuất nhanh", `${item.name}: còn ${item.qty}.`);
+        pushAudit("Xuất nhanh", `${item.name}: ${oldQty} → ${item.qty}.`, actor);
         render();
+        showToast(`${actor} đã xuất nhanh ${item.name}.`);
       }
 
       if (button.dataset.action === "edit") {
@@ -1188,12 +1646,14 @@
       }
 
       if (button.dataset.action === "delete") {
+        const actor = requireOperator("xóa mặt hàng");
+        if (!actor) return;
         const confirmed = confirm(`Xóa "${item.name}" khỏi danh sách tồn kho?`);
         if (!confirmed) return;
         items = items.filter(current => current.id !== id);
-        pushAudit("Xóa mặt hàng", `${item.name} đã được xóa khỏi kho.`);
+        pushAudit("Xóa mặt hàng", `${item.name} đã được xóa khỏi kho.`, actor);
         render();
-        showToast("Đã xóa mặt hàng.");
+        showToast(`${actor} đã xóa mặt hàng.`);
       }
     }
 
@@ -1206,8 +1666,41 @@
       els.formTitle.textContent = "Thêm mặt hàng";
     }
 
-    function pushAudit(title, detail) {
-      audit.unshift({ title, detail, at: new Date().toISOString() });
+    function currentOperator() {
+      const actor = normalizeText(els.operator.value);
+      if (actor) els.operator.value = actor;
+      return actor;
+    }
+
+    function requireOperator(actionText) {
+      const actor = currentOperator();
+      if (!actor) {
+        showToast(`Nhập tên người thao tác trước khi ${actionText}.`);
+        els.operator.focus();
+        return "";
+      }
+      try {
+        localStorage.setItem(operatorKey, actor);
+      } catch {
+        // The name is still available in the current page session.
+      }
+      return actor;
+    }
+
+    function describeItemChange(previous, next) {
+      const changes = [];
+      if (previous.name !== next.name) changes.push(`tên: ${previous.name} → ${next.name}`);
+      if (previous.sku !== next.sku) changes.push(`SKU: ${previous.sku} → ${next.sku}`);
+      if (previous.category !== next.category) changes.push(`nhóm: ${previous.category} → ${next.category}`);
+      if (previous.location !== next.location) changes.push(`vị trí: ${previous.location} → ${next.location}`);
+      if (previous.qty !== next.qty) changes.push(`tồn: ${previous.qty} → ${next.qty}`);
+      if (previous.min !== next.min) changes.push(`tối thiểu: ${previous.min} → ${next.min}`);
+      if (previous.price !== next.price) changes.push(`giá vốn: ${previous.price} → ${next.price}`);
+      return changes.length ? `${next.name}: ${changes.join("; ")}.` : `${next.name}: đã lưu lại thông tin, không đổi số liệu.`;
+    }
+
+    function pushAudit(title, detail, actor = "") {
+      audit.unshift({ title, detail, actor: actor || currentOperator() || "Chưa ghi tên", at: new Date().toISOString() });
       audit = audit.slice(0, 30);
     }
 
@@ -1235,11 +1728,13 @@
     }
 
     function exportJson() {
+      syncActiveWarehouse();
       const backup = {
         app: "chicken-plus-inventory",
+        version: 2,
         exportedAt: new Date().toISOString(),
-        items,
-        audit
+        activeWarehouseId,
+        warehouses: appState.warehouses
       };
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -1251,39 +1746,108 @@
       showToast("Đã xuất file sao lưu JSON.");
     }
 
-    function importJson(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const parsed = JSON.parse(String(reader.result || ""));
-          const importedItems = normalizeItems(parsed.items);
-          if (!importedItems.length) throw new Error("Không có mặt hàng");
-          const confirmed = confirm(`Nhập ${importedItems.length} mặt hàng từ file sao lưu và ghi đè danh sách hiện tại?`);
-          if (!confirmed) return;
-          items = importedItems;
-          audit = normalizeAudit(parsed.audit);
-          pushAudit("Nhập dữ liệu", `${importedItems.length} mặt hàng đã được nhập từ file sao lưu.`);
-          render();
-          showToast("Đã nhập dữ liệu sao lưu.");
-        } catch {
-          showToast("File sao lưu không hợp lệ.");
-        } finally {
-          els.jsonFileInput.value = "";
-        }
-      };
-      reader.readAsText(file);
-    }
-
     function resetSampleData() {
+      const actor = requireOperator("khôi phục dữ liệu mẫu");
+      if (!actor) return;
       const confirmed = confirm("Khôi phục dữ liệu mẫu và ghi đè danh sách hiện tại?");
       if (!confirmed) return;
       items = sampleItems.map(item => ({ ...item, id: makeId() }));
-      audit = [{ title: "Khôi phục dữ liệu mẫu", detail: "Danh sách mẫu đã được nạp lại.", at: new Date().toISOString() }];
+      audit = [{ title: "Khôi phục dữ liệu mẫu", detail: "Danh sách mẫu đã được nạp lại.", actor, at: new Date().toISOString() }];
       clearForm();
       render();
-      showToast("Đã khôi phục dữ liệu mẫu.");
+      showToast(`${actor} đã khôi phục dữ liệu mẫu.`);
+    }
+
+    function hasWarehouseData(value) {
+      if (!value) return false;
+      if (value.warehouses) {
+        return Object.values(value.warehouses).some(warehouse => Array.isArray(warehouse.items) && warehouse.items.length);
+      }
+      return Array.isArray(value.items) && value.items.length;
+    }
+
+    function normalizeAppState(value) {
+      if (value && value.warehouses) {
+        document.body.dataset.rawHauNghiaCount = String(Array.isArray(value.warehouses["hau-nghia"] && value.warehouses["hau-nghia"].items) ? value.warehouses["hau-nghia"].items.length : -1);
+        document.body.dataset.rawDucHoaCount = String(Array.isArray(value.warehouses["duc-hoa"] && value.warehouses["duc-hoa"].items) ? value.warehouses["duc-hoa"].items.length : -1);
+        const hauNghia = normalizeWarehouse("hau-nghia", value.warehouses["hau-nghia"]);
+        const hadDucHoa = Boolean(value.warehouses["duc-hoa"]);
+        let ducHoa = hadDucHoa
+          ? normalizeWarehouse("duc-hoa", value.warehouses["duc-hoa"])
+          : cloneWarehouse("duc-hoa", hauNghia);
+        let restoredHauNghia = hauNghia;
+        if (!restoredHauNghia.items.length && ducHoa.items.length) {
+          restoredHauNghia = cloneWarehouse("hau-nghia", ducHoa);
+        }
+        if (!ducHoa.items.length && restoredHauNghia.items.length) {
+          ducHoa = cloneWarehouse("duc-hoa", restoredHauNghia);
+        }
+        document.body.dataset.normalizedHauNghiaCount = String(restoredHauNghia.items.length);
+        document.body.dataset.normalizedDucHoaCount = String(ducHoa.items.length);
+        return {
+          version: 2,
+          activeWarehouseId: value.activeWarehouseId || "hau-nghia",
+          copiedHauNghiaToDucHoa: value.copiedHauNghiaToDucHoa || !hadDucHoa,
+          warehouses: {
+            "hau-nghia": restoredHauNghia,
+            "duc-hoa": ducHoa
+          }
+        };
+      }
+      return buildStateFromSingleWarehouse(value && value.items ? value.items : [], value && value.audit ? value.audit : []);
+    }
+
+    function buildStateFromSingleWarehouse(sourceItems, sourceAudit) {
+      const hauNghia = normalizeWarehouse("hau-nghia", { items: sourceItems, audit: sourceAudit });
+      const ducHoa = cloneWarehouse("duc-hoa", hauNghia);
+      return {
+        version: 2,
+        activeWarehouseId: "hau-nghia",
+        copiedHauNghiaToDucHoa: true,
+        warehouses: {
+          "hau-nghia": hauNghia,
+          "duc-hoa": ducHoa
+        }
+      };
+    }
+
+    function normalizeWarehouse(id, value) {
+      const warehouse = value || {};
+      const normalizedItems = normalizeItems(warehouse.items);
+      return {
+        ...warehouseConfigs[id],
+        items: normalizedItems,
+        audit: normalizeAudit(warehouse.audit),
+        categoryOptions: mergeOptions(warehouse.categoryOptions, normalizedItems.map(item => item.category)),
+        locationOptions: mergeOptions(warehouse.locationOptions, normalizedItems.map(item => item.location))
+      };
+    }
+
+    function cloneWarehouse(id, sourceWarehouse) {
+      const clonedItems = normalizeItems(sourceWarehouse.items).map(item => ({ ...item }));
+      return {
+        ...warehouseConfigs[id],
+        items: clonedItems,
+        audit: [
+          {
+            title: "Sao chép mặt hàng ban đầu",
+            detail: `Đã sao chép ${clonedItems.length} mặt hàng từ kho Hậu Nghĩa.`,
+            actor: "HỆ THỐNG",
+            at: new Date().toISOString()
+          }
+        ],
+        categoryOptions: mergeOptions(sourceWarehouse.categoryOptions, clonedItems.map(item => item.category)),
+        locationOptions: mergeOptions(sourceWarehouse.locationOptions, clonedItems.map(item => item.location))
+      };
+    }
+
+    function mergeOptions(existing, values) {
+      const set = new Set((Array.isArray(existing) ? existing : []).map(normalizeText).filter(Boolean));
+      (Array.isArray(values) ? values : []).forEach(value => {
+        const text = normalizeText(value);
+        if (text) set.add(text);
+      });
+      return [...set].sort((a, b) => a.localeCompare(b, "vi"));
     }
 
     function normalizeItems(value) {
@@ -1293,13 +1857,13 @@
     function normalizeItem(item) {
       return {
         id: item.id || makeId(),
-        name: String(item.name || "").trim(),
-        sku: String(item.sku || "").trim(),
-        category: String(item.category || "").trim(),
+        name: normalizeText(item.name),
+        sku: normalizeText(item.sku),
+        category: normalizeText(item.category),
         qty: Math.max(0, Number(item.qty) || 0),
         min: Math.max(0, Number(item.min) || 0),
         price: Math.max(0, Number(item.price) || 0),
-        location: String(item.location || "").trim()
+        location: normalizeText(item.location)
       };
     }
 
@@ -1307,8 +1871,24 @@
       return Array.isArray(value) ? value.slice(0, 30).map(entry => ({
         title: String(entry.title || "Cập nhật"),
         detail: String(entry.detail || ""),
+        actor: normalizeText(entry.actor || entry.user || entry.by || "CHƯA GHI TÊN"),
         at: entry.at || new Date().toISOString()
       })) : [];
+    }
+
+    function normalizeText(value) {
+      return String(value || "").trim().toLocaleUpperCase("vi-VN");
+    }
+
+    function uppercaseInput(input) {
+      const upper = String(input.value || "").toLocaleUpperCase("vi-VN");
+      if (input.value === upper) return;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = upper;
+      if (typeof start === "number" && typeof end === "number") {
+        input.setSelectionRange(start, end);
+      }
     }
 
     function setSyncStatus(message) {
@@ -1341,6 +1921,13 @@
       els.toast.classList.add("show");
       toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2200);
     }
+
+    window.inventoryDebugState = () => ({
+      activeWarehouseId,
+      itemsCount: items.length,
+      warehouseCounts: Object.fromEntries(Object.entries(appState.warehouses).map(([id, warehouse]) => [id, warehouse.items.length])),
+      syncMode
+    });
   </script>
 </body>
 </html>

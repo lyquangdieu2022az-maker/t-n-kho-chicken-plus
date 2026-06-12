@@ -1,6 +1,6 @@
-# Kho Chicken Plus Hậu Nghĩa
+# Kho Chicken Plus
 
-Web kiểm tồn kho cho Chicken Plus Hậu Nghĩa.
+Web kiểm tồn kho cho Chicken Plus Hậu Nghĩa và Chicken Plus Đức Hòa.
 
 ## Chạy local
 
@@ -17,7 +17,9 @@ Mở `http://localhost:4173`.
 - Khi deploy Render bằng `render.yaml`, app dùng Render PostgreSQL qua `DATABASE_URL`.
 - Nếu tài khoản Render đã có database free đang dùng, dùng database đó và đặt `DATABASE_URL` thủ công cho web service.
 - App lưu riêng trong bảng `chicken_plus_inventory_state`, không dùng chung bảng với app cũ.
-- Sau khi app chạy trên Render, máy tính và điện thoại dùng chung dữ liệu trên server.
+- Mỗi kho có dữ liệu riêng: `Hậu Nghĩa` và `Đức Hòa` không trộn số lượng với nhau.
+- Khi nâng cấp từ dữ liệu 1 kho cũ, app đưa dữ liệu cũ vào Hậu Nghĩa và sao chép mặt hàng sang Đức Hòa một lần ban đầu.
+- Sau khi app chạy trên Render, máy tính và điện thoại dùng chung dữ liệu server của từng kho.
 - Nếu đã nhập dữ liệu ở `localhost`, dùng nút `Sao lưu` để xuất JSON, mở web Render rồi bấm `Nhập` một lần.
 
 ## Deploy Render

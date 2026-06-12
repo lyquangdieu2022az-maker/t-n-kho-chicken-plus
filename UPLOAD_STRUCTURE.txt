@@ -13,6 +13,7 @@ t-n-kho-chicken-plus/
     assets/
       logo.png
       logo-cropped.png
+      logo-duc-hoa.jpg
 
 Delete these if they exist on GitHub:
 
