@@ -190,7 +190,7 @@ function buildStateFromSingleWarehouse(items, audit) {
 function normalizeWarehouse(id, value) {
   const source = value || {};
   const items = scopeItemIds(Array.isArray(source.items) ? source.items.map(normalizeItem) : [], id);
-  const audit = Array.isArray(source.audit) ? source.audit.slice(0, 30).map(normalizeAuditEntry) : [];
+  const audit = Array.isArray(source.audit) ? source.audit.slice(0, 500).map(normalizeAuditEntry) : [];
   return {
     ...warehouseConfigs[id],
     items,
@@ -243,7 +243,15 @@ function normalizeAuditEntry(entry) {
     title: String(entry.title || "Cập nhật"),
     detail: String(entry.detail || ""),
     actor: String(entry.actor || entry.user || entry.by || "CHƯA GHI TÊN").trim(),
-    at: entry.at || new Date().toISOString()
+    at: entry.at || new Date().toISOString(),
+    type: entry.type ? String(entry.type) : "",
+    itemId: entry.itemId ? String(entry.itemId) : "",
+    itemName: entry.itemName ? String(entry.itemName).trim() : "",
+    oldQty: Number.isFinite(Number(entry.oldQty)) ? Number(entry.oldQty) : null,
+    newQty: Number.isFinite(Number(entry.newQty)) ? Number(entry.newQty) : null,
+    quantity: Number.isFinite(Number(entry.quantity)) ? Number(entry.quantity) : null,
+    qtyChange: Number.isFinite(Number(entry.qtyChange)) ? Number(entry.qtyChange) : null,
+    warehouseId: entry.warehouseId ? String(entry.warehouseId) : ""
   };
 }
 
