@@ -231,11 +231,17 @@ function normalizeItem(item) {
     name: String(item.name || "").trim(),
     sku: String(item.sku || "").trim(),
     category: String(item.category || "").trim(),
+    stockMode: normalizeStockMode(item.stockMode),
     qty: Math.max(0, Number(item.qty) || 0),
     min: Math.max(0, Number(item.min) || 0),
     price: Math.max(0, Number(item.price) || 0),
     location: String(item.location || "").trim()
   };
+}
+
+function normalizeStockMode(value) {
+  const mode = String(value || "count").toLowerCase();
+  return ["count", "many", "few"].includes(mode) ? mode : "count";
 }
 
 function normalizeAuditEntry(entry) {

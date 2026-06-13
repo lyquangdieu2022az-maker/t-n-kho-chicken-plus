@@ -103,7 +103,10 @@
     }
 
     .gate-actions {
-      margin: 0 0 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
     }
 
     .warehouse-choice {
@@ -471,6 +474,12 @@
       box-shadow: 0 0 0 3px rgba(79, 179, 255, 0.22);
     }
 
+    input:disabled {
+      background: #edf6ff;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
     .table-wrap {
       overflow-x: auto;
     }
@@ -556,6 +565,12 @@
       font-weight: 800;
       font-size: 21px;
       color: var(--brand-black);
+    }
+
+    .qty.estimate {
+      color: var(--accent-dark);
+      font-size: 16px;
+      white-space: nowrap;
     }
 
     .tag {
@@ -649,6 +664,12 @@
       display: flex;
       gap: 10px;
       margin-top: 14px;
+    }
+
+    .field-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .quick-adjust-actions {
@@ -862,8 +883,8 @@
 <body>
   <section class="warehouse-gate" id="warehouseGate">
     <div class="warehouse-card">
-      <h1>CHỌN KHO CHICKEN PLUS</h1>
-      <p>lưu ý chọn đúng kho cửa hàng.</p>
+      <h1>Chọn kho Chicken Plus</h1>
+      <p>Mỗi kho có dữ liệu riêng và đồng bộ riêng.</p>
       <div class="warehouse-choices">
         <button class="warehouse-choice" type="button" data-warehouse="hau-nghia">
           <img src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
@@ -879,6 +900,9 @@
             <span>Mở kho Đức Hòa</span>
           </span>
         </button>
+      </div>
+      <div class="gate-actions">
+        <button class="btn" id="importJsonGateBtn" type="button">⇧ Nhập dữ liệu sao lưu</button>
       </div>
     </div>
   </section>
@@ -911,14 +935,15 @@
         </div>
         <div class="operator-card">
           <label for="operatorInput">Người thao tác</label>
-          <input id="operatorInput" placeholder="lưu ý nhập đúng tên" autocomplete="name">
+          <input id="operatorInput" placeholder="NHẬP TÊN NHÂN VIÊN" autocomplete="name">
         </div>
         <div class="actions">
           <button class="btn" id="switchWarehouseTopBtn" type="button">⇄ Đổi kho</button>
           <button class="btn" id="exportBtn" type="button">⇩ Xuất EXCEL</button>
           <button class="btn" id="toggleAdjustBtn" type="button">⇅ Nhập / xuất</button>
           <button class="btn" id="exportJsonBtn" type="button">⇩ Sao lưu</button>
-          <button class="btn danger" id="resetBtn" type="button">↺ Xóa dữ liệu</button>
+          <button class="btn" id="importJsonTopBtn" type="button">⇧ Nhập dữ liệu</button>
+          <button class="btn danger" id="resetBtn" type="button">↺ Dữ liệu mẫu</button>
           <button class="btn primary" id="focusAddBtn" type="button">+ Thêm hàng</button>
         </div>
       </header>
@@ -996,12 +1021,12 @@
               <input type="hidden" id="editId">
               <div class="field">
                 <label for="nameInput">Tên hàng</label>
-                <input id="nameInput" required placeholder="VÍ DỤ: GÀ NỬA CON">
+                <input id="nameInput" required placeholder="VÍ DỤ: MÈ GÀ">
               </div>
               <div class="two">
                 <div class="field">
                   <label for="skuInput">SKU</label>
-                  <input id="skuInput" required placeholder="GNC">
+                  <input id="skuInput" required placeholder="CF-500">
                 </div>
                 <div class="field">
                   <label for="categoryInput">Nhóm</label>
@@ -1015,24 +1040,35 @@
               </div>
               <div class="two">
                 <div class="field">
+                  <label for="stockModeInput">Kiểu tồn</label>
+                  <select id="stockModeInput">
+                    <option value="count">Đếm số lượng</option>
+                    <option value="many">Còn nhiều</option>
+                    <option value="few">Còn ít</option>
+                  </select>
+                </div>
+                <div class="field">
                   <label for="qtyInput">Số lượng</label>
                   <input id="qtyInput" required type="number" min="0" step="1" value="0">
                 </div>
+              </div>
+              <div class="two">
                 <div class="field">
                   <label for="minInput">Tối thiểu</label>
                   <input id="minInput" required type="number" min="0" step="1" value="5">
                 </div>
+                <div class="field">
+                  <label for="locationInput">Vị trí</label>
+                  <div class="option-tools">
+                    <input id="locationInput" required list="locationOptions" placeholder="TỦ GÀ">
+                    <button class="icon-btn" id="addLocationOptionBtn" type="button" title="Lưu vị trí này">+</button>
+                    <button class="icon-btn remove" id="removeLocationOptionBtn" type="button" title="Xóa vị trí này">×</button>
+                  </div>
+                  <datalist id="locationOptions"></datalist>
+                </div>
               </div>
               <input id="priceInput" type="hidden" value="0">
-              <div class="field">
-                <label for="locationInput">Vị trí</label>
-                <div class="option-tools">
-                  <input id="locationInput" required list="locationOptions" placeholder="TỦ GÀ">
-                  <button class="icon-btn" id="addLocationOptionBtn" type="button" title="Lưu vị trí này">+</button>
-                  <button class="icon-btn remove" id="removeLocationOptionBtn" type="button" title="Xóa vị trí này">×</button>
-                </div>
-                <datalist id="locationOptions"></datalist>
-              </div>
+              <div class="field-note" id="stockModeHint">Chọn Còn nhiều/Còn ít cho các món khó đếm như ly nhựa, bao tay.</div>
               <div class="form-actions">
                 <button class="btn primary" type="submit">Lưu</button>
                 <button class="btn" id="cancelEditBtn" type="button">Hủy</button>
@@ -1081,6 +1117,7 @@
     </main>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <input id="importJsonInput" type="file" accept="application/json,.json" hidden>
 
   <script>
     const legacyStorageKey = "inventory-checker-v2";
@@ -1150,6 +1187,8 @@
       categoryOptions: document.getElementById("categoryOptions"),
       addCategoryOption: document.getElementById("addCategoryOptionBtn"),
       removeCategoryOption: document.getElementById("removeCategoryOptionBtn"),
+      stockMode: document.getElementById("stockModeInput"),
+      stockModeHint: document.getElementById("stockModeHint"),
       qty: document.getElementById("qtyInput"),
       min: document.getElementById("minInput"),
       price: document.getElementById("priceInput"),
@@ -1169,7 +1208,8 @@
       quickOut: document.getElementById("quickOutBtn"),
       countStock: document.getElementById("countStockBtn"),
       auditList: document.getElementById("auditList"),
-      toast: document.getElementById("toast")
+      toast: document.getElementById("toast"),
+      importJson: document.getElementById("importJsonInput")
     };
 
     document.getElementById("todayText").textContent = "Cập nhật " + new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date());
@@ -1186,6 +1226,8 @@
     document.getElementById("toggleAdjustBtn").addEventListener("click", () => toggleQuickPanel());
     document.getElementById("exportBtn").addEventListener("click", exportExcel);
     document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
+    document.getElementById("importJsonGateBtn").addEventListener("click", openImportJson);
+    document.getElementById("importJsonTopBtn").addEventListener("click", openImportJson);
     document.getElementById("resetBtn").addEventListener("click", resetSampleData);
     document.getElementById("navLow").addEventListener("click", () => {
       els.status.value = "low";
@@ -1211,8 +1253,10 @@
     els.addLocationOption.addEventListener("click", () => addOption("location", els.location.value));
     els.removeCategoryOption.addEventListener("click", () => removeOption("category", els.categoryInput.value));
     els.removeLocationOption.addEventListener("click", () => removeOption("location", els.location.value));
+    els.stockMode.addEventListener("change", updateStockModeFields);
     els.form.addEventListener("submit", saveItem);
     els.adjustForm.addEventListener("submit", adjustStock);
+    els.importJson.addEventListener("change", importJsonFile);
     els.adjustCategory.addEventListener("change", renderAdjustOptions);
     els.adjustLocation.addEventListener("change", renderAdjustOptions);
     els.quickIn.addEventListener("click", () => runQuickAdjust("in"));
@@ -1442,7 +1486,14 @@
       document.body.dataset.ducHoaCount = String(appState.warehouses["duc-hoa"] ? appState.warehouses["duc-hoa"].items.length : 0);
     }
 
+    function isCountedItem(item) {
+      return normalizeStockMode(item && item.stockMode) === "count";
+    }
+
     function getStatus(item) {
+      const mode = normalizeStockMode(item && item.stockMode);
+      if (mode === "many") return "ok";
+      if (mode === "few") return "low";
       if (item.qty === 0) return "out";
       if (item.qty <= item.min) return "low";
       return "ok";
@@ -1452,11 +1503,38 @@
       return { ok: "Đủ hàng", low: "Sắp hết", out: "Hết hàng" }[status];
     }
 
+    function stockModeLabel(mode) {
+      return { many: "Còn nhiều", few: "Còn ít", count: "Đếm số lượng" }[normalizeStockMode(mode)];
+    }
+
+    function stockDisplay(item) {
+      return isCountedItem(item) ? item.qty.toLocaleString("vi-VN") : stockModeLabel(item.stockMode);
+    }
+
+    function minDisplay(item) {
+      return isCountedItem(item) ? item.min.toLocaleString("vi-VN") : "Không đếm";
+    }
+
+    function stockStatusLabel(item) {
+      return isCountedItem(item) ? statusLabel(getStatus(item)) : stockModeLabel(item.stockMode);
+    }
+
+    function updateStockModeFields() {
+      const counted = els.stockMode.value === "count";
+      els.qty.disabled = !counted;
+      els.min.disabled = !counted;
+      els.stockModeHint.textContent = counted
+        ? "Nhập số lượng chính xác cho các món đếm được."
+        : "Dùng cho các món khó đếm như ly nhựa, bao tay. Số lượng sẽ hiện bằng chữ.";
+    }
+
     function renderStats() {
-      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      const estimatedCount = items.filter(item => !isCountedItem(item)).length;
+      const totalQty = items.reduce((sum, item) => sum + (isCountedItem(item) ? item.qty : 0), 0);
       const lowCount = items.filter(item => getStatus(item) !== "ok").length;
       els.totalItems.textContent = items.length;
       els.totalQty.textContent = totalQty.toLocaleString("vi-VN");
+      els.totalQty.nextElementSibling.textContent = estimatedCount ? `${estimatedCount} món ghi còn nhiều/còn ít` : "Trong kho";
       els.lowItems.textContent = lowCount;
     }
 
@@ -1501,7 +1579,10 @@
         els.adjustItem.innerHTML = '<option value="">Chưa có mặt hàng</option>';
         return;
       }
-      els.adjustItem.innerHTML = filteredByLocation.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (${escapeHtml(item.sku)})</option>`).join("");
+      els.adjustItem.innerHTML = filteredByLocation.map(item => {
+        const suffix = isCountedItem(item) ? `(${item.sku})` : `- ${stockModeLabel(item.stockMode)}`;
+        return `<option value="${item.id}">${escapeHtml(item.name)} ${escapeHtml(suffix)}</option>`;
+      }).join("");
       els.adjustItem.value = filteredByLocation.some(item => item.id === selectedItem) ? selectedItem : filteredByLocation[0].id;
     }
 
@@ -1531,14 +1612,15 @@
 
       els.body.innerHTML = filtered.map(item => {
         const status = getStatus(item);
+        const counted = isCountedItem(item);
         return `
           <tr>
             <td>
               <strong>${escapeHtml(item.name)}</strong>
               <div class="sku">${escapeHtml(item.sku)}</div>
-              <div class="stock-note ${status}">CÒN: ${item.qty.toLocaleString("vi-VN")}</div>
+              <div class="stock-note ${status}">CÒN: ${escapeHtml(stockDisplay(item))}</div>
             </td>
-            <td><span class="qty">${item.qty.toLocaleString("vi-VN")}</span></td>
+            <td><span class="qty ${counted ? "" : "estimate"}">${escapeHtml(stockDisplay(item))}</span></td>
             <td>
               <div class="row-actions">
                 <button class="icon-btn" type="button" title="Nhập thêm 1" data-action="plus" data-id="${item.id}">+</button>
@@ -1549,8 +1631,8 @@
             </td>
             <td>${escapeHtml(item.category)}</td>
             <td>${escapeHtml(item.location)}</td>
-            <td>${item.min.toLocaleString("vi-VN")}</td>
-            <td><span class="tag ${status}">${statusLabel(status)}</span></td>
+            <td>${escapeHtml(minDisplay(item))}</td>
+            <td><span class="tag ${status}">${escapeHtml(stockStatusLabel(item))}</span></td>
           </tr>
         `;
       }).join("");
@@ -1582,6 +1664,7 @@
         name: els.name.value.trim(),
         sku: els.sku.value.trim(),
         category: els.categoryInput.value.trim(),
+        stockMode: els.stockMode.value,
         qty: Number(els.qty.value),
         min: Number(els.min.value),
         price: Number(els.price.value),
@@ -1603,7 +1686,7 @@
         pushAudit("Cập nhật mặt hàng", describeItemChange(previous, item), actor);
       } else {
         items.unshift(item);
-        pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho, số lượng ${item.qty}, vị trí ${item.location}.`, actor);
+        pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho, tồn ${stockDisplay(item)}, vị trí ${item.location}.`, actor);
       }
       addOption("category", item.category, { silent: true });
       addOption("location", item.location, { silent: true });
@@ -1680,6 +1763,11 @@
       const item = items.find(current => current.id === els.adjustItem.value);
       if (!item) return;
 
+      if (!isCountedItem(item)) {
+        showToast(`${item.name} đang để ${stockModeLabel(item.stockMode)}. Bấm sửa để đổi trạng thái.`);
+        return;
+      }
+
       const amount = Number(els.adjustQty.value);
       if (amount < 0) {
         showToast("Số lượng không hợp lệ.");
@@ -1721,6 +1809,10 @@
       if (!item) return;
 
       if (button.dataset.action === "plus") {
+        if (!isCountedItem(item)) {
+          showToast(`${item.name} đang để ${stockModeLabel(item.stockMode)}. Bấm sửa để đổi trạng thái.`);
+          return;
+        }
         const actor = requireOperator("nhập kho nhanh");
         if (!actor) return;
         const oldQty = item.qty;
@@ -1740,6 +1832,10 @@
       }
 
       if (button.dataset.action === "minus") {
+        if (!isCountedItem(item)) {
+          showToast(`${item.name} đang để ${stockModeLabel(item.stockMode)}. Bấm sửa để đổi trạng thái.`);
+          return;
+        }
         const actor = requireOperator("xuất kho nhanh");
         if (!actor) return;
         const oldQty = item.qty;
@@ -1765,10 +1861,12 @@
         els.name.value = item.name;
         els.sku.value = item.sku;
         els.categoryInput.value = item.category;
+        els.stockMode.value = normalizeStockMode(item.stockMode);
         els.qty.value = item.qty;
         els.min.value = item.min;
         els.price.value = item.price;
         els.location.value = item.location;
+        updateStockModeFields();
         els.name.focus();
       }
 
@@ -1790,6 +1888,8 @@
       els.qty.value = 0;
       els.min.value = 5;
       els.price.value = 0;
+      els.stockMode.value = "count";
+      updateStockModeFields();
       els.formTitle.textContent = "Thêm mặt hàng";
     }
 
@@ -1820,8 +1920,9 @@
       if (previous.sku !== next.sku) changes.push(`SKU: ${previous.sku} → ${next.sku}`);
       if (previous.category !== next.category) changes.push(`nhóm: ${previous.category} → ${next.category}`);
       if (previous.location !== next.location) changes.push(`vị trí: ${previous.location} → ${next.location}`);
-      if (previous.qty !== next.qty) changes.push(`tồn: ${previous.qty} → ${next.qty}`);
-      if (previous.min !== next.min) changes.push(`tối thiểu: ${previous.min} → ${next.min}`);
+      if (normalizeStockMode(previous.stockMode) !== normalizeStockMode(next.stockMode)) changes.push(`kiểu tồn: ${stockModeLabel(previous.stockMode)} → ${stockModeLabel(next.stockMode)}`);
+      if (previous.qty !== next.qty) changes.push(`tồn: ${stockDisplay(previous)} → ${stockDisplay(next)}`);
+      if (previous.min !== next.min) changes.push(`tối thiểu: ${minDisplay(previous)} → ${minDisplay(next)}`);
       if (previous.price !== next.price) changes.push(`giá vốn: ${previous.price} → ${next.price}`);
       return changes.length ? `${next.name}: ${changes.join("; ")}.` : `${next.name}: đã lưu lại thông tin, không đổi số liệu.`;
     }
@@ -1841,16 +1942,21 @@
       const headerRow = headers.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const itemRows = items.map((item, index) => {
         const status = getStatus(item);
+        const counted = isCountedItem(item);
         const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
         const statusStyle = status === "out" ? "StatusOut" : status === "low" ? "StatusLow" : "StatusOk";
+        const stockStyle = counted ? `${rowStyle}Number` : rowStyle;
+        const stockType = counted ? "Number" : "String";
+        const minStyle = counted ? `${rowStyle}Number` : rowStyle;
+        const minType = counted ? "Number" : "String";
         return `
           <Row ss:AutoFitHeight="1">
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="Number">${index + 1}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.name)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.category)}</Data></Cell>
-            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${item.qty}</Data></Cell>
-            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${item.min}</Data></Cell>
-            <Cell ss:StyleID="${statusStyle}"><Data ss:Type="String">${xmlEscape(statusLabel(status))}</Data></Cell>
+            <Cell ss:StyleID="${stockStyle}"><Data ss:Type="${stockType}">${xmlEscape(counted ? item.qty : stockDisplay(item))}</Data></Cell>
+            <Cell ss:StyleID="${minStyle}"><Data ss:Type="${minType}">${xmlEscape(counted ? item.min : minDisplay(item))}</Data></Cell>
+            <Cell ss:StyleID="${statusStyle}"><Data ss:Type="String">${xmlEscape(stockStatusLabel(item))}</Data></Cell>
           </Row>
         `;
       }).join("");
@@ -1880,10 +1986,11 @@
         ["Tồn tính theo lịch sử", summary.expectedTotal],
         ["Tồn tổng trên web", summary.webTotal],
         ["Chênh lệch web - lịch sử", summary.diff],
+        ["Mặt hàng ghi còn nhiều/còn ít", summary.estimatedCount],
         ["Kết luận", summary.label]
       ].map(([label, value], index) => `
         <Row ss:AutoFitHeight="1">
-          <Cell ss:StyleID="${index === 6 ? "Header" : "Cell"}"><Data ss:Type="String">${xmlEscape(label)}</Data></Cell>
+          <Cell ss:StyleID="${index === 7 ? "Header" : "Cell"}"><Data ss:Type="String">${xmlEscape(label)}</Data></Cell>
           <Cell ss:StyleID="${typeof value === "number" ? "CellNumber" : "Cell"}"><Data ss:Type="${typeof value === "number" ? "Number" : "String"}">${xmlEscape(value)}</Data></Cell>
         </Row>
       `).join("");
@@ -2069,6 +2176,44 @@
       showToast("Đã xuất file sao lưu JSON.");
     }
 
+    function openImportJson() {
+      els.importJson.value = "";
+      els.importJson.click();
+    }
+
+    async function importJsonFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text.replace(/^\uFEFF/, ""));
+        if (!hasWarehouseData(parsed)) throw new Error("File không có dữ liệu kho.");
+
+        const importedState = normalizeAppState(parsed);
+        const hauNghiaCount = importedState.warehouses["hau-nghia"].items.length;
+        const ducHoaCount = importedState.warehouses["duc-hoa"].items.length;
+        const confirmed = confirm(`Nhập dữ liệu từ "${file.name}"?\n\nKho Hậu Nghĩa: ${hauNghiaCount} mặt hàng\nKho Đức Hòa: ${ducHoaCount} mặt hàng\n\nDữ liệu hiện tại sẽ được thay bằng file này.`);
+        if (!confirmed) return;
+
+        if (hasActivatedWarehouse) syncActiveWarehouse();
+        appState = importedState;
+        activeWarehouseId = importedState.warehouses[importedState.activeWarehouseId]
+          ? importedState.activeWarehouseId
+          : "hau-nghia";
+        hasActivatedWarehouse = false;
+        selectWarehouse(activeWarehouseId);
+        pushAudit("Nhập dữ liệu sao lưu", `${file.name} đã được nhập lại. Hậu Nghĩa ${hauNghiaCount} mặt hàng, Đức Hòa ${ducHoaCount} mặt hàng.`, currentOperator() || "NHẬP DỮ LIỆU");
+        render();
+        if (syncMode === "server") await saveRemoteNow();
+        showToast("Đã nhập dữ liệu sao lưu.");
+      } catch (error) {
+        showToast("File sao lưu không hợp lệ hoặc không đọc được.");
+      } finally {
+        els.importJson.value = "";
+      }
+    }
+
     function todayMovements() {
       return audit
         .map(parseAuditMovement)
@@ -2140,7 +2285,12 @@
       let startTotal = 0;
       let inTotal = 0;
       let outTotal = 0;
+      let estimatedCount = 0;
       items.forEach(item => {
+        if (!isCountedItem(item)) {
+          estimatedCount += 1;
+          return;
+        }
         const itemMovements = movementByItem.get(item.name) || [];
         if (itemMovements.length) {
           startTotal += itemMovements[0].oldQty;
@@ -2154,10 +2304,10 @@
       });
 
       const expectedTotal = startTotal + inTotal - outTotal;
-      const webTotal = items.reduce((sum, item) => sum + item.qty, 0);
+      const webTotal = items.reduce((sum, item) => sum + (isCountedItem(item) ? item.qty : 0), 0);
       const diff = webTotal - expectedTotal;
       const label = diff === 0 ? "KHỚP TỒN WEB" : diff > 0 ? "DƯ HÀNG TỒN" : "THIẾU HÀNG TỒN";
-      return { startTotal, inTotal, outTotal, expectedTotal, webTotal, diff, label };
+      return { startTotal, inTotal, outTotal, expectedTotal, webTotal, diff, label, estimatedCount };
     }
 
     function resetSampleData() {
@@ -2282,11 +2432,17 @@
         name: normalizeText(item.name),
         sku: normalizeText(item.sku),
         category: normalizeText(item.category),
+        stockMode: normalizeStockMode(item.stockMode),
         qty: Math.max(0, Number(item.qty) || 0),
         min: Math.max(0, Number(item.min) || 0),
         price: Math.max(0, Number(item.price) || 0),
         location: normalizeText(item.location)
       };
+    }
+
+    function normalizeStockMode(value) {
+      const mode = String(value || "count").toLowerCase();
+      return ["count", "many", "few"].includes(mode) ? mode : "count";
     }
 
     function normalizeAudit(value) {
