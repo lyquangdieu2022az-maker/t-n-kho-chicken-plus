@@ -1074,11 +1074,12 @@
                     <option value="count">Đếm số lượng</option>
                     <option value="many">Còn nhiều</option>
                     <option value="few">Còn ít</option>
+                    <option value="text">Ghi tự do</option>
                   </select>
                 </div>
                 <div class="field">
                   <label for="qtyInput">Số lượng</label>
-                  <input id="qtyInput" required type="number" min="0" step="1" value="0">
+                  <input id="qtyInput" required type="text" value="0" placeholder="VD: 5, CÒN NHIỀU, 2 BỊCH">
                 </div>
               </div>
               <div class="two">
@@ -1126,7 +1127,7 @@
               </div>
               <div class="field">
                 <label for="adjustQty">Số lượng</label>
-                <input id="adjustQty" type="number" min="0" step="1" value="1" required>
+                <input id="adjustQty" type="text" value="1" placeholder="VD: 5, CÒN ÍT, 2 BỊCH">
               </div>
               <div class="field-note" id="adjustModeHint">Nhập số nếu đếm được, hoặc bấm Còn nhiều/Còn ít.</div>
               <div class="estimate-actions">
@@ -1308,7 +1309,7 @@
       els.adjustType.value = "count";
     });
     els.operator.value = normalizeText(readTextStorage(operatorKey));
-    [els.operator, els.name, els.sku, els.categoryInput, els.location].forEach(input => {
+    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.qty, els.adjustQty].forEach(input => {
       input.addEventListener("input", () => uppercaseInput(input));
     });
     els.operator.addEventListener("input", () => {
@@ -1537,6 +1538,7 @@
       const mode = normalizeStockMode(item && item.stockMode);
       if (mode === "many") return "ok";
       if (mode === "few") return "low";
+      if (mode === "text") return textStockStatus(item.stockText);
       if (item.qty === 0) return "out";
       if (item.qty <= item.min) return "low";
       return "ok";
@@ -1547,11 +1549,14 @@
     }
 
     function stockModeLabel(mode) {
-      return { many: "Còn nhiều", few: "Còn ít", count: "Đếm số lượng" }[normalizeStockMode(mode)];
+      return { many: "Còn nhiều", few: "Còn ít", text: "Ghi tự do", count: "Đếm số lượng" }[normalizeStockMode(mode)];
     }
 
     function stockDisplay(item) {
-      return isCountedItem(item) ? item.qty.toLocaleString("vi-VN") : stockModeLabel(item.stockMode);
+      const mode = normalizeStockMode(item && item.stockMode);
+      if (mode === "count") return item.qty.toLocaleString("vi-VN");
+      if (mode === "text") return normalizeText(item.stockText) || "GHI TỰ DO";
+      return normalizeText(item.stockText) || stockModeLabel(mode);
     }
 
     function minDisplay(item) {
@@ -1559,16 +1564,35 @@
     }
 
     function stockStatusLabel(item) {
-      return isCountedItem(item) ? statusLabel(getStatus(item)) : stockModeLabel(item.stockMode);
+      return isCountedItem(item) ? statusLabel(getStatus(item)) : stockDisplay(item);
     }
 
     function updateStockModeFields() {
       const counted = els.stockMode.value === "count";
-      els.qty.disabled = !counted;
       els.min.disabled = !counted;
       els.stockModeHint.textContent = counted
-        ? "Nhập số lượng chính xác cho các món đếm được."
-        : "Dùng cho các món khó đếm như ly nhựa, bao tay. Số lượng sẽ hiện bằng chữ.";
+        ? "Có thể nhập số hoặc ghi chữ như CÒN NHIỀU, 2 BỊCH."
+        : "Có thể để trống hoặc ghi chữ tự do, ví dụ CÒN ÍT, NỬA BAO.";
+    }
+
+    function textStockStatus(value) {
+      const text = normalizeText(value);
+      if (text.includes("HẾT")) return "out";
+      if (text.includes("ÍT") || text.includes("THIẾU") || text.includes("SẮP")) return "low";
+      return "ok";
+    }
+
+    function parseStockInput(value) {
+      const raw = String(value ?? "").trim();
+      const text = normalizeText(raw);
+      if (!text) return { mode: "count", qty: 0, text: "" };
+      const numeric = Number(raw.replace(/\s/g, "").replace(",", "."));
+      if (Number.isFinite(numeric) && raw.replace(/\s/g, "") !== "") {
+        return { mode: "count", qty: Math.max(0, numeric), text: "" };
+      }
+      if (text.includes("NHIỀU")) return { mode: "many", qty: 0, text };
+      if (text.includes("ÍT")) return { mode: "few", qty: 0, text };
+      return { mode: "text", qty: 0, text };
     }
 
     function renderStats() {
@@ -1624,7 +1648,7 @@
         return;
       }
       els.adjustItem.innerHTML = filteredByLocation.map(item => {
-        const suffix = isCountedItem(item) ? `(${item.sku})` : `- ${stockModeLabel(item.stockMode)}`;
+        const suffix = isCountedItem(item) ? `(${item.sku})` : `- ${stockDisplay(item)}`;
         return `<option value="${item.id}">${escapeHtml(item.name)} ${escapeHtml(suffix)}</option>`;
       }).join("");
       els.adjustItem.value = filteredByLocation.some(item => item.id === selectedItem) ? selectedItem : filteredByLocation[0].id;
@@ -1639,18 +1663,18 @@
       const item = selectedAdjustItem();
       const hasItem = Boolean(item);
       const counted = hasItem && isCountedItem(item);
-      els.adjustQty.disabled = !counted;
-      els.quickIn.disabled = !counted;
-      els.quickOut.disabled = !counted;
-      els.countStock.disabled = !counted;
+      els.adjustQty.disabled = !hasItem;
+      els.quickIn.disabled = !hasItem;
+      els.quickOut.disabled = !hasItem;
+      els.countStock.disabled = !hasItem;
       els.quickMany.disabled = !hasItem;
       els.quickFew.disabled = !hasItem;
       els.quickCountMode.disabled = !hasItem;
       els.adjustModeHint.textContent = !hasItem
         ? "Chưa có mặt hàng để cập nhật."
         : counted
-          ? "Nhập số nếu đếm được, hoặc bấm Còn nhiều/Còn ít."
-          : `${item.name} đang ghi ${stockModeLabel(item.stockMode)}. Bấm Đếm số lượng nếu muốn nhập số lại.`;
+          ? "Nhập số để cộng/trừ, hoặc gõ chữ như CÒN NHIỀU, 2 BỊCH."
+          : `${item.name} đang ghi ${stockDisplay(item)}. Có thể gõ số để đếm lại hoặc gõ chữ mới.`;
     }
 
     function renderTable() {
@@ -1726,13 +1750,17 @@
 
     function saveItem(event) {
       event.preventDefault();
+      const stockInput = parseStockInput(els.qty.value);
+      const selectedStockMode = normalizeStockMode(els.stockMode.value);
+      const resolvedStockMode = stockInput.mode === "count" ? selectedStockMode : stockInput.mode;
       const item = normalizeItem({
         id: els.editId.value || makeId(),
         name: els.name.value.trim(),
         sku: els.sku.value.trim(),
         category: els.categoryInput.value.trim(),
-        stockMode: els.stockMode.value,
-        qty: Number(els.qty.value),
+        stockMode: resolvedStockMode,
+        stockText: stockInput.mode === "count" ? "" : stockInput.text,
+        qty: stockInput.qty,
         min: Number(els.min.value),
         price: Number(els.price.value),
         location: els.location.value.trim()
@@ -1830,21 +1858,24 @@
       const item = selectedAdjustItem();
       if (!item) return;
 
-      if (!isCountedItem(item)) {
-        showToast(`${item.name} đang để ${stockModeLabel(item.stockMode)}. Bấm sửa để đổi trạng thái.`);
+      const stockInput = parseStockInput(els.adjustQty.value);
+      const actor = requireOperator("cập nhật số lượng");
+      if (!actor) return;
+
+      if (stockInput.mode !== "count") {
+        applyTextStock(item, stockInput.mode, stockInput.text, actor, "Ghi tồn tự do");
         return;
       }
 
-      const amount = Number(els.adjustQty.value);
+      const amount = stockInput.qty;
       if (amount < 0) {
         showToast("Số lượng không hợp lệ.");
         return;
       }
 
-      const actor = requireOperator("cập nhật số lượng");
-      if (!actor) return;
-
       const oldQty = item.qty;
+      item.stockMode = "count";
+      item.stockText = "";
       if (els.adjustType.value === "in") item.qty += amount;
       if (els.adjustType.value === "out") item.qty = Math.max(0, item.qty - amount);
       if (els.adjustType.value === "count") item.qty = amount;
@@ -1877,10 +1908,41 @@
       const actor = requireOperator(mode === "count" ? "đổi lại đếm số lượng" : `ghi ${label.toLowerCase()}`);
       if (!actor) return;
 
+      if (mode === "count") {
+        const stockInput = parseStockInput(els.adjustQty.value);
+        if (stockInput.mode !== "count") {
+          applyTextStock(item, stockInput.mode, stockInput.text, actor, "Ghi tồn tự do");
+          return;
+        }
+        const before = stockDisplay(item);
+        const oldQty = item.qty;
+        item.stockMode = "count";
+        item.stockText = "";
+        item.qty = stockInput.qty;
+        pushAudit("Đổi sang đếm số lượng", `${item.name}: ${before} → ${stockDisplay(item)}.`, actor, {
+          type: "estimate",
+          itemId: item.id,
+          itemName: item.name,
+          oldQty,
+          newQty: item.qty,
+          quantity: 0,
+          qtyChange: 0,
+          warehouseId: activeWarehouseId
+        });
+        render();
+        showToast(`${actor} đã ghi ${item.name}: ${stockDisplay(item)}.`);
+        return;
+      }
+
+      applyTextStock(item, normalizeStockMode(mode), stockModeLabel(mode), actor, "Ghi tồn ước lượng");
+    }
+
+    function applyTextStock(item, mode, text, actor, title) {
       const before = stockDisplay(item);
       item.stockMode = normalizeStockMode(mode);
+      item.stockText = normalizeText(text) || stockModeLabel(mode);
       const after = stockDisplay(item);
-      pushAudit(mode === "count" ? "Đổi sang đếm số lượng" : "Ghi tồn ước lượng", `${item.name}: ${before} → ${after}.`, actor, {
+      pushAudit(title, `${item.name}: ${before} → ${after}.`, actor, {
         type: "estimate",
         itemId: item.id,
         itemName: item.name,
@@ -1954,7 +2016,7 @@
         els.sku.value = item.sku;
         els.categoryInput.value = item.category;
         els.stockMode.value = normalizeStockMode(item.stockMode);
-        els.qty.value = item.qty;
+        els.qty.value = isCountedItem(item) ? item.qty : stockDisplay(item);
         els.min.value = item.min;
         els.price.value = item.price;
         els.location.value = item.location;
@@ -2014,6 +2076,7 @@
       if (previous.location !== next.location) changes.push(`vị trí: ${previous.location} → ${next.location}`);
       if (normalizeStockMode(previous.stockMode) !== normalizeStockMode(next.stockMode)) changes.push(`kiểu tồn: ${stockModeLabel(previous.stockMode)} → ${stockModeLabel(next.stockMode)}`);
       if (previous.qty !== next.qty) changes.push(`tồn: ${stockDisplay(previous)} → ${stockDisplay(next)}`);
+      if (normalizeText(previous.stockText) !== normalizeText(next.stockText)) changes.push(`ghi chú tồn: ${stockDisplay(previous)} → ${stockDisplay(next)}`);
       if (previous.min !== next.min) changes.push(`tối thiểu: ${minDisplay(previous)} → ${minDisplay(next)}`);
       if (previous.price !== next.price) changes.push(`giá vốn: ${previous.price} → ${next.price}`);
       return changes.length ? `${next.name}: ${changes.join("; ")}.` : `${next.name}: đã lưu lại thông tin, không đổi số liệu.`;
@@ -2526,6 +2589,7 @@
         sku: normalizeText(item.sku),
         category: normalizeText(item.category),
         stockMode: normalizeStockMode(item.stockMode),
+        stockText: normalizeText(item.stockText),
         qty: Math.max(0, Number(item.qty) || 0),
         min: Math.max(0, Number(item.min) || 0),
         price: Math.max(0, Number(item.price) || 0),
@@ -2535,7 +2599,7 @@
 
     function normalizeStockMode(value) {
       const mode = String(value || "count").toLowerCase();
-      return ["count", "many", "few"].includes(mode) ? mode : "count";
+      return ["count", "many", "few", "text"].includes(mode) ? mode : "count";
     }
 
     function normalizeAudit(value) {

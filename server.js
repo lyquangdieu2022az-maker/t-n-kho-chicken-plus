@@ -232,6 +232,7 @@ function normalizeItem(item) {
     sku: String(item.sku || "").trim(),
     category: String(item.category || "").trim(),
     stockMode: normalizeStockMode(item.stockMode),
+    stockText: String(item.stockText || "").trim(),
     qty: Math.max(0, Number(item.qty) || 0),
     min: Math.max(0, Number(item.min) || 0),
     price: Math.max(0, Number(item.price) || 0),
@@ -241,7 +242,7 @@ function normalizeItem(item) {
 
 function normalizeStockMode(value) {
   const mode = String(value || "count").toLowerCase();
-  return ["count", "many", "few"].includes(mode) ? mode : "count";
+  return ["count", "many", "few", "text"].includes(mode) ? mode : "count";
 }
 
 function normalizeAuditEntry(entry) {
