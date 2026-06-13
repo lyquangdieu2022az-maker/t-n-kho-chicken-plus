@@ -189,7 +189,7 @@ function buildStateFromSingleWarehouse(items, audit) {
 
 function normalizeWarehouse(id, value) {
   const source = value || {};
-  const items = Array.isArray(source.items) ? source.items.map(normalizeItem) : [];
+  const items = scopeItemIds(Array.isArray(source.items) ? source.items.map(normalizeItem) : [], id);
   const audit = Array.isArray(source.audit) ? source.audit.slice(0, 30).map(normalizeAuditEntry) : [];
   return {
     ...warehouseConfigs[id],
@@ -201,7 +201,7 @@ function normalizeWarehouse(id, value) {
 }
 
 function cloneWarehouse(id, sourceWarehouse) {
-  const clonedItems = sourceWarehouse.items.map(item => ({ ...item }));
+  const clonedItems = scopeItemIds(sourceWarehouse.items.map(item => ({ ...item })), id);
   return {
     ...warehouseConfigs[id],
     items: clonedItems,
@@ -242,8 +242,17 @@ function normalizeAuditEntry(entry) {
   return {
     title: String(entry.title || "Cập nhật"),
     detail: String(entry.detail || ""),
+    actor: String(entry.actor || entry.user || entry.by || "CHƯA GHI TÊN").trim(),
     at: entry.at || new Date().toISOString()
   };
+}
+
+function scopeItemIds(sourceItems, warehouseId) {
+  return sourceItems.map(item => {
+    const rawId = String(item.id || makeId());
+    const baseId = rawId.replace(/^(hau-nghia|duc-hoa)__/, "");
+    return { ...item, id: `${warehouseId}__${baseId}` };
+  });
 }
 
 function makeId() {

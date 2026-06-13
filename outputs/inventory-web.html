@@ -478,7 +478,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 720px;
+      min-width: 680px;
     }
 
     th,
@@ -503,10 +503,53 @@
       background: #f2f9ff;
     }
 
+    th:nth-child(1),
+    td:nth-child(1) {
+      min-width: 185px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      min-width: 76px;
+      text-align: center;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      min-width: 148px;
+    }
+
     .sku {
       color: var(--muted);
       font-size: 13px;
       margin-top: 3px;
+    }
+
+    .stock-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eaf6ff;
+      border: 1px solid var(--line-strong);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stock-note.low {
+      color: #8c4e00;
+      background: #fff6cf;
+      border-color: #e8bf40;
+    }
+
+    .stock-note.out {
+      color: var(--danger);
+      background: #fff0f0;
+      border-color: #f0b4b4;
     }
 
     .qty {
@@ -856,7 +899,7 @@
       </nav>
       <button class="btn" id="switchWarehouseBtn" type="button">Đổi kho</button>
       <div class="side-note" id="sideNote">
-        Kho Chicken Plus Hậu Nghĩa. Dữ liệu được lưu trên trình duyệt này và có thể xuất CSV khi cần đối soát.
+        Kho Chicken Plus Hậu Nghĩa. Dữ liệu kho này được đồng bộ riêng và có thể xuất Excel khi cần đối soát.
       </div>
     </aside>
 
@@ -931,10 +974,10 @@
               <thead>
                 <tr>
                   <th>Mặt hàng</th>
+                  <th>Tồn</th>
                   <th>Thao tác</th>
                   <th>Nhóm</th>
                   <th>Vị trí</th>
-                  <th>Tồn</th>
                   <th>Tối thiểu</th>
                   <th>Trạng thái</th>
                 </tr>
@@ -952,12 +995,12 @@
               <input type="hidden" id="editId">
               <div class="field">
                 <label for="nameInput">Tên hàng</label>
-                <input id="nameInput" required placeholder="VÍ DỤ: GÀ NỬA CON">
+                <input id="nameInput" required placeholder="VÍ DỤ: MÈ GÀ">
               </div>
               <div class="two">
                 <div class="field">
                   <label for="skuInput">SKU</label>
-                  <input id="skuInput" required placeholder="GNC">
+                  <input id="skuInput" required placeholder="CF-500">
                 </div>
                 <div class="field">
                   <label for="categoryInput">Nhóm</label>
@@ -1141,7 +1184,7 @@
       clearForm();
       els.name.focus();
     });
-    document.getElementById("exportBtn").addEventListener("click", exportCsv);
+    document.getElementById("exportBtn").addEventListener("click", exportExcel);
     document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
     document.getElementById("resetBtn").addEventListener("click", resetSampleData);
     document.getElementById("navLow").addEventListener("click", () => {
@@ -1338,7 +1381,7 @@
       els.brandSubtitle.textContent = warehouse.shortName;
       els.brandLogo.src = warehouse.logo;
       els.brandLogo.alt = warehouse.name;
-      els.sideNote.textContent = `${warehouse.name}. Dữ liệu kho này được đồng bộ riêng và không trộn với kho khác.`;
+      els.sideNote.textContent = `${warehouse.name}. Dữ liệu kho này được đồng bộ riêng, không trộn với kho khác và có thể xuất Excel để đối soát.`;
     }
 
     function syncActiveWarehouse() {
@@ -1469,7 +1512,9 @@
             <td>
               <strong>${escapeHtml(item.name)}</strong>
               <div class="sku">${escapeHtml(item.sku)}</div>
+              <div class="stock-note ${status}">CÒN: ${item.qty.toLocaleString("vi-VN")}</div>
             </td>
+            <td><span class="qty">${item.qty.toLocaleString("vi-VN")}</span></td>
             <td>
               <div class="row-actions">
                 <button class="icon-btn" type="button" title="Nhập thêm 1" data-action="plus" data-id="${item.id}">+</button>
@@ -1480,7 +1525,6 @@
             </td>
             <td>${escapeHtml(item.category)}</td>
             <td>${escapeHtml(item.location)}</td>
-            <td><span class="qty">${item.qty.toLocaleString("vi-VN")}</span></td>
             <td>${item.min.toLocaleString("vi-VN")}</td>
             <td><span class="tag ${status}">${statusLabel(status)}</span></td>
           </tr>
@@ -1730,31 +1774,149 @@
     }
 
     function pushAudit(title, detail, actor = "") {
-      audit.unshift({ title, detail, actor: actor || currentOperator() || "Chưa ghi tên", at: new Date().toISOString() });
+      audit.unshift({ title, detail, actor: actor || currentOperator() || "CHƯA GHI TÊN", at: new Date().toISOString() });
       audit = audit.slice(0, 30);
     }
 
-    function exportCsv() {
-      const headers = ["Ten hang", "SKU", "Nhom", "Vi tri", "So luong", "Toi thieu", "Gia von", "Trang thai"];
-      const rows = items.map(item => [
-        item.name,
-        item.sku,
-        item.category,
-        item.location,
-        item.qty,
-        item.min,
-        item.price,
-        statusLabel(getStatus(item))
-      ]);
-      const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
-      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    function exportExcel() {
+      syncActiveWarehouse();
+      const warehouse = currentWarehouse();
+      const exportedAt = new Intl.DateTimeFormat("vi-VN", { dateStyle: "full", timeStyle: "short" }).format(new Date());
+      const headers = ["STT", "Mặt hàng", "SKU", "Nhóm", "Vị trí", "Tồn", "Tối thiểu", "Trạng thái"];
+      const headerRow = headers.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const itemRows = items.map((item, index) => {
+        const status = getStatus(item);
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const statusStyle = status === "out" ? "StatusOut" : status === "low" ? "StatusLow" : "StatusOk";
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="Number">${index + 1}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.name)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Text"><Data ss:Type="String">${xmlEscape(item.sku)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.category)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.location)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${item.qty}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${item.min}</Data></Cell>
+            <Cell ss:StyleID="${statusStyle}"><Data ss:Type="String">${xmlEscape(statusLabel(status))}</Data></Cell>
+          </Row>
+        `;
+      }).join("");
+
+      const workbook = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="Default" ss:Name="Normal">
+      <Alignment ss:Vertical="Center" ss:WrapText="1"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Color="#10233F"/>
+    </Style>
+    <Style ss:ID="Title">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="18" ss:Bold="1" ss:Color="#FFFFFF"/>
+      <Interior ss:Color="#1D73C9" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Subtitle">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#0F2B46"/>
+      <Interior ss:Color="#EAF6FF" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Header">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#0F2B46"/>
+      <Interior ss:Color="#DCEEFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="Cell">
+      <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellAlt">
+      <Interior ss:Color="#F4FAFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellText">
+      <NumberFormat ss:Format="@"/>
+      <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellAltText">
+      <NumberFormat ss:Format="@"/>
+      <Interior ss:Color="#F4FAFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellNumber">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#10233F"/>
+      <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellAltNumber">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#10233F"/>
+      <Interior ss:Color="#F4FAFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="StatusOk">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#155C35"/>
+      <Interior ss:Color="#E9F8D9" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="StatusLow">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#8C4E00"/>
+      <Interior ss:Color="#FFF6CF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="StatusOut">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#C63B3B"/>
+      <Interior ss:Color="#FFF0F0" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+  </Styles>
+  <Worksheet ss:Name="${xmlAttribute(safeSheetName(warehouse.shortName || "Tồn kho"))}">
+    <Table>
+      <Column ss:Width="42"/>
+      <Column ss:Width="180"/>
+      <Column ss:Width="78"/>
+      <Column ss:Width="130"/>
+      <Column ss:Width="130"/>
+      <Column ss:Width="72"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="105"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="7" ss:StyleID="Title"><Data ss:Type="String">${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="7" ss:StyleID="Subtitle"><Data ss:Type="String">Xuất lúc: ${xmlEscape(exportedAt)} - Tổng mặt hàng: ${items.length}</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${headerRow}</Row>
+      ${itemRows}
+    </Table>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+</Workbook>`;
+
+      const blob = new Blob(["\ufeff" + workbook], { type: "application/vnd.ms-excel;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ton-kho-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `ton-kho-${activeWarehouseId}-${new Date().toISOString().slice(0, 10)}.xls`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast("Đã xuất file CSV.");
+      showToast("Đã xuất file Excel.");
     }
 
     function exportJson() {
@@ -1843,7 +2005,7 @@
 
     function normalizeWarehouse(id, value) {
       const warehouse = value || {};
-      const normalizedItems = normalizeItems(warehouse.items);
+      const normalizedItems = scopeItemIds(normalizeItems(warehouse.items), id);
       return {
         ...warehouseConfigs[id],
         items: normalizedItems,
@@ -1854,7 +2016,7 @@
     }
 
     function cloneWarehouse(id, sourceWarehouse) {
-      const clonedItems = normalizeItems(sourceWarehouse.items).map(item => ({ ...item }));
+      const clonedItems = scopeItemIds(normalizeItems(sourceWarehouse.items).map(item => ({ ...item })), id);
       return {
         ...warehouseConfigs[id],
         items: clonedItems,
@@ -1869,6 +2031,14 @@
         categoryOptions: mergeOptions(sourceWarehouse.categoryOptions, clonedItems.map(item => item.category)),
         locationOptions: mergeOptions(sourceWarehouse.locationOptions, clonedItems.map(item => item.location))
       };
+    }
+
+    function scopeItemIds(sourceItems, warehouseId) {
+      return sourceItems.map(item => {
+        const rawId = String(item.id || makeId());
+        const baseId = rawId.replace(/^(hau-nghia|duc-hoa)__/, "");
+        return { ...item, id: `${warehouseId}__${baseId}` };
+      });
     }
 
     function mergeOptions(existing, values) {
@@ -1930,9 +2100,25 @@
       return "item-" + Date.now().toString(36) + Math.random().toString(36).slice(2);
     }
 
-    function csvCell(value) {
-      const text = String(value ?? "");
-      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    function excelBorders() {
+      return '<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/>';
+    }
+
+    function safeSheetName(value) {
+      return String(value || "Tồn kho").replace(/[\\\/?*\[\]:]/g, " ").slice(0, 31) || "Tồn kho";
+    }
+
+    function xmlAttribute(value) {
+      return xmlEscape(value).replace(/"/g, "&quot;");
+    }
+
+    function xmlEscape(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
     }
 
     function escapeHtml(value) {
