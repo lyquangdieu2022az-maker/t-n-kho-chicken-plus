@@ -678,6 +678,31 @@
       gap: 10px;
     }
 
+    .estimate-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .btn.estimate-ok {
+      background: #e9f8d9;
+      color: #155c35;
+      border-color: #b7dd96;
+    }
+
+    .btn.estimate-low {
+      background: #fff6cf;
+      color: #8c4e00;
+      border-color: #e8bf40;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      animation: none;
+      transform: none;
+    }
+
     .btn.stock-out {
       background: #fff2f2;
       color: var(--danger);
@@ -860,6 +885,10 @@
       }
 
       .two {
+        grid-template-columns: 1fr;
+      }
+
+      .estimate-actions {
         grid-template-columns: 1fr;
       }
 
@@ -1099,6 +1128,12 @@
                 <label for="adjustQty">Số lượng</label>
                 <input id="adjustQty" type="number" min="0" step="1" value="1" required>
               </div>
+              <div class="field-note" id="adjustModeHint">Nhập số nếu đếm được, hoặc bấm Còn nhiều/Còn ít.</div>
+              <div class="estimate-actions">
+                <button class="btn estimate-ok" id="quickManyBtn" type="button">✓ Ghi còn nhiều</button>
+                <button class="btn estimate-low" id="quickFewBtn" type="button">! Ghi còn ít</button>
+                <button class="btn" id="quickCountModeBtn" type="button">↺ Đếm số lượng</button>
+              </div>
               <input id="adjustType" type="hidden" value="count">
               <div class="quick-adjust-actions">
                 <button class="btn primary" id="quickInBtn" type="button">+ Nhập kho nhanh</button>
@@ -1204,6 +1239,10 @@
       adjustItem: document.getElementById("adjustItem"),
       adjustType: document.getElementById("adjustType"),
       adjustQty: document.getElementById("adjustQty"),
+      adjustModeHint: document.getElementById("adjustModeHint"),
+      quickMany: document.getElementById("quickManyBtn"),
+      quickFew: document.getElementById("quickFewBtn"),
+      quickCountMode: document.getElementById("quickCountModeBtn"),
       quickIn: document.getElementById("quickInBtn"),
       quickOut: document.getElementById("quickOutBtn"),
       countStock: document.getElementById("countStockBtn"),
@@ -1259,6 +1298,10 @@
     els.importJson.addEventListener("change", importJsonFile);
     els.adjustCategory.addEventListener("change", renderAdjustOptions);
     els.adjustLocation.addEventListener("change", renderAdjustOptions);
+    els.adjustItem.addEventListener("change", updateQuickStockControls);
+    els.quickMany.addEventListener("click", () => setQuickStockMode("many"));
+    els.quickFew.addEventListener("click", () => setQuickStockMode("few"));
+    els.quickCountMode.addEventListener("click", () => setQuickStockMode("count"));
     els.quickIn.addEventListener("click", () => runQuickAdjust("in"));
     els.quickOut.addEventListener("click", () => runQuickAdjust("out"));
     els.countStock.addEventListener("click", () => {
@@ -1577,6 +1620,7 @@
 
       if (!filteredByLocation.length) {
         els.adjustItem.innerHTML = '<option value="">Chưa có mặt hàng</option>';
+        updateQuickStockControls();
         return;
       }
       els.adjustItem.innerHTML = filteredByLocation.map(item => {
@@ -1584,6 +1628,29 @@
         return `<option value="${item.id}">${escapeHtml(item.name)} ${escapeHtml(suffix)}</option>`;
       }).join("");
       els.adjustItem.value = filteredByLocation.some(item => item.id === selectedItem) ? selectedItem : filteredByLocation[0].id;
+      updateQuickStockControls();
+    }
+
+    function selectedAdjustItem() {
+      return items.find(current => current.id === els.adjustItem.value);
+    }
+
+    function updateQuickStockControls() {
+      const item = selectedAdjustItem();
+      const hasItem = Boolean(item);
+      const counted = hasItem && isCountedItem(item);
+      els.adjustQty.disabled = !counted;
+      els.quickIn.disabled = !counted;
+      els.quickOut.disabled = !counted;
+      els.countStock.disabled = !counted;
+      els.quickMany.disabled = !hasItem;
+      els.quickFew.disabled = !hasItem;
+      els.quickCountMode.disabled = !hasItem;
+      els.adjustModeHint.textContent = !hasItem
+        ? "Chưa có mặt hàng để cập nhật."
+        : counted
+          ? "Nhập số nếu đếm được, hoặc bấm Còn nhiều/Còn ít."
+          : `${item.name} đang ghi ${stockModeLabel(item.stockMode)}. Bấm Đếm số lượng nếu muốn nhập số lại.`;
     }
 
     function renderTable() {
@@ -1760,7 +1827,7 @@
 
     function adjustStock(event) {
       event.preventDefault();
-      const item = items.find(current => current.id === els.adjustItem.value);
+      const item = selectedAdjustItem();
       if (!item) return;
 
       if (!isCountedItem(item)) {
@@ -1800,6 +1867,31 @@
     function runQuickAdjust(type) {
       els.adjustType.value = type;
       adjustStock(new Event("submit", { cancelable: true }));
+    }
+
+    function setQuickStockMode(mode) {
+      const item = selectedAdjustItem();
+      if (!item) return;
+
+      const label = stockModeLabel(mode);
+      const actor = requireOperator(mode === "count" ? "đổi lại đếm số lượng" : `ghi ${label.toLowerCase()}`);
+      if (!actor) return;
+
+      const before = stockDisplay(item);
+      item.stockMode = normalizeStockMode(mode);
+      const after = stockDisplay(item);
+      pushAudit(mode === "count" ? "Đổi sang đếm số lượng" : "Ghi tồn ước lượng", `${item.name}: ${before} → ${after}.`, actor, {
+        type: "estimate",
+        itemId: item.id,
+        itemName: item.name,
+        oldQty: item.qty,
+        newQty: item.qty,
+        quantity: 0,
+        qtyChange: 0,
+        warehouseId: activeWarehouseId
+      });
+      render();
+      showToast(`${actor} đã ghi ${item.name}: ${after}.`);
     }
 
     function handleRowAction(event) {
@@ -2258,6 +2350,7 @@
     }
 
     function movementTypeLabel(type, qtyChange) {
+      if (type === "estimate") return "GHI TỒN ƯỚC LƯỢNG";
       if (type === "in" || qtyChange > 0) return "NHẬP KHO";
       if (type === "out" || qtyChange < 0) return "XUẤT KHO";
       return "CHỐT KIỂM";
