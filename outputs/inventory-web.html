@@ -2149,6 +2149,66 @@
           <Cell ss:StyleID="${typeof value === "number" ? "CellNumber" : "Cell"}"><Data ss:Type="${typeof value === "number" ? "Number" : "String"}">${xmlEscape(value)}</Data></Cell>
         </Row>
       `).join("");
+      const week = currentInventoryWeek();
+      const weeklyMovements = movementsForRange(week.start, week.end);
+      const weekTitle = `${formatDateOnly(week.start)} - ${formatDateOnly(week.end)}`;
+      const weeklyHeaders = ["Ngày", "Thứ", "Người thao tác", "Loại", "Mặt hàng", "Số lượng", "Tồn trước", "Tồn sau", "Chi tiết đối chiếu"];
+      const weeklyLastRow = Math.max(3, weeklyMovements.length + 3);
+      const weeklyHeaderRow = weeklyHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const weeklyRows = weeklyMovements.map((entry, index) => {
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const note = entry.type === "out"
+          ? `${entry.actor} xuất ${entry.itemName}, số lượng ${entry.quantity}, còn ${entry.newQty}.`
+          : entry.type === "in"
+            ? `${entry.actor} nhập ${entry.itemName}, số lượng ${entry.quantity}, tồn mới ${entry.newQty}.`
+            : `${entry.actor} chốt/ghi tồn ${entry.itemName}: ${entry.oldQty} -> ${entry.newQty}.`;
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(formatDateTime(entry.at))}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(dayName(entry.at))}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.actor)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.typeLabel)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.itemName)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.quantity}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.oldQty}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.newQty}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(note)}</Data></Cell>
+          </Row>
+        `;
+      }).join("") || '<Row><Cell ss:MergeAcross="8" ss:StyleID="Cell"><Data ss:Type="String">Tuần này chưa có nhập/xuất/chốt kiểm kho.</Data></Cell></Row>';
+      const weeklyReconciliation = buildWeeklyReconciliation(weeklyMovements, week);
+      const reconcileHeaders = ["Mặt hàng", "Nhóm", "Tồn CN đầu kỳ", "Nhập trong tuần", "Xuất trong tuần", "Tồn lý thuyết", "Tồn kiểm CN / hiện tại", "Lệch", "Kết luận"];
+      const reconcileLastRow = Math.max(3, weeklyReconciliation.rows.length + 3);
+      const reconcileHeaderRow = reconcileHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const reconcileRows = weeklyReconciliation.rows.map((entry, index) => {
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const conclusionStyle = entry.diff === 0 ? "StatusOk" : entry.diff < 0 ? "StatusOut" : "StatusLow";
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.name)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.category)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.opening}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.inTotal}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.outTotal}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.expected}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.checked}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.diff}</Data></Cell>
+            <Cell ss:StyleID="${conclusionStyle}"><Data ss:Type="String">${xmlEscape(entry.label)}</Data></Cell>
+          </Row>
+        `;
+      }).join("");
+      const reconcileSummaryRows = [
+        ["Tổng tồn lý thuyết", weeklyReconciliation.expectedTotal],
+        ["Tổng tồn kiểm / hiện tại", weeklyReconciliation.checkedTotal],
+        ["Tổng lệch", weeklyReconciliation.diffTotal],
+        ["Mặt hàng bị thiếu", weeklyReconciliation.shortCount],
+        ["Mặt hàng bị dư", weeklyReconciliation.overCount]
+      ].map(([label, value]) => `
+        <Row ss:AutoFitHeight="1">
+          <Cell ss:StyleID="Cell"><Data ss:Type="String">${xmlEscape(label)}</Data></Cell>
+          <Cell ss:MergeAcross="7" ss:StyleID="CellNumber"><Data ss:Type="Number">${value}</Data></Cell>
+        </Row>
+      `).join("");
 
       const workbook = `<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -2283,6 +2343,70 @@
       <ProtectScenarios>False</ProtectScenarios>
     </WorksheetOptions>
   </Worksheet>
+  <Worksheet ss:Name="Theo dõi tuần">
+    <Table>
+      <Column ss:Width="120"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="135"/>
+      <Column ss:Width="120"/>
+      <Column ss:Width="220"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="310"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="8" ss:StyleID="Title"><Data ss:Type="String">THEO DÕI NHẬP / XUẤT THEO TUẦN - ${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="8" ss:StyleID="Subtitle"><Data ss:Type="String">Kỳ kiểm kho: Chủ Nhật ${xmlEscape(weekTitle)}. Theo dõi ai nhập, ai xuất, xuất bao nhiêu và tồn còn lại.</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${weeklyHeaderRow}</Row>
+      ${weeklyRows}
+    </Table>
+    <AutoFilter x:Range="R3C1:R${weeklyLastRow}C9" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+  <Worksheet ss:Name="Đối chiếu CN">
+    <Table>
+      <Column ss:Width="220"/>
+      <Column ss:Width="150"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="110"/>
+      <Column ss:Width="118"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="125"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="8" ss:StyleID="Title"><Data ss:Type="String">ĐỐI CHIẾU KIỂM KHO CHỦ NHẬT - ${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="8" ss:StyleID="Subtitle"><Data ss:Type="String">Công thức: tồn CN đầu kỳ + nhập trong tuần - xuất trong tuần = tồn lý thuyết. Lệch âm là thiếu hàng cần kiểm tra.</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${reconcileHeaderRow}</Row>
+      ${reconcileRows}
+      <Row ss:Height="8"></Row>
+      ${reconcileSummaryRows}
+    </Table>
+    <AutoFilter x:Range="R3C1:R${reconcileLastRow}C9" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
   <Worksheet ss:Name="Tổng kết">
     <Table>
       <Column ss:Width="220"/>
@@ -2377,6 +2501,17 @@
         .sort((a, b) => new Date(a.at) - new Date(b.at));
     }
 
+    function movementsForRange(start, end) {
+      return audit
+        .map(parseAuditMovement)
+        .filter(Boolean)
+        .filter(entry => {
+          const date = new Date(entry.at);
+          return date >= start && date <= end;
+        })
+        .sort((a, b) => new Date(a.at) - new Date(b.at));
+    }
+
     function parseAuditMovement(entry) {
       const title = String(entry.title || "");
       const isMovementTitle = /nhập|xuất|chốt kiểm/i.test(title);
@@ -2423,6 +2558,38 @@
       return Number(String(value || "").replace(/\./g, "").replace(/,/g, ""));
     }
 
+    function currentInventoryWeek() {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      start.setDate(start.getDate() - start.getDay());
+      const end = new Date(start);
+      end.setDate(start.getDate() + 7);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+
+    function formatDateOnly(value) {
+      return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(new Date(value));
+    }
+
+    function formatDateTime(value) {
+      return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+    }
+
+    function dayName(value) {
+      const date = new Date(value);
+      const names = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+      return names[date.getDay()];
+    }
+
+    function isSameDate(left, right) {
+      const a = new Date(left);
+      const b = new Date(right);
+      return a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth()
+        && a.getDate() === b.getDate();
+    }
+
     function isToday(value) {
       const date = new Date(value || Date.now());
       const today = new Date();
@@ -2464,6 +2631,65 @@
       const diff = webTotal - expectedTotal;
       const label = diff === 0 ? "KHỚP TỒN WEB" : diff > 0 ? "DƯ HÀNG TỒN" : "THIẾU HÀNG TỒN";
       return { startTotal, inTotal, outTotal, expectedTotal, webTotal, diff, label, estimatedCount };
+    }
+
+    function buildWeeklyReconciliation(movements, week) {
+      const movementByItem = new Map();
+      movements.forEach(entry => {
+        if (entry.type === "estimate") return;
+        if (!movementByItem.has(entry.itemName)) movementByItem.set(entry.itemName, []);
+        movementByItem.get(entry.itemName).push(entry);
+      });
+
+      let expectedTotal = 0;
+      let checkedTotal = 0;
+      let diffTotal = 0;
+      let shortCount = 0;
+      let overCount = 0;
+      const rows = items
+        .filter(isCountedItem)
+        .map(item => {
+          const itemMovements = movementByItem.get(item.name) || [];
+          const startCounts = itemMovements.filter(entry => entry.type === "count" && isSameDate(entry.at, week.start));
+          const endCounts = itemMovements.filter(entry => entry.type === "count" && isSameDate(entry.at, week.end));
+          const opening = startCounts.length
+            ? startCounts[startCounts.length - 1].newQty
+            : itemMovements.length
+              ? itemMovements[0].oldQty
+              : item.qty;
+          const inTotal = itemMovements
+            .filter(entry => entry.type === "in")
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const outTotal = itemMovements
+            .filter(entry => entry.type === "out")
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const expected = opening + inTotal - outTotal;
+          const checked = endCounts.length ? endCounts[endCounts.length - 1].newQty : item.qty;
+          const diff = checked - expected;
+          const label = diff === 0 ? "KHỚP" : diff < 0 ? "THIẾU HÀNG" : "DƯ HÀNG";
+          expectedTotal += expected;
+          checkedTotal += checked;
+          diffTotal += diff;
+          if (diff < 0) shortCount += 1;
+          if (diff > 0) overCount += 1;
+          return {
+            name: item.name,
+            category: item.category,
+            opening,
+            inTotal,
+            outTotal,
+            expected,
+            checked,
+            diff,
+            label
+          };
+        })
+        .sort((a, b) => {
+          if (a.diff !== b.diff) return a.diff - b.diff;
+          return a.name.localeCompare(b.name, "vi");
+        });
+
+      return { rows, expectedTotal, checkedTotal, diffTotal, shortCount, overCount };
     }
 
     function resetSampleData() {
