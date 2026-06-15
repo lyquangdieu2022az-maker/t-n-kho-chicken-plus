@@ -1135,7 +1135,10 @@
                 <label for="adjustItem">Mặt hàng</label>
                 <select id="adjustItem"></select>
               </div>
-              <div class="field-note" id="adjustUnitHint">Đơn vị: -</div>
+              <div class="field">
+                <label for="adjustUnit">Đơn vị</label>
+                <input id="adjustUnit" list="unitOptions" placeholder="VD: SẤP, BỊCH, THÙNG">
+              </div>
               <div class="field">
                 <label for="adjustQty">Số lượng</label>
                 <input id="adjustQty" type="number" min="0" step="1" value="1" placeholder="VD: 5">
@@ -1253,7 +1256,7 @@
       adjustCategory: document.getElementById("adjustCategory"),
       adjustLocation: document.getElementById("adjustLocation"),
       adjustItem: document.getElementById("adjustItem"),
-      adjustUnitHint: document.getElementById("adjustUnitHint"),
+      adjustUnit: document.getElementById("adjustUnit"),
       adjustType: document.getElementById("adjustType"),
       adjustQty: document.getElementById("adjustQty"),
       adjustModeHint: document.getElementById("adjustModeHint"),
@@ -1318,6 +1321,7 @@
     els.adjustCategory.addEventListener("change", renderAdjustOptions);
     els.adjustLocation.addEventListener("change", renderAdjustOptions);
     els.adjustItem.addEventListener("change", updateQuickStockControls);
+    els.adjustUnit.addEventListener("input", () => uppercaseInput(els.adjustUnit));
     els.quickMany.addEventListener("click", () => setQuickStockMode("many"));
     els.quickFew.addEventListener("click", () => setQuickStockMode("few"));
     els.quickCountMode.addEventListener("click", () => setQuickStockMode("count"));
@@ -1327,7 +1331,7 @@
       els.adjustType.value = "count";
     });
     els.operator.value = normalizeText(readTextStorage(operatorKey));
-    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit].forEach(input => {
+    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit, els.adjustUnit].forEach(input => {
       input.addEventListener("input", () => uppercaseInput(input));
     });
     els.operator.addEventListener("input", () => {
@@ -1674,7 +1678,8 @@
         return;
       }
       els.adjustItem.innerHTML = filteredByLocation.map(item => {
-        const suffix = isCountedItem(item) ? `(${item.sku})` : `- ${stockDisplay(item)}`;
+        const unitSuffix = item.unit ? ` - ${item.unit}` : "";
+        const suffix = isCountedItem(item) ? `(${item.sku})${unitSuffix}` : `- ${stockDisplay(item)}${unitSuffix}`;
         return `<option value="${item.id}">${escapeHtml(item.name)} ${escapeHtml(suffix)}</option>`;
       }).join("");
       els.adjustItem.value = filteredByLocation.some(item => item.id === selectedItem) ? selectedItem : filteredByLocation[0].id;
@@ -1696,12 +1701,13 @@
       els.quickMany.disabled = !hasItem;
       els.quickFew.disabled = !hasItem;
       els.quickCountMode.disabled = !hasItem;
+      els.adjustUnit.disabled = !hasItem;
+      els.adjustUnit.value = hasItem ? (item.unit || "") : "";
       els.adjustModeHint.textContent = !hasItem
         ? "Chưa có mặt hàng để cập nhật."
         : counted
           ? "Nhập số để cộng/trừ. Đơn vị của mặt hàng được lưu riêng."
           : `${item.name} đang ghi ${stockDisplay(item)}. Có thể bấm Đếm số lượng rồi nhập số để kiểm lại.`;
-      els.adjustUnitHint.textContent = hasItem ? `Đơn vị: ${item.unit || "-"}` : "Đơn vị: -";
     }
 
     function renderTable() {
@@ -1911,6 +1917,7 @@
       const stockInput = parseStockInput(els.adjustQty.value);
       const actor = requireOperator("cập nhật số lượng");
       if (!actor) return;
+      applyQuickUnit(item, actor);
 
       if (stockInput.mode !== "count") {
         applyTextStock(item, stockInput.mode, stockInput.text, actor, "Ghi tồn tự do");
@@ -1944,6 +1951,21 @@
       });
       render();
       showToast(`${actor} đã cập nhật số lượng tồn.`);
+    }
+
+    function applyQuickUnit(item, actor) {
+      const nextUnit = normalizeText(els.adjustUnit.value);
+      if (!nextUnit || item.unit === nextUnit) return;
+      const previousUnit = item.unit || "-";
+      item.unit = nextUnit;
+      addOption("unit", nextUnit, { silent: true });
+      pushAudit("Cập nhật đơn vị", `${item.name}: ${previousUnit} → ${nextUnit}.`, actor, {
+        type: "unit",
+        itemId: item.id,
+        itemName: item.name,
+        unit: nextUnit,
+        warehouseId: activeWarehouseId
+      });
     }
 
     function runQuickAdjust(type) {
@@ -2216,10 +2238,11 @@
       const weeklyHeaderRow = weeklyHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const weeklyRows = weeklyMovements.map((entry, index) => {
         const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const movementAmount = `${entry.quantity}${entry.unit ? " " + entry.unit : ""}`;
         const note = entry.type === "out"
-          ? `${entry.actor} xuất ${entry.itemName}, số lượng ${entry.quantity}, còn ${entry.newQty}.`
+          ? `${entry.actor} xuất ${entry.itemName}, số lượng ${movementAmount}, còn ${entry.newQty}.`
           : entry.type === "in"
-            ? `${entry.actor} nhập ${entry.itemName}, số lượng ${entry.quantity}, tồn mới ${entry.newQty}.`
+            ? `${entry.actor} nhập ${entry.itemName}, số lượng ${movementAmount}, tồn mới ${entry.newQty}.`
             : `${entry.actor} chốt/ghi tồn ${entry.itemName}: ${entry.oldQty} -> ${entry.newQty}.`;
         return `
           <Row ss:AutoFitHeight="1">
