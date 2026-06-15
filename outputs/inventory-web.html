@@ -1079,7 +1079,7 @@
                 </div>
                 <div class="field">
                   <label for="qtyInput">Số lượng</label>
-                  <input id="qtyInput" required type="text" value="0" placeholder="VD: 5, CÒN NHIỀU, 2 BỊCH">
+                  <input id="qtyInput" required type="number" min="0" step="1" value="0" placeholder="VD: 5">
                 </div>
               </div>
               <div class="two">
@@ -1136,7 +1136,7 @@
               </div>
               <div class="field">
                 <label for="adjustQty">Số lượng</label>
-                <input id="adjustQty" type="text" value="1" placeholder="VD: 5, CÒN ÍT, 2 BỊCH">
+                <input id="adjustQty" type="number" min="0" step="1" value="1" placeholder="VD: 5">
               </div>
               <div class="field-note" id="adjustModeHint">Nhập số nếu đếm được, hoặc bấm Còn nhiều/Còn ít.</div>
               <div class="estimate-actions">
@@ -1324,7 +1324,7 @@
       els.adjustType.value = "count";
     });
     els.operator.value = normalizeText(readTextStorage(operatorKey));
-    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit, els.qty, els.adjustQty].forEach(input => {
+    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit].forEach(input => {
       input.addEventListener("input", () => uppercaseInput(input));
     });
     els.operator.addEventListener("input", () => {
@@ -1592,8 +1592,8 @@
       const counted = els.stockMode.value === "count";
       els.min.disabled = !counted;
       els.stockModeHint.textContent = counted
-        ? "Có thể nhập số hoặc ghi chữ như CÒN NHIỀU, 2 BỊCH."
-        : "Có thể để trống hoặc ghi chữ tự do, ví dụ CÒN ÍT, NỬA BAO.";
+        ? "Nhập số lượng bằng số. Đơn vị chọn ở ô Đơn vị bên dưới."
+        : "Còn nhiều/Còn ít dùng cho các món khó đếm, số lượng có thể để 0.";
     }
 
     function textStockStatus(value) {
@@ -1696,8 +1696,8 @@
       els.adjustModeHint.textContent = !hasItem
         ? "Chưa có mặt hàng để cập nhật."
         : counted
-          ? "Nhập số để cộng/trừ, hoặc gõ chữ như CÒN NHIỀU, 2 BỊCH."
-          : `${item.name} đang ghi ${stockDisplay(item)}. Có thể gõ số để đếm lại hoặc gõ chữ mới.`;
+          ? "Nhập số để cộng/trừ. Đơn vị của mặt hàng được lưu riêng."
+          : `${item.name} đang ghi ${stockDisplay(item)}. Có thể bấm Đếm số lượng rồi nhập số để kiểm lại.`;
     }
 
     function renderTable() {
