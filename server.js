@@ -8,6 +8,7 @@ const port = process.env.PORT || 4173;
 const publicDir = path.join(__dirname, "outputs");
 const dataDir = path.join(__dirname, "data");
 const localStatePath = path.join(dataDir, "state.json");
+const demoStatePath = path.join(dataDir, "demo-state.json");
 const stateTable = "chicken_plus_inventory_state";
 const stateKey = "inventory";
 const warehouseConfigs = {
@@ -82,6 +83,25 @@ app.put("/api/state", async (req, res, next) => {
   }
 });
 
+app.get("/api/demo-state", async (_req, res, next) => {
+  try {
+    const state = await readDemoState();
+    res.json(state);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put("/api/demo-state", async (req, res, next) => {
+  try {
+    const state = normalizeState(req.body);
+    await writeDemoState(state);
+    res.json({ ok: true, demo: true, updatedAt: new Date().toISOString() });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/", (_req, res) => {
   res.sendFile(path.join(publicDir, "inventory-web.html"));
 });
@@ -135,6 +155,23 @@ async function writeState(state) {
 
   await fs.mkdir(dataDir, { recursive: true });
   await fs.writeFile(localStatePath, JSON.stringify(state, null, 2), "utf8");
+}
+
+async function readDemoState() {
+  try {
+    const raw = await fs.readFile(demoStatePath, "utf8");
+    return { ...normalizeState(JSON.parse(raw.replace(/^\uFEFF/, ""))), isSeed: false, demo: true };
+  } catch {
+    const source = await readState();
+    const demoState = normalizeState(source);
+    await writeDemoState(demoState);
+    return { ...demoState, isSeed: false, demo: true };
+  }
+}
+
+async function writeDemoState(state) {
+  await fs.mkdir(dataDir, { recursive: true });
+  await fs.writeFile(demoStatePath, JSON.stringify(state, null, 2), "utf8");
 }
 
 async function ensureDatabase() {
@@ -196,7 +233,8 @@ function normalizeWarehouse(id, value) {
     items,
     audit,
     categoryOptions: deriveOptions(items, "category", source.categoryOptions),
-    locationOptions: deriveOptions(items, "location", source.locationOptions)
+    locationOptions: deriveOptions(items, "location", source.locationOptions),
+    unitOptions: deriveOptions(items, "unit", source.unitOptions)
   };
 }
 
@@ -213,7 +251,8 @@ function cloneWarehouse(id, sourceWarehouse) {
       }
     ],
     categoryOptions: deriveOptions(clonedItems, "category", sourceWarehouse.categoryOptions),
-    locationOptions: deriveOptions(clonedItems, "location", sourceWarehouse.locationOptions)
+    locationOptions: deriveOptions(clonedItems, "location", sourceWarehouse.locationOptions),
+    unitOptions: deriveOptions(clonedItems, "unit", sourceWarehouse.unitOptions)
   };
 }
 
@@ -236,7 +275,8 @@ function normalizeItem(item) {
     qty: Math.max(0, Number(item.qty) || 0),
     min: Math.max(0, Number(item.min) || 0),
     price: Math.max(0, Number(item.price) || 0),
-    location: String(item.location || "").trim()
+    location: String(item.location || "").trim(),
+    unit: String(item.unit || "").trim()
   };
 }
 
@@ -254,6 +294,7 @@ function normalizeAuditEntry(entry) {
     type: entry.type ? String(entry.type) : "",
     itemId: entry.itemId ? String(entry.itemId) : "",
     itemName: entry.itemName ? String(entry.itemName).trim() : "",
+    unit: entry.unit ? String(entry.unit).trim() : "",
     oldQty: Number.isFinite(Number(entry.oldQty)) ? Number(entry.oldQty) : null,
     newQty: Number.isFinite(Number(entry.newQty)) ? Number(entry.newQty) : null,
     quantity: Number.isFinite(Number(entry.quantity)) ? Number(entry.quantity) : null,

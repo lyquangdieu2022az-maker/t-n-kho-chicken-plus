@@ -1097,6 +1097,15 @@
                   <datalist id="locationOptions"></datalist>
                 </div>
               </div>
+              <div class="field">
+                <label for="unitInput">&#272;&#417;n v&#7883;</label>
+                <div class="option-tools">
+                  <input id="unitInput" list="unitOptions" placeholder="VD: CAI, BICH, SAP, THUNG">
+                  <button class="icon-btn" id="addUnitOptionBtn" type="button" title="L&#432;u &#273;&#417;n v&#7883; n&#224;y">+</button>
+                  <button class="icon-btn remove" id="removeUnitOptionBtn" type="button" title="X&#243;a &#273;&#417;n v&#7883; n&#224;y">×</button>
+                </div>
+                <datalist id="unitOptions"></datalist>
+              </div>
               <input id="priceInput" type="hidden" value="0">
               <div class="field-note" id="stockModeHint">Chọn Còn nhiều/Còn ít cho các món khó đếm như ly nhựa, bao tay.</div>
               <div class="form-actions">
@@ -1230,8 +1239,12 @@
       price: document.getElementById("priceInput"),
       location: document.getElementById("locationInput"),
       locationOptions: document.getElementById("locationOptions"),
+      unit: document.getElementById("unitInput"),
+      unitOptions: document.getElementById("unitOptions"),
       addLocationOption: document.getElementById("addLocationOptionBtn"),
       removeLocationOption: document.getElementById("removeLocationOptionBtn"),
+      addUnitOption: document.getElementById("addUnitOptionBtn"),
+      removeUnitOption: document.getElementById("removeUnitOptionBtn"),
       cancelEdit: document.getElementById("cancelEditBtn"),
       quickPanel: document.getElementById("quickAdjustPanel"),
       adjustForm: document.getElementById("adjustForm"),
@@ -1291,8 +1304,10 @@
     });
     els.addCategoryOption.addEventListener("click", () => addOption("category", els.categoryInput.value));
     els.addLocationOption.addEventListener("click", () => addOption("location", els.location.value));
+    els.addUnitOption.addEventListener("click", () => addOption("unit", els.unit.value));
     els.removeCategoryOption.addEventListener("click", () => removeOption("category", els.categoryInput.value));
     els.removeLocationOption.addEventListener("click", () => removeOption("location", els.location.value));
+    els.removeUnitOption.addEventListener("click", () => removeOption("unit", els.unit.value));
     els.stockMode.addEventListener("change", updateStockModeFields);
     els.form.addEventListener("submit", saveItem);
     els.adjustForm.addEventListener("submit", adjustStock);
@@ -1309,7 +1324,7 @@
       els.adjustType.value = "count";
     });
     els.operator.value = normalizeText(readTextStorage(operatorKey));
-    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.qty, els.adjustQty].forEach(input => {
+    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit, els.qty, els.adjustQty].forEach(input => {
       input.addEventListener("input", () => uppercaseInput(input));
     });
     els.operator.addEventListener("input", () => {
@@ -1485,7 +1500,8 @@
         items: normalizeItems(items),
         audit: normalizeAudit(audit),
         categoryOptions: mergeOptions(appState.warehouses[activeWarehouseId].categoryOptions, items.map(item => item.category)),
-        locationOptions: mergeOptions(appState.warehouses[activeWarehouseId].locationOptions, items.map(item => item.location))
+        locationOptions: mergeOptions(appState.warehouses[activeWarehouseId].locationOptions, items.map(item => item.location)),
+        unitOptions: mergeOptions(appState.warehouses[activeWarehouseId].unitOptions, items.map(item => item.unit))
       };
     }
 
@@ -1563,6 +1579,11 @@
       return isCountedItem(item) ? item.min.toLocaleString("vi-VN") : "Không đếm";
     }
 
+    function unitDisplay(item) {
+      const unit = normalizeText(item && item.unit);
+      return unit ? `Đơn vị: ${unit}` : "";
+    }
+
     function stockStatusLabel(item) {
       return isCountedItem(item) ? statusLabel(getStatus(item)) : stockDisplay(item);
     }
@@ -1620,8 +1641,10 @@
       const warehouse = currentWarehouse();
       const categories = mergeOptions(warehouse.categoryOptions, items.map(item => item.category));
       const locations = mergeOptions(warehouse.locationOptions, items.map(item => item.location));
+      const units = mergeOptions(warehouse.unitOptions, items.map(item => item.unit));
       els.categoryOptions.innerHTML = categories.map(category => `<option value="${escapeHtml(category)}"></option>`).join("");
       els.locationOptions.innerHTML = locations.map(location => `<option value="${escapeHtml(location)}"></option>`).join("");
+      els.unitOptions.innerHTML = units.map(unit => `<option value="${escapeHtml(unit)}"></option>`).join("");
     }
 
     function renderAdjustOptions() {
@@ -1692,7 +1715,7 @@
       }
 
       const filtered = items.filter(item => {
-        const haystack = [item.name, item.sku, item.category, item.location].join(" ").toLowerCase();
+        const haystack = [item.name, item.sku, item.category, item.location, item.unit].join(" ").toLowerCase();
         const matchesSearch = !query || haystack.includes(query);
         const matchesCategory = category === "all" || item.category === category;
         const matchesLocation = location === "all" || item.location === location;
@@ -1709,6 +1732,7 @@
             <td>
               <strong>${escapeHtml(item.name)}</strong>
               <div class="sku">${escapeHtml(item.sku)}</div>
+              <div class="sku">${escapeHtml(unitDisplay(item))}</div>
               <div class="stock-note ${status}">CÒN: ${escapeHtml(stockDisplay(item))}</div>
             </td>
             <td><span class="qty ${counted ? "" : "estimate"}">${escapeHtml(stockDisplay(item))}</span></td>
@@ -1758,6 +1782,7 @@
         name: els.name.value.trim(),
         sku: els.sku.value.trim(),
         category: els.categoryInput.value.trim(),
+        unit: els.unit.value.trim(),
         stockMode: resolvedStockMode,
         stockText: stockInput.mode === "count" ? "" : stockInput.text,
         qty: stockInput.qty,
@@ -1785,6 +1810,7 @@
       }
       addOption("category", item.category, { silent: true });
       addOption("location", item.location, { silent: true });
+      addOption("unit", item.unit, { silent: true });
       clearForm();
       hideItemPanel();
       render();
@@ -1797,19 +1823,20 @@
         if (!options.silent) showToast("Nhập nội dung trước khi lưu.");
         return;
       }
-      const actor = options.silent ? "" : requireOperator(type === "location" ? "lưu vị trí" : "lưu nhóm");
+      const actor = options.silent ? "" : requireOperator(`lưu ${optionLabel(type)}`);
       if (!options.silent && !actor) return;
       const warehouse = currentWarehouse();
-      const key = type === "location" ? "locationOptions" : "categoryOptions";
+      const key = optionKey(type);
       warehouse[key] = mergeOptions(warehouse[key], [value]);
       if (type === "location") els.location.value = value;
       if (type === "category") els.categoryInput.value = value;
+      if (type === "unit") els.unit.value = value;
       syncActiveWarehouse();
       renderDatalists();
       renderFilters();
       renderAdjustOptions();
       if (!options.silent) {
-        pushAudit(type === "location" ? "Thêm vị trí chọn nhanh" : "Thêm nhóm chọn nhanh", `${value} đã được lưu để chọn lại.`, actor);
+        pushAudit(`Thêm ${optionLabel(type)} chọn nhanh`, `${value} đã được lưu để chọn lại.`, actor);
         persist();
         showToast(type === "location" ? `${actor} đã lưu vị trí.` : `${actor} đã lưu nhóm.`);
       }
@@ -1817,8 +1844,8 @@
 
     function removeOption(type, rawValue) {
       const value = normalizeText(rawValue);
-      const label = type === "location" ? "vị trí" : "nhóm";
-      const labelTitle = type === "location" ? "Vị trí" : "Nhóm";
+      const label = optionLabel(type);
+      const labelTitle = optionTitle(type);
 
       if (!value || !activeWarehouseId) {
         showToast(`Nhập ${label} cần xóa trước.`);
@@ -1828,7 +1855,7 @@
       const actor = requireOperator(`xóa ${label}`);
       if (!actor) return;
 
-      const itemKey = type === "location" ? "location" : "category";
+      const itemKey = type === "location" ? "location" : type === "unit" ? "unit" : "category";
       const usedCount = items.filter(item => normalizeText(item[itemKey]) === value).length;
       if (usedCount) {
         showToast(`${labelTitle} "${value}" đang dùng cho ${usedCount} mặt hàng. Sửa các mặt hàng đó trước.`);
@@ -1836,8 +1863,8 @@
       }
 
       const warehouse = currentWarehouse();
-      const optionKey = type === "location" ? "locationOptions" : "categoryOptions";
-      const before = Array.isArray(warehouse[optionKey]) ? warehouse[optionKey] : [];
+      const optionListKey = optionKey(type);
+      const before = Array.isArray(warehouse[optionListKey]) ? warehouse[optionListKey] : [];
       const next = before.filter(option => normalizeText(option) !== value);
 
       if (next.length === before.length) {
@@ -1845,12 +1872,30 @@
         return;
       }
 
-      warehouse[optionKey] = next;
+      warehouse[optionListKey] = next;
       if (type === "location" && els.locationFilter.value === value) els.locationFilter.value = "all";
       if (type === "category" && els.category.value === value) els.category.value = "all";
-      pushAudit(type === "location" ? "Xóa vị trí chọn nhanh" : "Xóa nhóm chọn nhanh", `${value} đã được xóa khỏi danh sách chọn nhanh.`, actor);
+      pushAudit(`Xóa ${optionLabel(type)} chọn nhanh`, `${value} đã được xóa khỏi danh sách chọn nhanh.`, actor);
       render();
       showToast(`${actor} đã xóa ${label} ${value}.`);
+    }
+
+    function optionKey(type) {
+      if (type === "location") return "locationOptions";
+      if (type === "unit") return "unitOptions";
+      return "categoryOptions";
+    }
+
+    function optionLabel(type) {
+      if (type === "location") return "vị trí";
+      if (type === "unit") return "đơn vị";
+      return "nhóm";
+    }
+
+    function optionTitle(type) {
+      if (type === "location") return "Vị trí";
+      if (type === "unit") return "Đơn vị";
+      return "Nhóm";
     }
 
     function adjustStock(event) {
@@ -1885,6 +1930,7 @@
         type: els.adjustType.value,
         itemId: item.id,
         itemName: item.name,
+        unit: item.unit || "",
         oldQty,
         newQty: item.qty,
         quantity: amount,
@@ -1923,6 +1969,7 @@
           type: "estimate",
           itemId: item.id,
           itemName: item.name,
+        unit: item.unit || "",
           oldQty,
           newQty: item.qty,
           quantity: 0,
@@ -1946,6 +1993,7 @@
         type: "estimate",
         itemId: item.id,
         itemName: item.name,
+        unit: item.unit || "",
         oldQty: item.qty,
         newQty: item.qty,
         quantity: 0,
@@ -1975,6 +2023,7 @@
           type: "in",
           itemId: item.id,
           itemName: item.name,
+        unit: item.unit || "",
           oldQty,
           newQty: item.qty,
           quantity: 1,
@@ -1998,6 +2047,7 @@
           type: "out",
           itemId: item.id,
           itemName: item.name,
+        unit: item.unit || "",
           oldQty,
           newQty: item.qty,
           quantity: 1,
@@ -2020,6 +2070,7 @@
         els.min.value = item.min;
         els.price.value = item.price;
         els.location.value = item.location;
+        els.unit.value = item.unit || "";
         updateStockModeFields();
         els.name.focus();
       }
@@ -2042,6 +2093,7 @@
       els.qty.value = 0;
       els.min.value = 5;
       els.price.value = 0;
+      els.unit.value = "";
       els.stockMode.value = "count";
       updateStockModeFields();
       els.formTitle.textContent = "Thêm mặt hàng";
@@ -2091,9 +2143,9 @@
       syncActiveWarehouse();
       const warehouse = currentWarehouse();
       const exportedAt = new Intl.DateTimeFormat("vi-VN", { dateStyle: "full", timeStyle: "short" }).format(new Date());
-      const headers = ["STT", "Mặt hàng", "Nhóm", "Tồn", "Tối thiểu", "Trạng thái"];
+      const headers = ["STT", "Mặt hàng", "Đơn vị", "Nhóm", "Tồn", "Tối thiểu", "Trạng thái"];
       const lastExcelRow = Math.max(3, items.length + 3);
-      const autoFilterRange = `R3C1:R${lastExcelRow}C6`;
+      const autoFilterRange = `R3C1:R${lastExcelRow}C7`;
       const headerRow = headers.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const itemRows = items.map((item, index) => {
         const status = getStatus(item);
@@ -2108,6 +2160,7 @@
           <Row ss:AutoFitHeight="1">
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="Number">${index + 1}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.name)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.unit || "")}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.category)}</Data></Cell>
             <Cell ss:StyleID="${stockStyle}"><Data ss:Type="${stockType}">${xmlEscape(counted ? item.qty : stockDisplay(item))}</Data></Cell>
             <Cell ss:StyleID="${minStyle}"><Data ss:Type="${minType}">${xmlEscape(counted ? item.min : minDisplay(item))}</Data></Cell>
@@ -2116,7 +2169,7 @@
         `;
       }).join("");
       const movements = todayMovements();
-      const movementHeaders = ["Thời gian", "Người thao tác", "Loại", "Mặt hàng", "Số lượng", "Tồn trước", "Tồn sau"];
+      const movementHeaders = ["Thời gian", "Người thao tác", "Loại", "Mặt hàng", "Đơn vị", "Số lượng", "Tồn trước", "Tồn sau"];
       const movementLastRow = Math.max(3, movements.length + 3);
       const movementHeaderRow = movementHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const movementRows = movements.map((entry, index) => {
@@ -2127,12 +2180,13 @@
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.actor)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.typeLabel)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.itemName)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.unit || "")}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.quantity}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.oldQty}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.newQty}</Data></Cell>
           </Row>
         `;
-      }).join("") || '<Row><Cell ss:MergeAcross="6" ss:StyleID="Cell"><Data ss:Type="String">Hôm nay chưa có nhập/xuất kho.</Data></Cell></Row>';
+      }).join("") || '<Row><Cell ss:MergeAcross="7" ss:StyleID="Cell"><Data ss:Type="String">Hôm nay chưa có nhập/xuất kho.</Data></Cell></Row>';
       const summary = buildDailySummary(movements);
       const summaryRows = [
         ["Tồn đầu ngày", summary.startTotal],
@@ -2152,7 +2206,7 @@
       const week = currentInventoryWeek();
       const weeklyMovements = movementsForRange(week.start, week.end);
       const weekTitle = `${formatDateOnly(week.start)} - ${formatDateOnly(week.end)}`;
-      const weeklyHeaders = ["Ngày", "Thứ", "Người thao tác", "Loại", "Mặt hàng", "Số lượng", "Tồn trước", "Tồn sau", "Chi tiết đối chiếu"];
+      const weeklyHeaders = ["Ngày", "Thứ", "Người thao tác", "Loại", "Mặt hàng", "Đơn vị", "Số lượng", "Tồn trước", "Tồn sau", "Chi tiết đối chiếu"];
       const weeklyLastRow = Math.max(3, weeklyMovements.length + 3);
       const weeklyHeaderRow = weeklyHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const weeklyRows = weeklyMovements.map((entry, index) => {
@@ -2169,15 +2223,16 @@
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.actor)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.typeLabel)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.itemName)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.unit || "")}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.quantity}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.oldQty}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.newQty}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(note)}</Data></Cell>
           </Row>
         `;
-      }).join("") || '<Row><Cell ss:MergeAcross="8" ss:StyleID="Cell"><Data ss:Type="String">Tuần này chưa có nhập/xuất/chốt kiểm kho.</Data></Cell></Row>';
+      }).join("") || '<Row><Cell ss:MergeAcross="9" ss:StyleID="Cell"><Data ss:Type="String">Tuần này chưa có nhập/xuất/chốt kiểm kho.</Data></Cell></Row>';
       const weeklyReconciliation = buildWeeklyReconciliation(weeklyMovements, week);
-      const reconcileHeaders = ["Mặt hàng", "Nhóm", "Tồn CN đầu kỳ", "Nhập trong tuần", "Xuất trong tuần", "Tồn lý thuyết", "Tồn kiểm CN / hiện tại", "Lệch", "Kết luận"];
+      const reconcileHeaders = ["Mặt hàng", "Đơn vị", "Nhóm", "Tồn CN đầu kỳ", "Nhập trong tuần", "Xuất trong tuần", "Tồn lý thuyết", "Tồn kiểm CN / hiện tại", "Lệch", "Kết luận"];
       const reconcileLastRow = Math.max(3, weeklyReconciliation.rows.length + 3);
       const reconcileHeaderRow = reconcileHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const reconcileRows = weeklyReconciliation.rows.map((entry, index) => {
@@ -2186,6 +2241,7 @@
         return `
           <Row ss:AutoFitHeight="1">
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.name)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.unit || "")}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.category)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.opening}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.inTotal}</Data></Cell>
@@ -2206,7 +2262,7 @@
       ].map(([label, value]) => `
         <Row ss:AutoFitHeight="1">
           <Cell ss:StyleID="Cell"><Data ss:Type="String">${xmlEscape(label)}</Data></Cell>
-          <Cell ss:MergeAcross="7" ss:StyleID="CellNumber"><Data ss:Type="Number">${value}</Data></Cell>
+          <Cell ss:MergeAcross="8" ss:StyleID="CellNumber"><Data ss:Type="Number">${value}</Data></Cell>
         </Row>
       `).join("");
 
@@ -2290,15 +2346,16 @@
     <Table>
       <Column ss:Width="42"/>
       <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
       <Column ss:Width="150"/>
       <Column ss:Width="78"/>
       <Column ss:Width="86"/>
       <Column ss:Width="105"/>
       <Row ss:Height="30">
-        <Cell ss:MergeAcross="5" ss:StyleID="Title"><Data ss:Type="String">${xmlEscape(warehouse.name)}</Data></Cell>
+        <Cell ss:MergeAcross="6" ss:StyleID="Title"><Data ss:Type="String">${xmlEscape(warehouse.name)}</Data></Cell>
       </Row>
       <Row ss:Height="24">
-        <Cell ss:MergeAcross="5" ss:StyleID="Subtitle"><Data ss:Type="String">Xuất lúc: ${xmlEscape(exportedAt)} - Tổng mặt hàng: ${items.length} - Lọc bằng mũi tên ở dòng tiêu đề</Data></Cell>
+        <Cell ss:MergeAcross="6" ss:StyleID="Subtitle"><Data ss:Type="String">Xuất lúc: ${xmlEscape(exportedAt)} - Tổng mặt hàng: ${items.length} - Lọc bằng mũi tên ở dòng tiêu đề</Data></Cell>
       </Row>
       <Row ss:Height="26">${headerRow}</Row>
       ${itemRows}
@@ -2320,19 +2377,20 @@
       <Column ss:Width="135"/>
       <Column ss:Width="105"/>
       <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
       <Column ss:Width="82"/>
       <Column ss:Width="82"/>
       <Column ss:Width="82"/>
       <Row ss:Height="30">
-        <Cell ss:MergeAcross="6" ss:StyleID="Title"><Data ss:Type="String">NHẬP / XUẤT TRONG NGÀY - ${xmlEscape(warehouse.name)}</Data></Cell>
+        <Cell ss:MergeAcross="7" ss:StyleID="Title"><Data ss:Type="String">NHẬP / XUẤT TRONG NGÀY - ${xmlEscape(warehouse.name)}</Data></Cell>
       </Row>
       <Row ss:Height="24">
-        <Cell ss:MergeAcross="6" ss:StyleID="Subtitle"><Data ss:Type="String">Chỉ tính các thao tác phát sinh trong ngày xuất file.</Data></Cell>
+        <Cell ss:MergeAcross="7" ss:StyleID="Subtitle"><Data ss:Type="String">Chỉ tính các thao tác phát sinh trong ngày xuất file.</Data></Cell>
       </Row>
       <Row ss:Height="26">${movementHeaderRow}</Row>
       ${movementRows}
     </Table>
-    <AutoFilter x:Range="R3C1:R${movementLastRow}C7" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <AutoFilter x:Range="R3C1:R${movementLastRow}C8" xmlns="urn:schemas-microsoft-com:office:excel"/>
     <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
       <FreezePanes/>
       <FrozenNoSplit/>
@@ -2350,20 +2408,21 @@
       <Column ss:Width="135"/>
       <Column ss:Width="120"/>
       <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
       <Column ss:Width="82"/>
       <Column ss:Width="82"/>
       <Column ss:Width="82"/>
       <Column ss:Width="310"/>
       <Row ss:Height="30">
-        <Cell ss:MergeAcross="8" ss:StyleID="Title"><Data ss:Type="String">THEO DÕI NHẬP / XUẤT THEO TUẦN - ${xmlEscape(warehouse.name)}</Data></Cell>
+        <Cell ss:MergeAcross="9" ss:StyleID="Title"><Data ss:Type="String">THEO DÕI NHẬP / XUẤT THEO TUẦN - ${xmlEscape(warehouse.name)}</Data></Cell>
       </Row>
       <Row ss:Height="24">
-        <Cell ss:MergeAcross="8" ss:StyleID="Subtitle"><Data ss:Type="String">Kỳ kiểm kho: Chủ Nhật ${xmlEscape(weekTitle)}. Theo dõi ai nhập, ai xuất, xuất bao nhiêu và tồn còn lại.</Data></Cell>
+        <Cell ss:MergeAcross="9" ss:StyleID="Subtitle"><Data ss:Type="String">Kỳ kiểm kho: Chủ Nhật ${xmlEscape(weekTitle)}. Theo dõi ai nhập, ai xuất, xuất bao nhiêu và tồn còn lại.</Data></Cell>
       </Row>
       <Row ss:Height="26">${weeklyHeaderRow}</Row>
       ${weeklyRows}
     </Table>
-    <AutoFilter x:Range="R3C1:R${weeklyLastRow}C9" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <AutoFilter x:Range="R3C1:R${weeklyLastRow}C10" xmlns="urn:schemas-microsoft-com:office:excel"/>
     <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
       <FreezePanes/>
       <FrozenNoSplit/>
@@ -2377,6 +2436,7 @@
   <Worksheet ss:Name="Đối chiếu CN">
     <Table>
       <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
       <Column ss:Width="150"/>
       <Column ss:Width="100"/>
       <Column ss:Width="100"/>
@@ -2386,17 +2446,17 @@
       <Column ss:Width="80"/>
       <Column ss:Width="125"/>
       <Row ss:Height="30">
-        <Cell ss:MergeAcross="8" ss:StyleID="Title"><Data ss:Type="String">ĐỐI CHIẾU KIỂM KHO CHỦ NHẬT - ${xmlEscape(warehouse.name)}</Data></Cell>
+        <Cell ss:MergeAcross="9" ss:StyleID="Title"><Data ss:Type="String">ĐỐI CHIẾU KIỂM KHO CHỦ NHẬT - ${xmlEscape(warehouse.name)}</Data></Cell>
       </Row>
       <Row ss:Height="24">
-        <Cell ss:MergeAcross="8" ss:StyleID="Subtitle"><Data ss:Type="String">Công thức: tồn CN đầu kỳ + nhập trong tuần - xuất trong tuần = tồn lý thuyết. Lệch âm là thiếu hàng cần kiểm tra.</Data></Cell>
+        <Cell ss:MergeAcross="9" ss:StyleID="Subtitle"><Data ss:Type="String">Công thức: tồn CN đầu kỳ + nhập trong tuần - xuất trong tuần = tồn lý thuyết. Lệch âm là thiếu hàng cần kiểm tra.</Data></Cell>
       </Row>
       <Row ss:Height="26">${reconcileHeaderRow}</Row>
       ${reconcileRows}
       <Row ss:Height="8"></Row>
       ${reconcileSummaryRows}
     </Table>
-    <AutoFilter x:Range="R3C1:R${reconcileLastRow}C9" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <AutoFilter x:Range="R3C1:R${reconcileLastRow}C10" xmlns="urn:schemas-microsoft-com:office:excel"/>
     <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
       <FreezePanes/>
       <FrozenNoSplit/>
@@ -2533,6 +2593,8 @@
       const type = entry.type || (/xuất/i.test(title) ? "out" : /nhập/i.test(title) ? "in" : "count");
       const quantity = Number.isFinite(Number(entry.quantity)) ? Math.abs(Number(entry.quantity)) : Math.abs(qtyChange);
       if (!itemName) itemName = normalizeText(String(entry.detail || "").split(":", 1)[0]);
+      const matchedItem = items.find(item => item.id === entry.itemId || normalizeText(item.name) === itemName);
+      const unit = normalizeText(entry.unit || (matchedItem && matchedItem.unit) || "");
       return {
         at: entry.at || new Date().toISOString(),
         timeText: new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.at || Date.now())),
@@ -2540,6 +2602,7 @@
         type,
         typeLabel: movementTypeLabel(type, qtyChange),
         itemName,
+        unit,
         oldQty,
         newQty,
         quantity,
@@ -2674,6 +2737,7 @@
           if (diff > 0) overCount += 1;
           return {
             name: item.name,
+            unit: item.unit || "",
             category: item.category,
             opening,
             inTotal,
@@ -2765,7 +2829,8 @@
         items: normalizedItems,
         audit: normalizeAudit(warehouse.audit),
         categoryOptions: mergeOptions(warehouse.categoryOptions, normalizedItems.map(item => item.category)),
-        locationOptions: mergeOptions(warehouse.locationOptions, normalizedItems.map(item => item.location))
+        locationOptions: mergeOptions(warehouse.locationOptions, normalizedItems.map(item => item.location)),
+        unitOptions: mergeOptions(warehouse.unitOptions, normalizedItems.map(item => item.unit))
       };
     }
 
@@ -2783,7 +2848,8 @@
           }
         ],
         categoryOptions: mergeOptions(sourceWarehouse.categoryOptions, clonedItems.map(item => item.category)),
-        locationOptions: mergeOptions(sourceWarehouse.locationOptions, clonedItems.map(item => item.location))
+        locationOptions: mergeOptions(sourceWarehouse.locationOptions, clonedItems.map(item => item.location)),
+        unitOptions: mergeOptions(sourceWarehouse.unitOptions, clonedItems.map(item => item.unit))
       };
     }
 
@@ -2819,7 +2885,8 @@
         qty: Math.max(0, Number(item.qty) || 0),
         min: Math.max(0, Number(item.min) || 0),
         price: Math.max(0, Number(item.price) || 0),
-        location: normalizeText(item.location)
+        location: normalizeText(item.location),
+        unit: normalizeText(item.unit)
       };
     }
 
@@ -2837,6 +2904,7 @@
         type: entry.type ? String(entry.type) : "",
         itemId: entry.itemId ? String(entry.itemId) : "",
         itemName: entry.itemName ? normalizeText(entry.itemName) : "",
+        unit: entry.unit ? normalizeText(entry.unit) : "",
         oldQty: Number.isFinite(Number(entry.oldQty)) ? Number(entry.oldQty) : null,
         newQty: Number.isFinite(Number(entry.newQty)) ? Number(entry.newQty) : null,
         quantity: Number.isFinite(Number(entry.quantity)) ? Number(entry.quantity) : null,
