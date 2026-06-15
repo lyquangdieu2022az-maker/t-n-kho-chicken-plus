@@ -1030,6 +1030,7 @@
                 <tr>
                   <th>Mặt hàng</th>
                   <th>Tồn</th>
+                  <th>Đơn vị</th>
                   <th>Thao tác</th>
                   <th>Nhóm</th>
                   <th>Vị trí</th>
@@ -1082,6 +1083,15 @@
                   <input id="qtyInput" required type="number" min="0" step="1" value="0" placeholder="VD: 5">
                 </div>
               </div>
+              <div class="field">
+                <label for="unitInput">&#272;&#417;n v&#7883;</label>
+                <div class="option-tools">
+                  <input id="unitInput" list="unitOptions" placeholder="VD: CAI, BICH, SAP, THUNG">
+                  <button class="icon-btn" id="addUnitOptionBtn" type="button" title="L&#432;u &#273;&#417;n v&#7883; n&#224;y">+</button>
+                  <button class="icon-btn remove" id="removeUnitOptionBtn" type="button" title="X&#243;a &#273;&#417;n v&#7883; n&#224;y">×</button>
+                </div>
+                <datalist id="unitOptions"></datalist>
+              </div>
               <div class="two">
                 <div class="field">
                   <label for="minInput">Tối thiểu</label>
@@ -1096,15 +1106,6 @@
                   </div>
                   <datalist id="locationOptions"></datalist>
                 </div>
-              </div>
-              <div class="field">
-                <label for="unitInput">&#272;&#417;n v&#7883;</label>
-                <div class="option-tools">
-                  <input id="unitInput" list="unitOptions" placeholder="VD: CAI, BICH, SAP, THUNG">
-                  <button class="icon-btn" id="addUnitOptionBtn" type="button" title="L&#432;u &#273;&#417;n v&#7883; n&#224;y">+</button>
-                  <button class="icon-btn remove" id="removeUnitOptionBtn" type="button" title="X&#243;a &#273;&#417;n v&#7883; n&#224;y">×</button>
-                </div>
-                <datalist id="unitOptions"></datalist>
               </div>
               <input id="priceInput" type="hidden" value="0">
               <div class="field-note" id="stockModeHint">Chọn Còn nhiều/Còn ít cho các món khó đếm như ly nhựa, bao tay.</div>
@@ -1134,6 +1135,7 @@
                 <label for="adjustItem">Mặt hàng</label>
                 <select id="adjustItem"></select>
               </div>
+              <div class="field-note" id="adjustUnitHint">Đơn vị: -</div>
               <div class="field">
                 <label for="adjustQty">Số lượng</label>
                 <input id="adjustQty" type="number" min="0" step="1" value="1" placeholder="VD: 5">
@@ -1251,6 +1253,7 @@
       adjustCategory: document.getElementById("adjustCategory"),
       adjustLocation: document.getElementById("adjustLocation"),
       adjustItem: document.getElementById("adjustItem"),
+      adjustUnitHint: document.getElementById("adjustUnitHint"),
       adjustType: document.getElementById("adjustType"),
       adjustQty: document.getElementById("adjustQty"),
       adjustModeHint: document.getElementById("adjustModeHint"),
@@ -1698,6 +1701,7 @@
         : counted
           ? "Nhập số để cộng/trừ. Đơn vị của mặt hàng được lưu riêng."
           : `${item.name} đang ghi ${stockDisplay(item)}. Có thể bấm Đếm số lượng rồi nhập số để kiểm lại.`;
+      els.adjustUnitHint.textContent = hasItem ? `Đơn vị: ${item.unit || "-"}` : "Đơn vị: -";
     }
 
     function renderTable() {
@@ -1736,6 +1740,7 @@
               <div class="stock-note ${status}">CÒN: ${escapeHtml(stockDisplay(item))}</div>
             </td>
             <td><span class="qty ${counted ? "" : "estimate"}">${escapeHtml(stockDisplay(item))}</span></td>
+            <td>${escapeHtml(item.unit || "-")}</td>
             <td>
               <div class="row-actions">
                 <button class="icon-btn" type="button" title="Nhập thêm 1" data-action="plus" data-id="${item.id}">+</button>
