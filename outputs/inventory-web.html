@@ -377,6 +377,23 @@
       background: var(--accent-dark);
     }
 
+    .btn.mode-in {
+      background: #eaf6ff;
+      color: #14589c;
+      border-color: #8ec9ff;
+    }
+
+    .btn.mode-out {
+      background: #fff2f2;
+      color: var(--danger);
+      border-color: #f0b4b4;
+    }
+
+    .btn.mode-active {
+      outline: 3px solid rgba(29, 115, 201, 0.22);
+      transform: translateY(-1px);
+    }
+
     .btn.danger {
       background: #fff2f2;
       color: var(--danger);
@@ -678,6 +695,12 @@
       gap: 10px;
     }
 
+    .quick-submit {
+      width: 100%;
+      min-height: 48px;
+      font-size: 17px;
+    }
+
     .estimate-actions {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -969,7 +992,8 @@
         <div class="actions">
           <button class="btn" id="switchWarehouseTopBtn" type="button">⇄ Đổi kho</button>
           <button class="btn" id="exportBtn" type="button">⇩ Xuất EXCEL</button>
-          <button class="btn" id="toggleAdjustBtn" type="button">⇅ Nhập / xuất</button>
+          <button class="btn mode-in" id="openInBtn" type="button">+ Nhập kho</button>
+          <button class="btn mode-out" id="openOutBtn" type="button">− Xuất kho</button>
           <button class="btn" id="exportJsonBtn" type="button">⇩ Sao lưu</button>
           <button class="btn" id="importJsonTopBtn" type="button">⇧ Nhập dữ liệu</button>
           <button class="btn danger" id="resetBtn" type="button">↺ Dữ liệu mẫu</button>
@@ -1117,7 +1141,7 @@
           </div>
 
           <div class="panel form-panel" id="quickAdjustPanel" hidden>
-            <h3>Nhập / xuất nhanh</h3>
+            <h3 id="quickPanelTitle">Nhập kho</h3>
             <form id="adjustForm" class="form-grid">
               <div class="field">
                 <label for="adjustCategory">Nhóm hàng</label>
@@ -1154,6 +1178,7 @@
                 <button class="btn primary" id="quickInBtn" type="button">+ Nhập kho nhanh</button>
                 <button class="btn stock-out" id="quickOutBtn" type="button">− Xuất kho nhanh</button>
               </div>
+              <button class="btn primary quick-submit" id="quickSubmitBtn" type="submit">+ Nhập kho</button>
               <button class="btn" id="countStockBtn" type="submit">Chốt kiểm số lượng</button>
             </form>
           </div>
@@ -1252,6 +1277,7 @@
       removeUnitOption: document.getElementById("removeUnitOptionBtn"),
       cancelEdit: document.getElementById("cancelEditBtn"),
       quickPanel: document.getElementById("quickAdjustPanel"),
+      quickPanelTitle: document.getElementById("quickPanelTitle"),
       adjustForm: document.getElementById("adjustForm"),
       adjustCategory: document.getElementById("adjustCategory"),
       adjustLocation: document.getElementById("adjustLocation"),
@@ -1265,6 +1291,7 @@
       quickCountMode: document.getElementById("quickCountModeBtn"),
       quickIn: document.getElementById("quickInBtn"),
       quickOut: document.getElementById("quickOutBtn"),
+      quickSubmit: document.getElementById("quickSubmitBtn"),
       countStock: document.getElementById("countStockBtn"),
       auditList: document.getElementById("auditList"),
       toast: document.getElementById("toast"),
@@ -1282,7 +1309,8 @@
       showItemPanel();
       els.name.focus();
     });
-    document.getElementById("toggleAdjustBtn").addEventListener("click", () => toggleQuickPanel());
+    document.getElementById("openInBtn").addEventListener("click", () => openQuickPanel("in"));
+    document.getElementById("openOutBtn").addEventListener("click", () => openQuickPanel("out"));
     document.getElementById("exportBtn").addEventListener("click", exportExcel);
     document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
     document.getElementById("importJsonGateBtn").addEventListener("click", openImportJson);
@@ -1329,6 +1357,9 @@
     els.quickOut.addEventListener("click", () => runQuickAdjust("out"));
     els.countStock.addEventListener("click", () => {
       els.adjustType.value = "count";
+    });
+    els.quickSubmit.addEventListener("click", () => {
+      if (els.adjustType.value === "count") els.adjustType.value = "in";
     });
     els.operator.value = normalizeText(readTextStorage(operatorKey));
     [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit, els.adjustUnit].forEach(input => {
@@ -1525,14 +1556,26 @@
       els.itemPanel.hidden = true;
     }
 
-    function toggleQuickPanel() {
-      const shouldShow = els.quickPanel.hidden;
-      els.quickPanel.hidden = !shouldShow;
-      if (shouldShow) els.itemPanel.hidden = true;
+    function openQuickPanel(type = "in") {
+      setAdjustMode(type);
+      els.quickPanel.hidden = false;
+      els.itemPanel.hidden = true;
     }
 
     function hideQuickPanel() {
       els.quickPanel.hidden = true;
+    }
+
+    function setAdjustMode(type) {
+      const mode = type === "out" ? "out" : "in";
+      els.adjustType.value = mode;
+      const isOut = mode === "out";
+      els.quickPanelTitle.textContent = isOut ? "Xuất kho" : "Nhập kho";
+      els.quickSubmit.textContent = isOut ? "− Xuất kho" : "+ Nhập kho";
+      els.quickSubmit.classList.toggle("stock-out", isOut);
+      els.quickSubmit.classList.toggle("primary", !isOut);
+      els.quickIn.classList.toggle("mode-active", !isOut);
+      els.quickOut.classList.toggle("mode-active", isOut);
     }
 
     function render(options = {}) {
@@ -1815,9 +1858,11 @@
         const previous = items[existingIndex];
         items[existingIndex] = item;
         pushAudit("Cập nhật mặt hàng", describeItemChange(previous, item), actor);
+        pushStockChangeAudit(previous, item, actor);
       } else {
         items.unshift(item);
         pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho, tồn ${stockDisplay(item)}, vị trí ${item.location}.`, actor);
+        pushNewItemStockAudit(item, actor);
       }
       addOption("category", item.category, { silent: true });
       addOption("location", item.location, { silent: true });
@@ -1826,6 +1871,39 @@
       hideItemPanel();
       render();
       showToast(`${actor} đã lưu mặt hàng.`);
+    }
+
+    function pushStockChangeAudit(previous, next, actor) {
+      if (!isCountedItem(previous) || !isCountedItem(next) || previous.qty === next.qty) return;
+      const qtyChange = next.qty - previous.qty;
+      const type = qtyChange > 0 ? "in" : "out";
+      const title = qtyChange > 0 ? "Nhập kho" : "Xuất kho";
+      pushAudit(title, `${next.name}: ${previous.qty} → ${next.qty}.`, actor, {
+        type,
+        itemId: next.id,
+        itemName: next.name,
+        unit: next.unit || "",
+        oldQty: previous.qty,
+        newQty: next.qty,
+        quantity: Math.abs(qtyChange),
+        qtyChange,
+        warehouseId: activeWarehouseId
+      });
+    }
+
+    function pushNewItemStockAudit(item, actor) {
+      if (!isCountedItem(item) || item.qty <= 0) return;
+      pushAudit("Nhập kho", `${item.name}: 0 → ${item.qty}.`, actor, {
+        type: "in",
+        itemId: item.id,
+        itemName: item.name,
+        unit: item.unit || "",
+        oldQty: 0,
+        newQty: item.qty,
+        quantity: item.qty,
+        qtyChange: item.qty,
+        warehouseId: activeWarehouseId
+      });
     }
 
     function addOption(type, rawValue, options = {}) {
@@ -1969,7 +2047,7 @@
     }
 
     function runQuickAdjust(type) {
-      els.adjustType.value = type;
+      setAdjustMode(type);
       adjustStock(new Event("submit", { cancelable: true }));
     }
 
@@ -2602,14 +2680,16 @@
 
     function parseAuditMovement(entry) {
       const title = String(entry.title || "");
-      const isMovementTitle = /nhập|xuất|chốt kiểm/i.test(title);
+      const isMovementTitle = /nhập|xuất|chốt kiểm|cập nhật mặt hàng/i.test(title);
       const structured = Number.isFinite(Number(entry.oldQty)) && Number.isFinite(Number(entry.newQty));
       let itemName = normalizeText(entry.itemName || "");
       let oldQty = structured ? Number(entry.oldQty) : null;
       let newQty = structured ? Number(entry.newQty) : null;
 
       if (!structured) {
-        const match = String(entry.detail || "").match(/^(.+?):\s*([\d.,]+)\s*→\s*([\d.,]+)/);
+        const detailText = String(entry.detail || "");
+        const match = detailText.match(/^(.+?):.*?tồn:\s*([\d.,]+)\s*→\s*([\d.,]+)/i)
+          || detailText.match(/^(.+?):\s*([\d.,]+)\s*→\s*([\d.,]+)/);
         if (!match || !isMovementTitle) return null;
         itemName = normalizeText(match[1]);
         oldQty = parseAuditNumber(match[2]);
@@ -2618,7 +2698,7 @@
 
       if (!Number.isFinite(oldQty) || !Number.isFinite(newQty)) return null;
       const qtyChange = Number.isFinite(Number(entry.qtyChange)) ? Number(entry.qtyChange) : newQty - oldQty;
-      const type = entry.type || (/xuất/i.test(title) ? "out" : /nhập/i.test(title) ? "in" : "count");
+      const type = entry.type || (/xuất/i.test(title) ? "out" : /nhập/i.test(title) ? "in" : /cập nhật mặt hàng/i.test(title) && qtyChange !== 0 ? (qtyChange > 0 ? "in" : "out") : "count");
       const quantity = Number.isFinite(Number(entry.quantity)) ? Math.abs(Number(entry.quantity)) : Math.abs(qtyChange);
       if (!itemName) itemName = normalizeText(String(entry.detail || "").split(":", 1)[0]);
       const matchedItem = items.find(item => item.id === entry.itemId || normalizeText(item.name) === itemName);
