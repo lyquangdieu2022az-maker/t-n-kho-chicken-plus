@@ -2338,12 +2338,14 @@
         `;
       }).join("") || '<Row><Cell ss:MergeAcross="9" ss:StyleID="Cell"><Data ss:Type="String">Tuần này chưa có nhập/xuất/chốt kiểm kho.</Data></Cell></Row>';
       const weeklyReconciliation = buildWeeklyReconciliation(weeklyMovements, week);
-      const reconcileHeaders = ["Mặt hàng", "Đơn vị", "Nhóm", "Tồn CN đầu kỳ", "Nhập trong tuần", "Xuất trong tuần", "Tồn lý thuyết", "Tồn kiểm CN / hiện tại", "Lệch", "Kết luận"];
+      const reconcileHeaders = ["Mặt hàng", "Đơn vị", "Nhóm", "Tồn CN đầu kỳ", "Nhập trong tuần", "Xuất trong tuần", "Tồn lý thuyết", "Tồn kiểm CN", "Lệch", "Kết luận"];
       const reconcileLastRow = Math.max(3, weeklyReconciliation.rows.length + 3);
       const reconcileHeaderRow = reconcileHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
       const reconcileRows = weeklyReconciliation.rows.map((entry, index) => {
         const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
-        const conclusionStyle = entry.diff === 0 ? "StatusOk" : entry.diff < 0 ? "StatusOut" : "StatusLow";
+        const conclusionStyle = entry.hasClosingCount ? (entry.diff === 0 ? "StatusOk" : entry.diff < 0 ? "StatusOut" : "StatusLow") : "StatusLow";
+        const checkedType = entry.hasClosingCount ? "Number" : "String";
+        const checkedStyle = entry.hasClosingCount ? `${rowStyle}Number` : rowStyle;
         return `
           <Row ss:AutoFitHeight="1">
             <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.name)}</Data></Cell>
@@ -2353,7 +2355,7 @@
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.inTotal}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.outTotal}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.expected}</Data></Cell>
-            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.checked}</Data></Cell>
+            <Cell ss:StyleID="${checkedStyle}"><Data ss:Type="${checkedType}">${xmlEscape(entry.checkedText)}</Data></Cell>
             <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.diff}</Data></Cell>
             <Cell ss:StyleID="${conclusionStyle}"><Data ss:Type="String">${xmlEscape(entry.label)}</Data></Cell>
           </Row>
@@ -2798,9 +2800,9 @@
       });
 
       const expectedTotal = startTotal + inTotal - outTotal;
-      const webTotal = items.reduce((sum, item) => sum + (isCountedItem(item) ? item.qty : 0), 0);
-      const diff = webTotal - expectedTotal;
-      const label = diff === 0 ? "KHỚP TỒN WEB" : diff > 0 ? "DƯ HÀNG TỒN" : "THIẾU HÀNG TỒN";
+      const webTotal = expectedTotal;
+      const diff = 0;
+      const label = "ĐANG THEO DÕI";
       return { startTotal, inTotal, outTotal, expectedTotal, webTotal, diff, label, estimatedCount };
     }
 
@@ -2835,14 +2837,15 @@
             .filter(entry => entry.type === "out")
             .reduce((sum, entry) => sum + entry.quantity, 0);
           const expected = opening + inTotal - outTotal;
-          const checked = endCounts.length ? endCounts[endCounts.length - 1].newQty : item.qty;
-          const diff = checked - expected;
-          const label = diff === 0 ? "KHỚP" : diff < 0 ? "THIẾU HÀNG" : "DƯ HÀNG";
+          const hasClosingCount = endCounts.length > 0;
+          const checked = hasClosingCount ? endCounts[endCounts.length - 1].newQty : expected;
+          const diff = hasClosingCount ? checked - expected : 0;
+          const label = hasClosingCount ? (diff === 0 ? "KHỚP" : diff < 0 ? "THIẾU HÀNG" : "DƯ HÀNG") : "ĐANG THEO DÕI";
           expectedTotal += expected;
           checkedTotal += checked;
-          diffTotal += diff;
-          if (diff < 0) shortCount += 1;
-          if (diff > 0) overCount += 1;
+          if (hasClosingCount) diffTotal += diff;
+          if (hasClosingCount && diff < 0) shortCount += 1;
+          if (hasClosingCount && diff > 0) overCount += 1;
           return {
             name: item.name,
             unit: item.unit || "",
@@ -2852,8 +2855,10 @@
             outTotal,
             expected,
             checked,
+            checkedText: hasClosingCount ? checked : "CHƯA CHỐT CN",
             diff,
-            label
+            label,
+            hasClosingCount
           };
         })
         .sort((a, b) => {
