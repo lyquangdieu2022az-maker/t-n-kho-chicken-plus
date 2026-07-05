@@ -314,6 +314,19 @@
       border-color: rgba(255, 255, 255, 0.7);
     }
 
+    .protected-card {
+      width: min(360px, 100%);
+    }
+
+    .protected-card .option-tools {
+      gap: 6px;
+    }
+
+    .protected-card .btn {
+      flex: 0 0 auto;
+      min-height: 40px;
+    }
+
     .sync-status {
       display: inline-flex;
       align-items: center;
@@ -989,6 +1002,13 @@
           <label for="operatorInput">Người thao tác</label>
           <input id="operatorInput" placeholder="NHẬP TÊN NHÂN VIÊN" autocomplete="name">
         </div>
+        <div class="operator-card protected-card">
+          <label for="protectedPasswordInput">Mật khẩu KHO BẾP / GÀ</label>
+          <div class="option-tools">
+            <input id="protectedPasswordInput" type="password" placeholder="NHẬP MẬT KHẨU">
+            <button class="btn" id="unlockProtectedBtn" type="button">Mở khóa</button>
+          </div>
+        </div>
         <div class="actions">
           <button class="btn" id="switchWarehouseTopBtn" type="button">⇄ Đổi kho</button>
           <button class="btn" id="exportBtn" type="button">⇩ Xuất EXCEL</button>
@@ -1201,6 +1221,9 @@
     const activeWarehouseKey = "inventory-active-warehouse-v1";
     const operatorKey = "inventory-operator-name-v1";
     const apiStateUrl = "/api/state";
+    const protectedPassword = "20022005";
+    const protectedCategories = new Set(["KHO BẾP", "GÀ"]);
+    const unlockedCategories = new Set();
     const warehouseConfigs = {
       "hau-nghia": {
         id: "hau-nghia",
@@ -1239,6 +1262,8 @@
       appShell: document.getElementById("appShell"),
       warehouseTitle: document.getElementById("warehouseTitle"),
       operator: document.getElementById("operatorInput"),
+      protectedPassword: document.getElementById("protectedPasswordInput"),
+      unlockProtected: document.getElementById("unlockProtectedBtn"),
       brandLogo: document.getElementById("brandLogo"),
       brandSubtitle: document.getElementById("brandSubtitle"),
       sideNote: document.getElementById("sideNote"),
@@ -1316,6 +1341,10 @@
     document.getElementById("importJsonGateBtn").addEventListener("click", openImportJson);
     document.getElementById("importJsonTopBtn").addEventListener("click", openImportJson);
     document.getElementById("resetBtn").addEventListener("click", resetSampleData);
+    els.unlockProtected.addEventListener("click", unlockProtectedGroups);
+    els.protectedPassword.addEventListener("keydown", event => {
+      if (event.key === "Enter") unlockProtectedGroups();
+    });
     document.getElementById("navLow").addEventListener("click", () => {
       els.status.value = "low";
       render();
@@ -1329,7 +1358,12 @@
     });
 
     els.search.addEventListener("input", renderTable);
-    els.category.addEventListener("change", renderTable);
+    els.category.addEventListener("change", () => {
+      if (!ensureCategoryAccess(els.category.value)) {
+        els.category.value = "all";
+      }
+      renderTable();
+    });
     els.locationFilter.addEventListener("change", renderTable);
       els.status.addEventListener("change", renderTable);
     els.cancelEdit.addEventListener("click", () => {
@@ -1346,7 +1380,12 @@
     els.form.addEventListener("submit", saveItem);
     els.adjustForm.addEventListener("submit", adjustStock);
     els.importJson.addEventListener("change", importJsonFile);
-    els.adjustCategory.addEventListener("change", renderAdjustOptions);
+    els.adjustCategory.addEventListener("change", () => {
+      if (!ensureCategoryAccess(els.adjustCategory.value)) {
+        els.adjustCategory.value = "all";
+      }
+      renderAdjustOptions();
+    });
     els.adjustLocation.addEventListener("change", renderAdjustOptions);
     els.adjustItem.addEventListener("change", updateQuickStockControls);
     els.adjustUnit.addEventListener("input", () => uppercaseInput(els.adjustUnit));
@@ -1446,6 +1485,44 @@
       } catch {
         return [];
       }
+    }
+
+    function normalizeCategoryKey(value) {
+      return normalizeText(value);
+    }
+
+    function isProtectedCategory(value) {
+      return protectedCategories.has(normalizeCategoryKey(value));
+    }
+
+    function isCategoryUnlocked(value) {
+      const category = normalizeCategoryKey(value);
+      return !isProtectedCategory(category) || unlockedCategories.has(category);
+    }
+
+    function ensureCategoryAccess(value) {
+      const category = normalizeCategoryKey(value);
+      if (!isProtectedCategory(category) || unlockedCategories.has(category)) return true;
+      showToast(`Nhập mật khẩu để mở nhóm ${category}.`);
+      els.protectedPassword.focus();
+      return false;
+    }
+
+    function ensureItemAccess(item) {
+      return item ? ensureCategoryAccess(item.category) : true;
+    }
+
+    function unlockProtectedGroups() {
+      if (els.protectedPassword.value.trim() !== protectedPassword) {
+        showToast("Sai mật khẩu KHO BẾP / GÀ.");
+        els.protectedPassword.focus();
+        return false;
+      }
+      protectedCategories.forEach(category => unlockedCategories.add(category));
+      els.protectedPassword.value = "";
+      render();
+      showToast("Đã mở khóa nhóm KHO BẾP và GÀ.");
+      return true;
     }
 
     function persistLocal() {
@@ -1709,8 +1786,8 @@
       els.adjustLocation.value = locations.includes(selectedLocation) ? selectedLocation : "all";
 
       const filteredItems = els.adjustCategory.value === "all"
-        ? items
-        : items.filter(item => item.category === els.adjustCategory.value);
+        ? items.filter(item => isCategoryUnlocked(item.category))
+        : items.filter(item => item.category === els.adjustCategory.value && isCategoryUnlocked(item.category));
       const filteredByLocation = els.adjustLocation.value === "all"
         ? filteredItems
         : filteredItems.filter(item => item.location === els.adjustLocation.value);
@@ -1768,6 +1845,7 @@
       }
 
       const filtered = items.filter(item => {
+        if (!isCategoryUnlocked(item.category)) return false;
         const haystack = [item.name, item.sku, item.category, item.location, item.unit].join(" ").toLowerCase();
         const matchesSearch = !query || haystack.includes(query);
         const matchesCategory = category === "all" || item.category === category;
@@ -1849,6 +1927,8 @@
         showToast("Vui lòng nhập đủ thông tin mặt hàng.");
         return;
       }
+
+      if (!ensureCategoryAccess(item.category)) return;
 
       const actor = requireOperator("lưu thay đổi kho");
       if (!actor) return;
@@ -1991,6 +2071,7 @@
       event.preventDefault();
       const item = selectedAdjustItem();
       if (!item) return;
+      if (!ensureItemAccess(item)) return;
 
       const stockInput = parseStockInput(els.adjustQty.value);
       const actor = requireOperator("cập nhật số lượng");
@@ -2114,6 +2195,7 @@
       const id = button.dataset.id;
       const item = items.find(current => current.id === id);
       if (!item) return;
+      if (!ensureItemAccess(item)) return;
 
       if (button.dataset.action === "plus") {
         if (!isCountedItem(item)) {
@@ -2245,6 +2327,10 @@
     }
 
     function exportExcel() {
+      for (const category of protectedCategories) {
+        const hasProtectedItems = items.some(item => normalizeCategoryKey(item.category) === category);
+        if (hasProtectedItems && !ensureCategoryAccess(category)) return;
+      }
       syncActiveWarehouse();
       const warehouse = currentWarehouse();
       const exportedAt = new Intl.DateTimeFormat("vi-VN", { dateStyle: "full", timeStyle: "short" }).format(new Date());
