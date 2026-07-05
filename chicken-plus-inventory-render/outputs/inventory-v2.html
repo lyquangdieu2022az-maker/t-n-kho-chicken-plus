@@ -1,0 +1,3218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kho Chicken Plus Hậu Nghĩa</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f9ff;
+      --panel: #ffffff;
+      --ink: #10233f;
+      --muted: #5d708a;
+      --line: #d8e7f7;
+      --line-strong: #8bbbe8;
+      --accent: #4fb3ff;
+      --accent-dark: #1f76d2;
+      --brand-red: #df3e4b;
+      --brand-black: #0f2b46;
+      --warning: #b57400;
+      --danger: #c63b3b;
+      --ok: #227447;
+      --blue: #1d73c9;
+      --shadow: 0 16px 34px rgba(29, 98, 157, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(92, 180, 255, 0.22), transparent 30%),
+        radial-gradient(circle at 82% 0%, rgba(170, 219, 255, 0.38), transparent 26%),
+        linear-gradient(180deg, #f7fbff 0%, #eef7ff 100%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Times New Roman", Times, serif;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    @keyframes buttonFloat {
+      0% { transform: translateY(-1px) rotate(0deg); }
+      45% { transform: translateY(-3px) rotate(-0.7deg); }
+      100% { transform: translateY(-2px) rotate(0deg); }
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 282px minmax(0, 1fr);
+    }
+
+    .app[hidden],
+    .warehouse-gate[hidden] {
+      display: none !important;
+    }
+
+    .warehouse-gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .warehouse-card {
+      width: min(920px, 100%);
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .warehouse-card h1 {
+      margin: 0;
+      font-size: 34px;
+      text-transform: uppercase;
+    }
+
+    .warehouse-card p {
+      margin: 8px 0 20px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .warehouse-choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .gate-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .warehouse-choice {
+      min-height: 168px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #edf7ff);
+      color: var(--ink);
+      padding: 16px;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .warehouse-choice:hover {
+      border-color: var(--accent-dark);
+      box-shadow: 0 12px 24px rgba(31, 118, 210, 0.18);
+      animation: buttonFloat 420ms ease both;
+    }
+
+    .warehouse-choice img {
+      width: 120px;
+      height: 96px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: #ffd400;
+      border: 1px solid var(--line);
+    }
+
+    .warehouse-choice strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.08;
+      text-transform: uppercase;
+    }
+
+    .warehouse-choice span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #ffffff 0%, #eaf6ff 58%, #d9edff 100%);
+      color: var(--ink);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 72px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.64);
+    }
+
+    .brand-logo {
+      width: 94px;
+      height: 64px;
+      border-radius: 8px;
+      background: #ffd400;
+      object-fit: contain;
+      padding: 6px;
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 8px 16px rgba(29, 98, 157, 0.16);
+    }
+
+    .brand h1 {
+      font-size: 27px;
+      line-height: 1.1;
+      margin: 0;
+      letter-spacing: 0;
+      color: var(--brand-black);
+      text-transform: uppercase;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      height: 42px;
+      border-radius: 8px;
+      color: var(--brand-black);
+      background: rgba(255, 255, 255, 0.72);
+      text-align: left;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: var(--accent-dark);
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(31, 118, 210, 0.18);
+      animation: buttonFloat 420ms ease both;
+    }
+
+    .side-note {
+      margin-top: auto;
+      border-top: 1px solid var(--line-strong);
+      padding-top: 16px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    main {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 18px;
+      padding: 18px;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(29, 115, 201, 0.98), rgba(93, 178, 255, 0.94)),
+        #1d73c9;
+      border: 1px solid var(--line-strong);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topbar::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 14px auto;
+      width: 152px;
+      height: 10px;
+      background: rgba(255,255,255,0.42);
+      border-radius: 999px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.16);
+    }
+
+    .topbar > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar > div:first-child {
+      min-width: 0;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.15;
+      letter-spacing: 0;
+      color: #ffffff;
+      text-transform: uppercase;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: #eaf6ff;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .operator-card {
+      display: grid;
+      gap: 6px;
+      width: min(320px, 100%);
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+    }
+
+    .operator-card label {
+      color: #ffffff;
+    }
+
+    .operator-card input {
+      background: #ffffff;
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .protected-card {
+      width: min(360px, 100%);
+    }
+
+    .protected-card .option-tools {
+      gap: 6px;
+    }
+
+    .protected-card .btn {
+      flex: 0 0 auto;
+      min-height: 40px;
+    }
+
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      margin-left: 10px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 8px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      border: 1px solid var(--line-strong);
+      white-space: nowrap;
+      font-weight: 700;
+      box-shadow: 0 8px 16px rgba(29, 98, 157, 0.08);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .btn:hover {
+      border-color: var(--accent-dark);
+      box-shadow: 0 12px 22px rgba(31, 118, 210, 0.18);
+      animation: buttonFloat 420ms ease both;
+    }
+
+    .btn:active,
+    .icon-btn:active,
+    .warehouse-choice:active,
+    .nav button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent-dark);
+      box-shadow: 0 10px 20px rgba(31, 118, 210, 0.2);
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .btn.mode-in {
+      background: #eaf6ff;
+      color: #14589c;
+      border-color: #8ec9ff;
+    }
+
+    .btn.mode-out {
+      background: #fff2f2;
+      color: var(--danger);
+      border-color: #f0b4b4;
+    }
+
+    .btn.mode-active {
+      outline: 3px solid rgba(29, 115, 201, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .btn.danger {
+      background: #fff2f2;
+      color: var(--danger);
+      border-color: #f0b4b4;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      background: linear-gradient(180deg, #ffffff 0%, #edf7ff 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: 98px;
+      border-top: 5px solid var(--accent);
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 32px;
+      line-height: 1;
+      color: var(--blue);
+    }
+
+    .stat small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 170px 170px 150px;
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #edf7ff, #ffffff);
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      color: var(--brand-black);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      padding: 0 11px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent-dark);
+      box-shadow: 0 0 0 3px rgba(79, 179, 255, 0.22);
+    }
+
+    input:disabled {
+      background: #edf6ff;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--brand-black);
+      font-size: 12px;
+      text-transform: uppercase;
+      background: #eaf6ff;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:hover {
+      background: #f2f9ff;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      min-width: 185px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      min-width: 76px;
+      text-align: center;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      min-width: 148px;
+    }
+
+    .sku {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .stock-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eaf6ff;
+      border: 1px solid var(--line-strong);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stock-note.low {
+      color: #8c4e00;
+      background: #fff6cf;
+      border-color: #e8bf40;
+    }
+
+    .stock-note.out {
+      color: var(--danger);
+      background: #fff0f0;
+      border-color: #f0b4b4;
+    }
+
+    .qty {
+      font-weight: 800;
+      font-size: 21px;
+      color: var(--brand-black);
+    }
+
+    .qty.estimate {
+      color: var(--accent-dark);
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      min-height: 26px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.ok {
+      color: #155c35;
+      background: #e9f8d9;
+      border: 1px solid #b7dd96;
+    }
+
+    .tag.low {
+      color: #8c4e00;
+      background: #fff0b2;
+      border: 1px solid #e8bf40;
+    }
+
+    .tag.out {
+      color: var(--danger);
+      background: #ffe4df;
+      border: 1px solid #f3a098;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-start;
+      min-width: 154px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #eaf6ff;
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      font-weight: 800;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent-dark);
+      background: #d7edff;
+      box-shadow: 0 8px 14px rgba(31, 118, 210, 0.15);
+      animation: buttonFloat 420ms ease both;
+    }
+
+    .icon-btn.remove {
+      color: var(--danger);
+      background: #fff0f0;
+    }
+
+    .drawer {
+      display: grid;
+      gap: 16px;
+    }
+
+    .form-panel {
+      padding: 16px;
+    }
+
+    .form-panel h3 {
+      margin: 0 0 14px;
+      font-size: 21px;
+      color: var(--brand-black);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .field-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .quick-adjust-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .quick-submit {
+      width: 100%;
+      min-height: 48px;
+      font-size: 17px;
+    }
+
+    .estimate-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .btn.estimate-ok {
+      background: #e9f8d9;
+      color: #155c35;
+      border-color: #b7dd96;
+    }
+
+    .btn.estimate-low {
+      background: #fff6cf;
+      color: #8c4e00;
+      border-color: #e8bf40;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      animation: none;
+      transform: none;
+    }
+
+    .btn.stock-out {
+      background: #fff2f2;
+      color: var(--danger);
+      border-color: #f0b4b4;
+      box-shadow: 0 10px 20px rgba(198, 59, 59, 0.1);
+      font-weight: 800;
+    }
+
+    .option-tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .option-tools input {
+      min-width: 0;
+    }
+
+    .option-tools .icon-btn {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .audit {
+      padding: 16px;
+    }
+
+    .audit h3 {
+      margin: 0 0 12px;
+      font-size: 21px;
+    }
+
+    .audit-list {
+      display: grid;
+      gap: 10px;
+      max-height: 310px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .audit-item {
+      border-left: 4px solid var(--accent-dark);
+      background: #f2f9ff;
+      border-radius: 6px;
+      padding: 10px 10px 10px 12px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .audit-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .audit-item time {
+      color: var(--muted);
+    }
+
+    .audit-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .audit-actor {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .empty {
+      padding: 30px 16px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--brand-black);
+      color: #ffffff;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 180ms ease;
+      max-width: min(420px, calc(100vw - 36px));
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (min-width: 980px) {
+      .topbar {
+        grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+        grid-template-areas:
+          "title title"
+          "operator actions";
+      }
+
+      .topbar > div:first-child {
+        grid-area: title;
+      }
+
+      .operator-card {
+        grid-area: operator;
+      }
+
+      .actions {
+        grid-area: actions;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: block;
+        padding: 14px 16px;
+      }
+
+      .brand {
+        margin-bottom: 12px;
+      }
+
+      .nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .side-note {
+        display: none;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .warehouse-choices {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      main {
+        padding: 16px;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions .btn {
+        flex: 1;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .two {
+        grid-template-columns: 1fr;
+      }
+
+      .estimate-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .warehouse-choice {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 470px) {
+      .stats,
+      .nav {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar h2 {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="warehouse-gate" id="warehouseGate">
+    <div class="warehouse-card">
+      <h1>Chọn kho Chicken Plus</h1>
+      <p>Mỗi kho có dữ liệu riêng và đồng bộ riêng.</p>
+      <div class="warehouse-choices">
+        <button class="warehouse-choice" type="button" data-warehouse="hau-nghia">
+          <img src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
+          <span>
+            <strong>Chicken Plus Hậu Nghĩa</strong>
+            <span>Mở kho Hậu Nghĩa</span>
+          </span>
+        </button>
+        <button class="warehouse-choice" type="button" data-warehouse="duc-hoa">
+          <img src="assets/logo-duc-hoa.jpg" alt="Chicken Plus Đức Hòa">
+          <span>
+            <strong>Chicken Plus Đức Hòa</strong>
+            <span>Mở kho Đức Hòa</span>
+          </span>
+        </button>
+      </div>
+      <div class="gate-actions">
+        <button class="btn" id="importJsonGateBtn" type="button">⇧ Nhập dữ liệu sao lưu</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="app" id="appShell" hidden>
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" id="brandLogo" src="assets/logo-cropped.png" alt="Chicken Plus Hậu Nghĩa">
+        <div>
+          <h1>Chicken Plus</h1>
+          <p id="brandSubtitle">Kho Hậu Nghĩa</p>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Điều hướng">
+        <button class="active" type="button"><span>▦</span> Tổng quan kho</button>
+        <button type="button" id="navLow"><span>!</span> Sắp hết</button>
+        <button type="button" id="navAll"><span>⌕</span> Bỏ lọc</button>
+      </nav>
+      <button class="btn" id="switchWarehouseBtn" type="button">Đổi kho</button>
+      <div class="side-note" id="sideNote">
+        Kho Chicken Plus Hậu Nghĩa. Dữ liệu kho này được đồng bộ riêng và có thể xuất Excel khi cần đối soát.
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h2 id="warehouseTitle">Kho Chicken Plus Hậu Nghĩa</h2>
+          <p><span id="todayText">Cập nhật hôm nay</span><span id="syncStatus" class="sync-status">Đang kết nối</span></p>
+        </div>
+        <div class="operator-card">
+          <label for="operatorInput">Người thao tác</label>
+          <input id="operatorInput" placeholder="NHẬP TÊN NHÂN VIÊN" autocomplete="name">
+        </div>
+        <div class="operator-card protected-card">
+          <label for="protectedPasswordInput">Mật khẩu KHO BẾP / GÀ</label>
+          <div class="option-tools">
+            <input id="protectedPasswordInput" type="password" placeholder="NHẬP MẬT KHẨU">
+            <button class="btn" id="unlockProtectedBtn" type="button">Mở khóa</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="switchWarehouseTopBtn" type="button">⇄ Đổi kho</button>
+          <button class="btn" id="exportBtn" type="button">⇩ Xuất EXCEL</button>
+          <button class="btn mode-in" id="openInBtn" type="button">+ Nhập kho</button>
+          <button class="btn mode-out" id="openOutBtn" type="button">− Xuất kho</button>
+          <button class="btn" id="exportJsonBtn" type="button">⇩ Sao lưu</button>
+          <button class="btn" id="importJsonTopBtn" type="button">⇧ Nhập dữ liệu</button>
+          <button class="btn danger" id="resetBtn" type="button">↺ Dữ liệu mẫu</button>
+          <button class="btn primary" id="focusAddBtn" type="button">+ Thêm hàng</button>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="Chỉ số tồn kho">
+        <div class="stat">
+          <span>Tổng mặt hàng</span>
+          <strong id="totalItems">0</strong>
+          <small>Đang theo dõi</small>
+        </div>
+        <div class="stat">
+          <span>Tổng số lượng</span>
+          <strong id="totalQty">0</strong>
+          <small>Trong kho</small>
+        </div>
+        <div class="stat">
+          <span>Sắp hết</span>
+          <strong id="lowItems">0</strong>
+          <small>Dưới mức tối thiểu</small>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel">
+          <div class="toolbar">
+            <div class="field">
+              <label for="searchInput">Tìm kiếm</label>
+              <input id="searchInput" placeholder="Tên hàng, mã SKU, vị trí..." autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="categoryFilter">Nhóm hàng</label>
+              <select id="categoryFilter">
+                <option value="all">Chọn nhóm</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="locationFilter">Vị trí</label>
+              <select id="locationFilter">
+                <option value="all">Chọn vị trí</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="statusFilter">Trạng thái</label>
+              <select id="statusFilter">
+                <option value="all">Chọn trạng thái</option>
+                <option value="low">Sắp hết</option>
+                <option value="out">Hết hàng</option>
+                <option value="ok">Đủ hàng</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mặt hàng</th>
+                  <th>Tồn</th>
+                  <th>Đơn vị</th>
+                  <th>Thao tác</th>
+                  <th>Nhóm</th>
+                  <th>Vị trí</th>
+                  <th>Tối thiểu</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody"></tbody>
+            </table>
+          </div>
+          <div id="emptyState" class="empty" hidden>Không tìm thấy mặt hàng phù hợp.</div>
+        </div>
+
+        <aside class="drawer">
+          <div class="panel form-panel" id="itemEditorPanel" hidden>
+            <h3 id="formTitle">Thêm mặt hàng</h3>
+            <form id="itemForm" class="form-grid">
+              <input type="hidden" id="editId">
+              <div class="field">
+                <label for="nameInput">Tên hàng</label>
+                <input id="nameInput" required placeholder="VÍ DỤ: MÈ GÀ">
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="skuInput">SKU</label>
+                  <input id="skuInput" required placeholder="CF-500">
+                </div>
+                <div class="field">
+                  <label for="categoryInput">Nhóm</label>
+                  <div class="option-tools">
+                    <input id="categoryInput" required list="categoryOptions" placeholder="GÀ">
+                    <button class="icon-btn" id="addCategoryOptionBtn" type="button" title="Lưu nhóm này">+</button>
+                    <button class="icon-btn remove" id="removeCategoryOptionBtn" type="button" title="Xóa nhóm này">×</button>
+                  </div>
+                  <datalist id="categoryOptions"></datalist>
+                </div>
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="stockModeInput">Kiểu tồn</label>
+                  <select id="stockModeInput">
+                    <option value="count">Đếm số lượng</option>
+                    <option value="many">Còn nhiều</option>
+                    <option value="few">Còn ít</option>
+                    <option value="text">Ghi tự do</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="qtyInput">Số lượng</label>
+                  <input id="qtyInput" required type="number" min="0" step="1" value="0" placeholder="VD: 5">
+                </div>
+              </div>
+              <div class="field">
+                <label for="unitInput">&#272;&#417;n v&#7883;</label>
+                <div class="option-tools">
+                  <input id="unitInput" list="unitOptions" placeholder="VD: CAI, BICH, SAP, THUNG">
+                  <button class="icon-btn" id="addUnitOptionBtn" type="button" title="L&#432;u &#273;&#417;n v&#7883; n&#224;y">+</button>
+                  <button class="icon-btn remove" id="removeUnitOptionBtn" type="button" title="X&#243;a &#273;&#417;n v&#7883; n&#224;y">×</button>
+                </div>
+                <datalist id="unitOptions"></datalist>
+              </div>
+              <div class="two">
+                <div class="field">
+                  <label for="minInput">Tối thiểu</label>
+                  <input id="minInput" required type="number" min="0" step="1" value="5">
+                </div>
+                <div class="field">
+                  <label for="locationInput">Vị trí</label>
+                  <div class="option-tools">
+                    <input id="locationInput" required list="locationOptions" placeholder="TỦ GÀ">
+                    <button class="icon-btn" id="addLocationOptionBtn" type="button" title="Lưu vị trí này">+</button>
+                    <button class="icon-btn remove" id="removeLocationOptionBtn" type="button" title="Xóa vị trí này">×</button>
+                  </div>
+                  <datalist id="locationOptions"></datalist>
+                </div>
+              </div>
+              <input id="priceInput" type="hidden" value="0">
+              <div class="field-note" id="stockModeHint">Chọn Còn nhiều/Còn ít cho các món khó đếm như ly nhựa, bao tay.</div>
+              <div class="form-actions">
+                <button class="btn primary" type="submit">Lưu</button>
+                <button class="btn" id="cancelEditBtn" type="button">Hủy</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel form-panel" id="quickAdjustPanel" hidden>
+            <h3 id="quickPanelTitle">Nhập kho</h3>
+            <form id="adjustForm" class="form-grid">
+              <div class="field">
+                <label for="adjustCategory">Nhóm hàng</label>
+                <select id="adjustCategory">
+                  <option value="all">Tất cả nhóm</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="adjustLocation">Vị trí</label>
+                <select id="adjustLocation">
+                  <option value="all">Tất cả vị trí</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="adjustItem">Mặt hàng</label>
+                <select id="adjustItem"></select>
+              </div>
+              <div class="field">
+                <label for="adjustUnit">Đơn vị</label>
+                <input id="adjustUnit" list="unitOptions" placeholder="VD: SẤP, BỊCH, THÙNG">
+              </div>
+              <div class="field">
+                <label for="adjustQty">Số lượng</label>
+                <input id="adjustQty" type="number" min="0" step="1" value="1" placeholder="VD: 5">
+              </div>
+              <div class="field-note" id="adjustModeHint">Nhập số nếu đếm được, hoặc bấm Còn nhiều/Còn ít.</div>
+              <div class="estimate-actions">
+                <button class="btn estimate-ok" id="quickManyBtn" type="button">✓ Ghi còn nhiều</button>
+                <button class="btn estimate-low" id="quickFewBtn" type="button">! Ghi còn ít</button>
+                <button class="btn" id="quickCountModeBtn" type="button">↺ Đếm số lượng</button>
+              </div>
+              <input id="adjustType" type="hidden" value="count">
+              <div class="quick-adjust-actions">
+                <button class="btn primary" id="quickInBtn" type="button">+ Nhập kho nhanh</button>
+                <button class="btn stock-out" id="quickOutBtn" type="button">− Xuất kho nhanh</button>
+              </div>
+              <button class="btn primary quick-submit" id="quickSubmitBtn" type="submit">+ Nhập kho</button>
+              <button class="btn" id="countStockBtn" type="submit">Chốt kiểm số lượng</button>
+            </form>
+          </div>
+
+          <div class="panel audit">
+            <h3>Lịch sử gần đây</h3>
+            <div id="auditList" class="audit-list"></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <input id="importJsonInput" type="file" accept="application/json,.json" hidden>
+
+  <script>
+    const legacyStorageKey = "inventory-checker-v2";
+    const legacyAuditKey = "inventory-checker-audit-v2";
+    const storageKey = "inventory-checker-v3";
+    const activeWarehouseKey = "inventory-active-warehouse-v1";
+    const operatorKey = "inventory-operator-name-v1";
+    const apiStateUrl = "/api/state";
+    const protectedPassword = "20022005";
+    const protectedCategories = new Set(["KHO BẾP", "GÀ"]);
+    const unlockedCategories = new Set();
+    const warehouseConfigs = {
+      "hau-nghia": {
+        id: "hau-nghia",
+        name: "Kho Chicken Plus Hậu Nghĩa",
+        shortName: "Kho Hậu Nghĩa",
+        logo: "assets/logo-cropped.png"
+      },
+      "duc-hoa": {
+        id: "duc-hoa",
+        name: "Kho Chicken Plus Đức Hòa",
+        shortName: "Kho Đức Hòa",
+        logo: "assets/logo-duc-hoa.jpg"
+      }
+    };
+    const sampleItems = [
+      { id: makeId(), name: "Mè gà", sku: "M", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Đùi gà", sku: "D", category: "Gà", qty: 34, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Không xương", sku: "KX", category: "Gà", qty: 9, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Nửa con", sku: "1/5", category: "Gà", qty: 11, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Cánh gà", sku: "C", category: "Gà", qty: 68, min: 5, price: 0, location: "Tủ gà" },
+      { id: makeId(), name: "Sốt Chicken Plus", sku: "SOT", category: "Sốt", qty: 12, min: 4, price: 0, location: "Kệ sốt" }
+    ];
+
+    let appState = buildStateFromSingleWarehouse(sampleItems, [
+      { title: "Khởi tạo dữ liệu mẫu", detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.", actor: "HỆ THỐNG", at: new Date().toISOString() }
+    ]);
+    let activeWarehouseId = readTextStorage(activeWarehouseKey) || "";
+    let hasActivatedWarehouse = false;
+    let items = [];
+    let audit = [];
+    let syncMode = "local";
+    let saveTimer;
+
+    const els = {
+      warehouseGate: document.getElementById("warehouseGate"),
+      appShell: document.getElementById("appShell"),
+      warehouseTitle: document.getElementById("warehouseTitle"),
+      operator: document.getElementById("operatorInput"),
+      protectedPassword: document.getElementById("protectedPasswordInput"),
+      unlockProtected: document.getElementById("unlockProtectedBtn"),
+      brandLogo: document.getElementById("brandLogo"),
+      brandSubtitle: document.getElementById("brandSubtitle"),
+      sideNote: document.getElementById("sideNote"),
+      body: document.getElementById("inventoryBody"),
+      empty: document.getElementById("emptyState"),
+      search: document.getElementById("searchInput"),
+      category: document.getElementById("categoryFilter"),
+      locationFilter: document.getElementById("locationFilter"),
+      status: document.getElementById("statusFilter"),
+      totalItems: document.getElementById("totalItems"),
+      totalQty: document.getElementById("totalQty"),
+      lowItems: document.getElementById("lowItems"),
+      syncStatus: document.getElementById("syncStatus"),
+      itemPanel: document.getElementById("itemEditorPanel"),
+      form: document.getElementById("itemForm"),
+      formTitle: document.getElementById("formTitle"),
+      editId: document.getElementById("editId"),
+      name: document.getElementById("nameInput"),
+      sku: document.getElementById("skuInput"),
+      categoryInput: document.getElementById("categoryInput"),
+      categoryOptions: document.getElementById("categoryOptions"),
+      addCategoryOption: document.getElementById("addCategoryOptionBtn"),
+      removeCategoryOption: document.getElementById("removeCategoryOptionBtn"),
+      stockMode: document.getElementById("stockModeInput"),
+      stockModeHint: document.getElementById("stockModeHint"),
+      qty: document.getElementById("qtyInput"),
+      min: document.getElementById("minInput"),
+      price: document.getElementById("priceInput"),
+      location: document.getElementById("locationInput"),
+      locationOptions: document.getElementById("locationOptions"),
+      unit: document.getElementById("unitInput"),
+      unitOptions: document.getElementById("unitOptions"),
+      addLocationOption: document.getElementById("addLocationOptionBtn"),
+      removeLocationOption: document.getElementById("removeLocationOptionBtn"),
+      addUnitOption: document.getElementById("addUnitOptionBtn"),
+      removeUnitOption: document.getElementById("removeUnitOptionBtn"),
+      cancelEdit: document.getElementById("cancelEditBtn"),
+      quickPanel: document.getElementById("quickAdjustPanel"),
+      quickPanelTitle: document.getElementById("quickPanelTitle"),
+      adjustForm: document.getElementById("adjustForm"),
+      adjustCategory: document.getElementById("adjustCategory"),
+      adjustLocation: document.getElementById("adjustLocation"),
+      adjustItem: document.getElementById("adjustItem"),
+      adjustUnit: document.getElementById("adjustUnit"),
+      adjustType: document.getElementById("adjustType"),
+      adjustQty: document.getElementById("adjustQty"),
+      adjustModeHint: document.getElementById("adjustModeHint"),
+      quickMany: document.getElementById("quickManyBtn"),
+      quickFew: document.getElementById("quickFewBtn"),
+      quickCountMode: document.getElementById("quickCountModeBtn"),
+      quickIn: document.getElementById("quickInBtn"),
+      quickOut: document.getElementById("quickOutBtn"),
+      quickSubmit: document.getElementById("quickSubmitBtn"),
+      countStock: document.getElementById("countStockBtn"),
+      auditList: document.getElementById("auditList"),
+      toast: document.getElementById("toast"),
+      importJson: document.getElementById("importJsonInput")
+    };
+
+    document.getElementById("todayText").textContent = "Cập nhật " + new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date());
+    document.querySelectorAll("[data-warehouse]").forEach(button => {
+      button.addEventListener("click", () => selectWarehouse(button.dataset.warehouse));
+    });
+    document.getElementById("switchWarehouseBtn").addEventListener("click", showWarehouseGate);
+    document.getElementById("switchWarehouseTopBtn").addEventListener("click", showWarehouseGate);
+    document.getElementById("focusAddBtn").addEventListener("click", () => {
+      clearForm();
+      showItemPanel();
+      els.name.focus();
+    });
+    document.getElementById("openInBtn").addEventListener("click", () => openQuickPanel("in"));
+    document.getElementById("openOutBtn").addEventListener("click", () => openQuickPanel("out"));
+    document.getElementById("exportBtn").addEventListener("click", exportExcel);
+    document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
+    document.getElementById("importJsonGateBtn").addEventListener("click", openImportJson);
+    document.getElementById("importJsonTopBtn").addEventListener("click", openImportJson);
+    document.getElementById("resetBtn").addEventListener("click", resetSampleData);
+    els.unlockProtected.addEventListener("click", unlockProtectedGroups);
+    els.protectedPassword.addEventListener("keydown", event => {
+      if (event.key === "Enter") unlockProtectedGroups();
+    });
+    document.getElementById("navLow").addEventListener("click", () => {
+      els.status.value = "low";
+      render();
+    });
+    document.getElementById("navAll").addEventListener("click", () => {
+      els.search.value = "";
+      els.category.value = "all";
+      els.locationFilter.value = "all";
+      els.status.value = "all";
+      render();
+    });
+
+    els.search.addEventListener("input", renderTable);
+    els.category.addEventListener("change", () => {
+      if (!ensureCategoryAccess(els.category.value)) {
+        els.category.value = "all";
+      }
+      renderTable();
+    });
+    els.locationFilter.addEventListener("change", renderTable);
+      els.status.addEventListener("change", renderTable);
+    els.cancelEdit.addEventListener("click", () => {
+      clearForm();
+      hideItemPanel();
+    });
+    els.addCategoryOption.addEventListener("click", () => addOption("category", els.categoryInput.value));
+    els.addLocationOption.addEventListener("click", () => addOption("location", els.location.value));
+    els.addUnitOption.addEventListener("click", () => addOption("unit", els.unit.value));
+    els.removeCategoryOption.addEventListener("click", () => removeOption("category", els.categoryInput.value));
+    els.removeLocationOption.addEventListener("click", () => removeOption("location", els.location.value));
+    els.removeUnitOption.addEventListener("click", () => removeOption("unit", els.unit.value));
+    els.stockMode.addEventListener("change", updateStockModeFields);
+    els.form.addEventListener("submit", saveItem);
+    els.adjustForm.addEventListener("submit", adjustStock);
+    els.importJson.addEventListener("change", importJsonFile);
+    els.adjustCategory.addEventListener("change", () => {
+      if (!ensureCategoryAccess(els.adjustCategory.value)) {
+        els.adjustCategory.value = "all";
+      }
+      renderAdjustOptions();
+    });
+    els.adjustLocation.addEventListener("change", renderAdjustOptions);
+    els.adjustItem.addEventListener("change", updateQuickStockControls);
+    els.adjustUnit.addEventListener("input", () => uppercaseInput(els.adjustUnit));
+    els.quickMany.addEventListener("click", () => setQuickStockMode("many"));
+    els.quickFew.addEventListener("click", () => setQuickStockMode("few"));
+    els.quickCountMode.addEventListener("click", () => setQuickStockMode("count"));
+    els.quickIn.addEventListener("click", () => runQuickAdjust("in"));
+    els.quickOut.addEventListener("click", () => runQuickAdjust("out"));
+    els.countStock.addEventListener("click", () => {
+      els.adjustType.value = "count";
+    });
+    els.quickSubmit.addEventListener("click", () => {
+      if (els.adjustType.value === "count") els.adjustType.value = "in";
+    });
+    els.operator.value = normalizeText(readTextStorage(operatorKey));
+    [els.operator, els.name, els.sku, els.categoryInput, els.location, els.unit, els.adjustUnit].forEach(input => {
+      input.addEventListener("input", () => uppercaseInput(input));
+    });
+    els.operator.addEventListener("input", () => {
+      try {
+        localStorage.setItem(operatorKey, els.operator.value.trim());
+      } catch {
+        // The audit log still records the typed name for the current session.
+      }
+    });
+
+    init();
+
+    async function init() {
+      setSyncStatus("Đang kết nối");
+      const localState = loadLocalState();
+
+      try {
+        const response = await fetch(`${apiStateUrl}?t=${Date.now()}`, { cache: "no-store", headers: { Accept: "application/json" } });
+        if (!response.ok) throw new Error("Không đọc được dữ liệu server");
+        const state = JSON.parse((await response.text()).replace(/^\uFEFF/, ""));
+        syncMode = "server";
+
+        if (state.isSeed && hasWarehouseData(localState)) {
+          appState = normalizeAppState(localState);
+          activateInitialWarehouse();
+          await saveRemoteNow();
+          setSyncStatus("Đã đưa dữ liệu cũ lên server");
+          showToast("Đã đồng bộ dữ liệu đang có lên server.");
+          return;
+        }
+
+        appState = normalizeAppState(state);
+        activateInitialWarehouse();
+        persistLocal();
+        setSyncStatus("Đồng bộ server");
+      } catch {
+        syncMode = "local";
+        appState = normalizeAppState(hasWarehouseData(localState) ? localState : buildStateFromSingleWarehouse(sampleItems, [
+          { title: "Khởi tạo dữ liệu mẫu", detail: "6 mặt hàng đã sẵn sàng để kiểm tồn.", actor: "HỆ THỐNG", at: new Date().toISOString() }
+        ]));
+        activateInitialWarehouse();
+        persistLocal();
+        setSyncStatus("Lưu trên máy này");
+      }
+    }
+
+    function loadLocalState() {
+      const multi = readJson(storageKey);
+      const legacy = {
+        items: readArray(legacyStorageKey),
+        audit: readArray(legacyAuditKey)
+      };
+      if (multi && multi.warehouses && hasWarehouseData(multi)) return multi;
+      if (legacy.items.length) return legacy;
+      return multi && multi.warehouses ? multi : legacy;
+    }
+
+    function readTextStorage(key) {
+      try {
+        return typeof localStorage === "undefined" ? "" : localStorage.getItem(key);
+      } catch {
+        return "";
+      }
+    }
+
+    function readJson(key) {
+      try {
+        const saved = readTextStorage(key);
+        return saved ? JSON.parse(saved.replace(/^\uFEFF/, "")) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function readArray(key) {
+      try {
+        const saved = readTextStorage(key);
+        if (!saved) return [];
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function normalizeCategoryKey(value) {
+      return normalizeText(value);
+    }
+
+    function isProtectedCategory(value) {
+      return protectedCategories.has(normalizeCategoryKey(value));
+    }
+
+    function isCategoryUnlocked(value) {
+      const category = normalizeCategoryKey(value);
+      return !isProtectedCategory(category) || unlockedCategories.has(category);
+    }
+
+    function ensureCategoryAccess(value) {
+      const category = normalizeCategoryKey(value);
+      if (!isProtectedCategory(category) || unlockedCategories.has(category)) return true;
+      showToast(`Nhập mật khẩu để mở nhóm ${category}.`);
+      els.protectedPassword.focus();
+      return false;
+    }
+
+    function ensureItemAccess(item) {
+      return item ? ensureCategoryAccess(item.category) : true;
+    }
+
+    function unlockProtectedGroups() {
+      if (els.protectedPassword.value.trim() !== protectedPassword) {
+        showToast("Sai mật khẩu KHO BẾP / GÀ.");
+        els.protectedPassword.focus();
+        return false;
+      }
+      protectedCategories.forEach(category => unlockedCategories.add(category));
+      els.protectedPassword.value = "";
+      render();
+      showToast("Đã mở khóa nhóm KHO BẾP và GÀ.");
+      return true;
+    }
+
+    function persistLocal() {
+      try {
+        syncActiveWarehouse();
+        localStorage.setItem(storageKey, JSON.stringify(appState));
+        localStorage.setItem(activeWarehouseKey, activeWarehouseId);
+      } catch {
+        // Private browsing or locked storage: the server copy still keeps data when available.
+      }
+    }
+
+    function persist() {
+      persistLocal();
+      if (syncMode !== "server") {
+        setSyncStatus("Lưu trên máy này");
+        return;
+      }
+      scheduleRemoteSave();
+    }
+
+    function scheduleRemoteSave() {
+      clearTimeout(saveTimer);
+      setSyncStatus("Đang lưu");
+      saveTimer = setTimeout(saveRemoteNow, 350);
+    }
+
+    async function saveRemoteNow() {
+      try {
+        syncActiveWarehouse();
+        const response = await fetch(apiStateUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(appState)
+        });
+        if (!response.ok) throw new Error("Không lưu được server");
+        setSyncStatus("Đã đồng bộ");
+      } catch {
+        setSyncStatus("Mất kết nối, lưu tạm máy này");
+      }
+    }
+
+    function activateInitialWarehouse() {
+      const savedWarehouse = readTextStorage(activeWarehouseKey);
+      if (savedWarehouse && appState.warehouses[savedWarehouse]) {
+        selectWarehouse(savedWarehouse);
+        return;
+      }
+      showWarehouseGate();
+    }
+
+    function showWarehouseGate() {
+      if (hasActivatedWarehouse) syncActiveWarehouse();
+      els.appShell.hidden = true;
+      els.warehouseGate.hidden = false;
+    }
+
+    function selectWarehouse(id) {
+      if (!appState.warehouses[id]) return;
+      if (hasActivatedWarehouse) syncActiveWarehouse();
+      activeWarehouseId = id;
+      const warehouse = appState.warehouses[id];
+      items = warehouse.items;
+      audit = warehouse.audit;
+      hasActivatedWarehouse = true;
+      applyWarehouseBrand(warehouse);
+      els.warehouseGate.hidden = true;
+      els.appShell.hidden = false;
+      clearForm();
+      hideItemPanel();
+      hideQuickPanel();
+      render({ skipPersist: true });
+      persistLocal();
+    }
+
+    function applyWarehouseBrand(warehouse) {
+      document.title = warehouse.name;
+      els.warehouseTitle.textContent = warehouse.name;
+      els.brandSubtitle.textContent = warehouse.shortName;
+      els.brandLogo.src = warehouse.logo;
+      els.brandLogo.alt = warehouse.name;
+      els.sideNote.textContent = `${warehouse.name}. Dữ liệu kho này được đồng bộ riêng, không trộn với kho khác và có thể xuất Excel để đối soát.`;
+    }
+
+    function syncActiveWarehouse() {
+      if (!activeWarehouseId || !appState.warehouses[activeWarehouseId]) return;
+      appState.activeWarehouseId = activeWarehouseId;
+      appState.warehouses[activeWarehouseId] = {
+        ...appState.warehouses[activeWarehouseId],
+        items: normalizeItems(items),
+        audit: normalizeAudit(audit),
+        categoryOptions: mergeOptions(appState.warehouses[activeWarehouseId].categoryOptions, items.map(item => item.category)),
+        locationOptions: mergeOptions(appState.warehouses[activeWarehouseId].locationOptions, items.map(item => item.location)),
+        unitOptions: mergeOptions(appState.warehouses[activeWarehouseId].unitOptions, items.map(item => item.unit))
+      };
+    }
+
+    function currentWarehouse() {
+      return appState.warehouses[activeWarehouseId] || appState.warehouses["hau-nghia"];
+    }
+
+    function showItemPanel() {
+      els.itemPanel.hidden = false;
+      els.quickPanel.hidden = true;
+    }
+
+    function hideItemPanel() {
+      els.itemPanel.hidden = true;
+    }
+
+    function openQuickPanel(type = "in") {
+      setAdjustMode(type);
+      els.quickPanel.hidden = false;
+      els.itemPanel.hidden = true;
+    }
+
+    function hideQuickPanel() {
+      els.quickPanel.hidden = true;
+    }
+
+    function setAdjustMode(type) {
+      const mode = type === "out" ? "out" : "in";
+      els.adjustType.value = mode;
+      const isOut = mode === "out";
+      els.quickPanelTitle.textContent = isOut ? "Xuất kho" : "Nhập kho";
+      els.quickSubmit.textContent = isOut ? "− Xuất kho" : "+ Nhập kho";
+      els.quickSubmit.classList.toggle("stock-out", isOut);
+      els.quickSubmit.classList.toggle("primary", !isOut);
+      els.quickIn.classList.toggle("mode-active", !isOut);
+      els.quickOut.classList.toggle("mode-active", isOut);
+    }
+
+    function render(options = {}) {
+      updateDebugDataset();
+      renderStats();
+      renderFilters();
+      renderAdjustOptions();
+      renderDatalists();
+      renderTable();
+      renderAudit();
+      if (!options.skipPersist) persist();
+    }
+
+    function updateDebugDataset() {
+      document.body.dataset.activeWarehouse = activeWarehouseId || "";
+      document.body.dataset.itemsCount = String(items.length);
+      document.body.dataset.hauNghiaCount = String(appState.warehouses["hau-nghia"] ? appState.warehouses["hau-nghia"].items.length : 0);
+      document.body.dataset.ducHoaCount = String(appState.warehouses["duc-hoa"] ? appState.warehouses["duc-hoa"].items.length : 0);
+    }
+
+    function isCountedItem(item) {
+      return normalizeStockMode(item && item.stockMode) === "count";
+    }
+
+    function getStatus(item) {
+      const mode = normalizeStockMode(item && item.stockMode);
+      if (mode === "many") return "ok";
+      if (mode === "few") return "low";
+      if (mode === "text") return textStockStatus(item.stockText);
+      if (item.qty === 0) return "out";
+      if (item.qty <= item.min) return "low";
+      return "ok";
+    }
+
+    function statusLabel(status) {
+      return { ok: "Đủ hàng", low: "Sắp hết", out: "Hết hàng" }[status];
+    }
+
+    function stockModeLabel(mode) {
+      return { many: "Còn nhiều", few: "Còn ít", text: "Ghi tự do", count: "Đếm số lượng" }[normalizeStockMode(mode)];
+    }
+
+    function stockDisplay(item) {
+      const mode = normalizeStockMode(item && item.stockMode);
+      if (mode === "count") return item.qty.toLocaleString("vi-VN");
+      if (mode === "text") return normalizeText(item.stockText) || "GHI TỰ DO";
+      return normalizeText(item.stockText) || stockModeLabel(mode);
+    }
+
+    function minDisplay(item) {
+      return isCountedItem(item) ? item.min.toLocaleString("vi-VN") : "Không đếm";
+    }
+
+    function unitDisplay(item) {
+      const unit = normalizeText(item && item.unit);
+      return unit ? `Đơn vị: ${unit}` : "";
+    }
+
+    function stockStatusLabel(item) {
+      return isCountedItem(item) ? statusLabel(getStatus(item)) : stockDisplay(item);
+    }
+
+    function updateStockModeFields() {
+      const counted = els.stockMode.value === "count";
+      els.min.disabled = !counted;
+      els.stockModeHint.textContent = counted
+        ? "Nhập số lượng bằng số. Đơn vị chọn ở ô Đơn vị bên dưới."
+        : "Còn nhiều/Còn ít dùng cho các món khó đếm, số lượng có thể để 0.";
+    }
+
+    function textStockStatus(value) {
+      const text = normalizeText(value);
+      if (text.includes("HẾT")) return "out";
+      if (text.includes("ÍT") || text.includes("THIẾU") || text.includes("SẮP")) return "low";
+      return "ok";
+    }
+
+    function parseStockInput(value) {
+      const raw = String(value ?? "").trim();
+      const text = normalizeText(raw);
+      if (!text) return { mode: "count", qty: 0, text: "" };
+      const numeric = Number(raw.replace(/\s/g, "").replace(",", "."));
+      if (Number.isFinite(numeric) && raw.replace(/\s/g, "") !== "") {
+        return { mode: "count", qty: Math.max(0, numeric), text: "" };
+      }
+      if (text.includes("NHIỀU")) return { mode: "many", qty: 0, text };
+      if (text.includes("ÍT")) return { mode: "few", qty: 0, text };
+      return { mode: "text", qty: 0, text };
+    }
+
+    function renderStats() {
+      const estimatedCount = items.filter(item => !isCountedItem(item)).length;
+      const totalQty = items.reduce((sum, item) => sum + (isCountedItem(item) ? item.qty : 0), 0);
+      const lowCount = items.filter(item => getStatus(item) !== "ok").length;
+      els.totalItems.textContent = items.length;
+      els.totalQty.textContent = totalQty.toLocaleString("vi-VN");
+      els.totalQty.nextElementSibling.textContent = estimatedCount ? `${estimatedCount} món ghi còn nhiều/còn ít` : "Trong kho";
+      els.lowItems.textContent = lowCount;
+    }
+
+    function renderFilters() {
+      const selectedCategory = els.category.value || "all";
+      const selectedLocation = els.locationFilter.value || "all";
+      const categories = mergeOptions(currentWarehouse().categoryOptions, items.map(item => item.category));
+      const locations = mergeOptions(currentWarehouse().locationOptions, items.map(item => item.location));
+      els.category.innerHTML = '<option value="all">Chọn nhóm</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
+      els.category.value = categories.includes(selectedCategory) ? selectedCategory : "all";
+      els.locationFilter.innerHTML = '<option value="all">Chọn vị trí</option>' + locations.map(location => `<option value="${escapeHtml(location)}">${escapeHtml(location)}</option>`).join("");
+      els.locationFilter.value = locations.includes(selectedLocation) ? selectedLocation : "all";
+    }
+
+    function renderDatalists() {
+      const warehouse = currentWarehouse();
+      const categories = mergeOptions(warehouse.categoryOptions, items.map(item => item.category));
+      const locations = mergeOptions(warehouse.locationOptions, items.map(item => item.location));
+      const units = mergeOptions(warehouse.unitOptions, items.map(item => item.unit));
+      els.categoryOptions.innerHTML = categories.map(category => `<option value="${escapeHtml(category)}"></option>`).join("");
+      els.locationOptions.innerHTML = locations.map(location => `<option value="${escapeHtml(location)}"></option>`).join("");
+      els.unitOptions.innerHTML = units.map(unit => `<option value="${escapeHtml(unit)}"></option>`).join("");
+    }
+
+    function renderAdjustOptions() {
+      const selectedCategory = els.adjustCategory.value || "all";
+      const selectedLocation = els.adjustLocation.value || "all";
+      const selectedItem = els.adjustItem.value;
+      const categories = mergeOptions(currentWarehouse().categoryOptions, items.map(item => item.category));
+      const locations = mergeOptions(currentWarehouse().locationOptions, items.map(item => item.location));
+      els.adjustCategory.innerHTML = '<option value="all">Tất cả nhóm</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("");
+      els.adjustCategory.value = categories.includes(selectedCategory) ? selectedCategory : "all";
+      els.adjustLocation.innerHTML = '<option value="all">Tất cả vị trí</option>' + locations.map(location => `<option value="${escapeHtml(location)}">${escapeHtml(location)}</option>`).join("");
+      els.adjustLocation.value = locations.includes(selectedLocation) ? selectedLocation : "all";
+
+      const filteredItems = els.adjustCategory.value === "all"
+        ? items.filter(item => isCategoryUnlocked(item.category))
+        : items.filter(item => item.category === els.adjustCategory.value && isCategoryUnlocked(item.category));
+      const filteredByLocation = els.adjustLocation.value === "all"
+        ? filteredItems
+        : filteredItems.filter(item => item.location === els.adjustLocation.value);
+
+      if (!filteredByLocation.length) {
+        els.adjustItem.innerHTML = '<option value="">Chưa có mặt hàng</option>';
+        updateQuickStockControls();
+        return;
+      }
+      els.adjustItem.innerHTML = filteredByLocation.map(item => {
+        const unitSuffix = item.unit ? ` - ${item.unit}` : "";
+        const suffix = isCountedItem(item) ? `(${item.sku})${unitSuffix}` : `- ${stockDisplay(item)}${unitSuffix}`;
+        return `<option value="${item.id}">${escapeHtml(item.name)} ${escapeHtml(suffix)}</option>`;
+      }).join("");
+      els.adjustItem.value = filteredByLocation.some(item => item.id === selectedItem) ? selectedItem : filteredByLocation[0].id;
+      updateQuickStockControls();
+    }
+
+    function selectedAdjustItem() {
+      return items.find(current => current.id === els.adjustItem.value);
+    }
+
+    function updateQuickStockControls() {
+      const item = selectedAdjustItem();
+      const hasItem = Boolean(item);
+      const counted = hasItem && isCountedItem(item);
+      els.adjustQty.disabled = !hasItem;
+      els.quickIn.disabled = !hasItem;
+      els.quickOut.disabled = !hasItem;
+      els.countStock.disabled = !hasItem;
+      els.quickMany.disabled = !hasItem;
+      els.quickFew.disabled = !hasItem;
+      els.quickCountMode.disabled = !hasItem;
+      els.adjustUnit.disabled = !hasItem;
+      els.adjustUnit.value = hasItem ? (item.unit || "") : "";
+      els.adjustModeHint.textContent = !hasItem
+        ? "Chưa có mặt hàng để cập nhật."
+        : counted
+          ? "Nhập số để cộng/trừ. Đơn vị của mặt hàng được lưu riêng."
+          : `${item.name} đang ghi ${stockDisplay(item)}. Có thể bấm Đếm số lượng rồi nhập số để kiểm lại.`;
+    }
+
+    function renderTable() {
+      const query = els.search.value.trim().toLowerCase();
+      const category = els.category.value;
+      const location = els.locationFilter.value;
+      const status = els.status.value;
+      const hasFocusedFilter = Boolean(query) || category !== "all" || location !== "all" || status !== "all";
+
+      if (!hasFocusedFilter) {
+        els.body.innerHTML = "";
+        els.empty.textContent = "Chọn nhóm, vị trí, trạng thái hoặc tìm kiếm để xem mặt hàng.";
+        els.empty.hidden = false;
+        return;
+      }
+
+      const filtered = items.filter(item => {
+        if (!isCategoryUnlocked(item.category)) return false;
+        const haystack = [item.name, item.sku, item.category, item.location, item.unit].join(" ").toLowerCase();
+        const matchesSearch = !query || haystack.includes(query);
+        const matchesCategory = category === "all" || item.category === category;
+        const matchesLocation = location === "all" || item.location === location;
+        const itemStatus = getStatus(item);
+        const matchesStatus = status === "all" || itemStatus === status || (status === "low" && itemStatus === "out");
+        return matchesSearch && matchesCategory && matchesLocation && matchesStatus;
+      });
+
+      els.body.innerHTML = filtered.map(item => {
+        const status = getStatus(item);
+        const counted = isCountedItem(item);
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name)}</strong>
+              <div class="sku">${escapeHtml(item.sku)}</div>
+              <div class="sku">${escapeHtml(unitDisplay(item))}</div>
+              <div class="stock-note ${status}">CÒN: ${escapeHtml(stockDisplay(item))}</div>
+            </td>
+            <td><span class="qty ${counted ? "" : "estimate"}">${escapeHtml(stockDisplay(item))}</span></td>
+            <td>${escapeHtml(item.unit || "-")}</td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" type="button" title="Nhập thêm 1" data-action="plus" data-id="${item.id}">+</button>
+                <button class="icon-btn" type="button" title="Xuất bớt 1" data-action="minus" data-id="${item.id}">−</button>
+                <button class="icon-btn" type="button" title="Sửa" data-action="edit" data-id="${item.id}">✎</button>
+                <button class="icon-btn remove" type="button" title="Xóa" data-action="delete" data-id="${item.id}">×</button>
+              </div>
+            </td>
+            <td>${escapeHtml(item.category)}</td>
+            <td>${escapeHtml(item.location)}</td>
+            <td>${escapeHtml(minDisplay(item))}</td>
+            <td><span class="tag ${status}">${escapeHtml(stockStatusLabel(item))}</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      els.empty.textContent = "Không tìm thấy mặt hàng phù hợp.";
+      els.empty.hidden = filtered.length > 0;
+      els.body.querySelectorAll("button").forEach(button => button.addEventListener("click", handleRowAction));
+    }
+
+    function renderAudit() {
+      els.auditList.innerHTML = audit.length
+        ? audit.slice(0, 12).map(entry => `
+            <div class="audit-item">
+              <strong>${escapeHtml(entry.title)}</strong>
+              <div>${escapeHtml(entry.detail)}</div>
+              <div class="audit-meta">
+                <span class="audit-actor">${escapeHtml(entry.actor || "CHƯA GHI TÊN")}</span>
+                <time>${new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.at))}</time>
+              </div>
+            </div>
+          `).join("")
+        : '<div class="empty">Chưa có thay đổi nào.</div>';
+    }
+
+    function saveItem(event) {
+      event.preventDefault();
+      const stockInput = parseStockInput(els.qty.value);
+      const selectedStockMode = normalizeStockMode(els.stockMode.value);
+      const resolvedStockMode = stockInput.mode === "count" ? selectedStockMode : stockInput.mode;
+      const item = normalizeItem({
+        id: els.editId.value || makeId(),
+        name: els.name.value.trim(),
+        sku: els.sku.value.trim(),
+        category: els.categoryInput.value.trim(),
+        unit: els.unit.value.trim(),
+        stockMode: resolvedStockMode,
+        stockText: stockInput.mode === "count" ? "" : stockInput.text,
+        qty: stockInput.qty,
+        min: Number(els.min.value),
+        price: Number(els.price.value),
+        location: els.location.value.trim()
+      });
+
+      if (!item.name || !item.sku || !item.category || !item.location) {
+        showToast("Vui lòng nhập đủ thông tin mặt hàng.");
+        return;
+      }
+
+      if (!ensureCategoryAccess(item.category)) return;
+
+      const actor = requireOperator("lưu thay đổi kho");
+      if (!actor) return;
+
+      const existingIndex = items.findIndex(current => current.id === item.id);
+      if (existingIndex >= 0) {
+        const previous = items[existingIndex];
+        items[existingIndex] = item;
+        pushAudit("Cập nhật mặt hàng", describeItemChange(previous, item), actor);
+        pushStockChangeAudit(previous, item, actor);
+      } else {
+        items.unshift(item);
+        pushAudit("Thêm mặt hàng", `${item.name} đã được thêm vào kho, tồn ${stockDisplay(item)}, vị trí ${item.location}.`, actor);
+        pushNewItemStockAudit(item, actor);
+      }
+      addOption("category", item.category, { silent: true });
+      addOption("location", item.location, { silent: true });
+      addOption("unit", item.unit, { silent: true });
+      clearForm();
+      hideItemPanel();
+      render();
+      showToast(`${actor} đã lưu mặt hàng.`);
+    }
+
+    function pushStockChangeAudit(previous, next, actor) {
+      if (!isCountedItem(previous) || !isCountedItem(next) || previous.qty === next.qty) return;
+      const qtyChange = next.qty - previous.qty;
+      const type = qtyChange > 0 ? "in" : "out";
+      const title = qtyChange > 0 ? "Nhập kho" : "Xuất kho";
+      pushAudit(title, `${next.name}: ${previous.qty} → ${next.qty}.`, actor, {
+        type,
+        itemId: next.id,
+        itemName: next.name,
+        unit: next.unit || "",
+        oldQty: previous.qty,
+        newQty: next.qty,
+        quantity: Math.abs(qtyChange),
+        qtyChange,
+        warehouseId: activeWarehouseId
+      });
+    }
+
+    function pushNewItemStockAudit(item, actor) {
+      if (!isCountedItem(item) || item.qty <= 0) return;
+      pushAudit("Nhập kho", `${item.name}: 0 → ${item.qty}.`, actor, {
+        type: "in",
+        itemId: item.id,
+        itemName: item.name,
+        unit: item.unit || "",
+        oldQty: 0,
+        newQty: item.qty,
+        quantity: item.qty,
+        qtyChange: item.qty,
+        warehouseId: activeWarehouseId
+      });
+    }
+
+    function addOption(type, rawValue, options = {}) {
+      const value = normalizeText(rawValue);
+      if (!value || !activeWarehouseId) {
+        if (!options.silent) showToast("Nhập nội dung trước khi lưu.");
+        return;
+      }
+      const actor = options.silent ? "" : requireOperator(`lưu ${optionLabel(type)}`);
+      if (!options.silent && !actor) return;
+      const warehouse = currentWarehouse();
+      const key = optionKey(type);
+      warehouse[key] = mergeOptions(warehouse[key], [value]);
+      if (type === "location") els.location.value = value;
+      if (type === "category") els.categoryInput.value = value;
+      if (type === "unit") els.unit.value = value;
+      syncActiveWarehouse();
+      renderDatalists();
+      renderFilters();
+      renderAdjustOptions();
+      if (!options.silent) {
+        pushAudit(`Thêm ${optionLabel(type)} chọn nhanh`, `${value} đã được lưu để chọn lại.`, actor);
+        persist();
+        showToast(type === "location" ? `${actor} đã lưu vị trí.` : `${actor} đã lưu nhóm.`);
+      }
+    }
+
+    function removeOption(type, rawValue) {
+      const value = normalizeText(rawValue);
+      const label = optionLabel(type);
+      const labelTitle = optionTitle(type);
+
+      if (!value || !activeWarehouseId) {
+        showToast(`Nhập ${label} cần xóa trước.`);
+        return;
+      }
+
+      const actor = requireOperator(`xóa ${label}`);
+      if (!actor) return;
+
+      const itemKey = type === "location" ? "location" : type === "unit" ? "unit" : "category";
+      const usedCount = items.filter(item => normalizeText(item[itemKey]) === value).length;
+      if (usedCount) {
+        showToast(`${labelTitle} "${value}" đang dùng cho ${usedCount} mặt hàng. Sửa các mặt hàng đó trước.`);
+        return;
+      }
+
+      const warehouse = currentWarehouse();
+      const optionListKey = optionKey(type);
+      const before = Array.isArray(warehouse[optionListKey]) ? warehouse[optionListKey] : [];
+      const next = before.filter(option => normalizeText(option) !== value);
+
+      if (next.length === before.length) {
+        showToast(`${labelTitle} "${value}" không có trong danh sách chọn nhanh.`);
+        return;
+      }
+
+      warehouse[optionListKey] = next;
+      if (type === "location" && els.locationFilter.value === value) els.locationFilter.value = "all";
+      if (type === "category" && els.category.value === value) els.category.value = "all";
+      pushAudit(`Xóa ${optionLabel(type)} chọn nhanh`, `${value} đã được xóa khỏi danh sách chọn nhanh.`, actor);
+      render();
+      showToast(`${actor} đã xóa ${label} ${value}.`);
+    }
+
+    function optionKey(type) {
+      if (type === "location") return "locationOptions";
+      if (type === "unit") return "unitOptions";
+      return "categoryOptions";
+    }
+
+    function optionLabel(type) {
+      if (type === "location") return "vị trí";
+      if (type === "unit") return "đơn vị";
+      return "nhóm";
+    }
+
+    function optionTitle(type) {
+      if (type === "location") return "Vị trí";
+      if (type === "unit") return "Đơn vị";
+      return "Nhóm";
+    }
+
+    function adjustStock(event) {
+      event.preventDefault();
+      const item = selectedAdjustItem();
+      if (!item) return;
+      if (!ensureItemAccess(item)) return;
+
+      const stockInput = parseStockInput(els.adjustQty.value);
+      const actor = requireOperator("cập nhật số lượng");
+      if (!actor) return;
+      applyQuickUnit(item, actor);
+
+      if (stockInput.mode !== "count") {
+        applyTextStock(item, stockInput.mode, stockInput.text, actor, "Ghi tồn tự do");
+        return;
+      }
+
+      const amount = stockInput.qty;
+      if (amount < 0) {
+        showToast("Số lượng không hợp lệ.");
+        return;
+      }
+
+      const oldQty = item.qty;
+      item.stockMode = "count";
+      item.stockText = "";
+      if (els.adjustType.value === "in") item.qty += amount;
+      if (els.adjustType.value === "out") item.qty = Math.max(0, item.qty - amount);
+      if (els.adjustType.value === "count") item.qty = amount;
+
+      const actionText = { in: "Nhập kho", out: "Xuất kho", count: "Chốt kiểm" }[els.adjustType.value];
+      pushAudit(actionText, `${item.name}: ${oldQty} → ${item.qty}.`, actor, {
+        type: els.adjustType.value,
+        itemId: item.id,
+        itemName: item.name,
+        unit: item.unit || "",
+        oldQty,
+        newQty: item.qty,
+        quantity: amount,
+        qtyChange: item.qty - oldQty,
+        warehouseId: activeWarehouseId
+      });
+      render();
+      showToast(`${actor} đã cập nhật số lượng tồn.`);
+    }
+
+    function applyQuickUnit(item, actor) {
+      const nextUnit = normalizeText(els.adjustUnit.value);
+      if (!nextUnit || item.unit === nextUnit) return;
+      const previousUnit = item.unit || "-";
+      item.unit = nextUnit;
+      addOption("unit", nextUnit, { silent: true });
+      pushAudit("Cập nhật đơn vị", `${item.name}: ${previousUnit} → ${nextUnit}.`, actor, {
+        type: "unit",
+        itemId: item.id,
+        itemName: item.name,
+        unit: nextUnit,
+        warehouseId: activeWarehouseId
+      });
+    }
+
+    function runQuickAdjust(type) {
+      setAdjustMode(type);
+      adjustStock(new Event("submit", { cancelable: true }));
+    }
+
+    function setQuickStockMode(mode) {
+      const item = selectedAdjustItem();
+      if (!item) return;
+
+      const label = stockModeLabel(mode);
+      const actor = requireOperator(mode === "count" ? "đổi lại đếm số lượng" : `ghi ${label.toLowerCase()}`);
+      if (!actor) return;
+
+      if (mode === "count") {
+        const stockInput = parseStockInput(els.adjustQty.value);
+        if (stockInput.mode !== "count") {
+          applyTextStock(item, stockInput.mode, stockInput.text, actor, "Ghi tồn tự do");
+          return;
+        }
+        const before = stockDisplay(item);
+        const oldQty = item.qty;
+        item.stockMode = "count";
+        item.stockText = "";
+        item.qty = stockInput.qty;
+        pushAudit("Đổi sang đếm số lượng", `${item.name}: ${before} → ${stockDisplay(item)}.`, actor, {
+          type: "estimate",
+          itemId: item.id,
+          itemName: item.name,
+        unit: item.unit || "",
+          oldQty,
+          newQty: item.qty,
+          quantity: 0,
+          qtyChange: 0,
+          warehouseId: activeWarehouseId
+        });
+        render();
+        showToast(`${actor} đã ghi ${item.name}: ${stockDisplay(item)}.`);
+        return;
+      }
+
+      applyTextStock(item, normalizeStockMode(mode), stockModeLabel(mode), actor, "Ghi tồn ước lượng");
+    }
+
+    function applyTextStock(item, mode, text, actor, title) {
+      const before = stockDisplay(item);
+      item.stockMode = normalizeStockMode(mode);
+      item.stockText = normalizeText(text) || stockModeLabel(mode);
+      const after = stockDisplay(item);
+      pushAudit(title, `${item.name}: ${before} → ${after}.`, actor, {
+        type: "estimate",
+        itemId: item.id,
+        itemName: item.name,
+        unit: item.unit || "",
+        oldQty: item.qty,
+        newQty: item.qty,
+        quantity: 0,
+        qtyChange: 0,
+        warehouseId: activeWarehouseId
+      });
+      render();
+      showToast(`${actor} đã ghi ${item.name}: ${after}.`);
+    }
+
+    function handleRowAction(event) {
+      const button = event.currentTarget;
+      const id = button.dataset.id;
+      const item = items.find(current => current.id === id);
+      if (!item) return;
+      if (!ensureItemAccess(item)) return;
+
+      if (button.dataset.action === "plus") {
+        if (!isCountedItem(item)) {
+          showToast(`${item.name} đang để ${stockModeLabel(item.stockMode)}. Bấm sửa để đổi trạng thái.`);
+          return;
+        }
+        const actor = requireOperator("nhập kho nhanh");
+        if (!actor) return;
+        const oldQty = item.qty;
+        item.qty += 1;
+        pushAudit("Nhập nhanh", `${item.name}: ${oldQty} → ${item.qty}.`, actor, {
+          type: "in",
+          itemId: item.id,
+          itemName: item.name,
+        unit: item.unit || "",
+          oldQty,
+          newQty: item.qty,
+          quantity: 1,
+          qtyChange: 1,
+          warehouseId: activeWarehouseId
+        });
+        render();
+        showToast(`${actor} đã nhập nhanh ${item.name}.`);
+      }
+
+      if (button.dataset.action === "minus") {
+        if (!isCountedItem(item)) {
+          showToast(`${item.name} đang để ${stockModeLabel(item.stockMode)}. Bấm sửa để đổi trạng thái.`);
+          return;
+        }
+        const actor = requireOperator("xuất kho nhanh");
+        if (!actor) return;
+        const oldQty = item.qty;
+        item.qty = Math.max(0, item.qty - 1);
+        pushAudit("Xuất nhanh", `${item.name}: ${oldQty} → ${item.qty}.`, actor, {
+          type: "out",
+          itemId: item.id,
+          itemName: item.name,
+        unit: item.unit || "",
+          oldQty,
+          newQty: item.qty,
+          quantity: 1,
+          qtyChange: item.qty - oldQty,
+          warehouseId: activeWarehouseId
+        });
+        render();
+        showToast(`${actor} đã xuất nhanh ${item.name}.`);
+      }
+
+      if (button.dataset.action === "edit") {
+        showItemPanel();
+        els.formTitle.textContent = "Sửa mặt hàng";
+        els.editId.value = item.id;
+        els.name.value = item.name;
+        els.sku.value = item.sku;
+        els.categoryInput.value = item.category;
+        els.stockMode.value = normalizeStockMode(item.stockMode);
+        els.qty.value = isCountedItem(item) ? item.qty : stockDisplay(item);
+        els.min.value = item.min;
+        els.price.value = item.price;
+        els.location.value = item.location;
+        els.unit.value = item.unit || "";
+        updateStockModeFields();
+        els.name.focus();
+      }
+
+      if (button.dataset.action === "delete") {
+        const actor = requireOperator("xóa mặt hàng");
+        if (!actor) return;
+        const confirmed = confirm(`Xóa "${item.name}" khỏi danh sách tồn kho?`);
+        if (!confirmed) return;
+        items = items.filter(current => current.id !== id);
+        pushAudit("Xóa mặt hàng", `${item.name} đã được xóa khỏi kho.`, actor);
+        render();
+        showToast(`${actor} đã xóa mặt hàng.`);
+      }
+    }
+
+    function clearForm() {
+      els.form.reset();
+      els.editId.value = "";
+      els.qty.value = 0;
+      els.min.value = 5;
+      els.price.value = 0;
+      els.unit.value = "";
+      els.stockMode.value = "count";
+      updateStockModeFields();
+      els.formTitle.textContent = "Thêm mặt hàng";
+    }
+
+    function currentOperator() {
+      const actor = normalizeText(els.operator.value);
+      if (actor) els.operator.value = actor;
+      return actor;
+    }
+
+    function requireOperator(actionText) {
+      const actor = currentOperator();
+      if (!actor) {
+        showToast(`Nhập tên người thao tác trước khi ${actionText}.`);
+        els.operator.focus();
+        return "";
+      }
+      try {
+        localStorage.setItem(operatorKey, actor);
+      } catch {
+        // The name is still available in the current page session.
+      }
+      return actor;
+    }
+
+    function describeItemChange(previous, next) {
+      const changes = [];
+      if (previous.name !== next.name) changes.push(`tên: ${previous.name} → ${next.name}`);
+      if (previous.sku !== next.sku) changes.push(`SKU: ${previous.sku} → ${next.sku}`);
+      if (previous.category !== next.category) changes.push(`nhóm: ${previous.category} → ${next.category}`);
+      if (previous.location !== next.location) changes.push(`vị trí: ${previous.location} → ${next.location}`);
+      if (normalizeStockMode(previous.stockMode) !== normalizeStockMode(next.stockMode)) changes.push(`kiểu tồn: ${stockModeLabel(previous.stockMode)} → ${stockModeLabel(next.stockMode)}`);
+      if (previous.qty !== next.qty) changes.push(`tồn: ${stockDisplay(previous)} → ${stockDisplay(next)}`);
+      if (normalizeText(previous.stockText) !== normalizeText(next.stockText)) changes.push(`ghi chú tồn: ${stockDisplay(previous)} → ${stockDisplay(next)}`);
+      if (previous.min !== next.min) changes.push(`tối thiểu: ${minDisplay(previous)} → ${minDisplay(next)}`);
+      if (previous.price !== next.price) changes.push(`giá vốn: ${previous.price} → ${next.price}`);
+      return changes.length ? `${next.name}: ${changes.join("; ")}.` : `${next.name}: đã lưu lại thông tin, không đổi số liệu.`;
+    }
+
+    function pushAudit(title, detail, actor = "", meta = {}) {
+      audit.unshift({ title, detail, actor: actor || currentOperator() || "CHƯA GHI TÊN", at: new Date().toISOString(), ...meta });
+      audit = audit.slice(0, 500);
+    }
+
+    function exportExcel() {
+      for (const category of protectedCategories) {
+        const hasProtectedItems = items.some(item => normalizeCategoryKey(item.category) === category);
+        if (hasProtectedItems && !ensureCategoryAccess(category)) return;
+      }
+      syncActiveWarehouse();
+      const warehouse = currentWarehouse();
+      const exportedAt = new Intl.DateTimeFormat("vi-VN", { dateStyle: "full", timeStyle: "short" }).format(new Date());
+      const headers = ["STT", "Mặt hàng", "Đơn vị", "Nhóm", "Tồn", "Tối thiểu", "Trạng thái"];
+      const lastExcelRow = Math.max(3, items.length + 3);
+      const autoFilterRange = `R3C1:R${lastExcelRow}C7`;
+      const headerRow = headers.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const itemRows = items.map((item, index) => {
+        const status = getStatus(item);
+        const counted = isCountedItem(item);
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const statusStyle = status === "out" ? "StatusOut" : status === "low" ? "StatusLow" : "StatusOk";
+        const stockStyle = counted ? `${rowStyle}Number` : rowStyle;
+        const stockType = counted ? "Number" : "String";
+        const minStyle = counted ? `${rowStyle}Number` : rowStyle;
+        const minType = counted ? "Number" : "String";
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="Number">${index + 1}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.name)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.unit || "")}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(item.category)}</Data></Cell>
+            <Cell ss:StyleID="${stockStyle}"><Data ss:Type="${stockType}">${xmlEscape(counted ? item.qty : stockDisplay(item))}</Data></Cell>
+            <Cell ss:StyleID="${minStyle}"><Data ss:Type="${minType}">${xmlEscape(counted ? item.min : minDisplay(item))}</Data></Cell>
+            <Cell ss:StyleID="${statusStyle}"><Data ss:Type="String">${xmlEscape(stockStatusLabel(item))}</Data></Cell>
+          </Row>
+        `;
+      }).join("");
+      const movements = todayMovements();
+      const movementHeaders = ["Thời gian", "Người thao tác", "Loại", "Mặt hàng", "Đơn vị", "Số lượng", "Tồn trước", "Tồn sau"];
+      const movementLastRow = Math.max(3, movements.length + 3);
+      const movementHeaderRow = movementHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const movementRows = movements.map((entry, index) => {
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.timeText)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.actor)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.typeLabel)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.itemName)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.unit || "")}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.quantity}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.oldQty}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.newQty}</Data></Cell>
+          </Row>
+        `;
+      }).join("") || '<Row><Cell ss:MergeAcross="7" ss:StyleID="Cell"><Data ss:Type="String">Hôm nay chưa có nhập/xuất kho.</Data></Cell></Row>';
+      const summary = buildDailySummary(movements);
+      const summaryRows = [
+        ["Tồn đầu ngày", summary.startTotal],
+        ["Tổng nhập trong ngày", summary.inTotal],
+        ["Tổng xuất trong ngày", summary.outTotal],
+        ["Tồn tính theo lịch sử", summary.expectedTotal],
+        ["Tồn tổng trên web", summary.webTotal],
+        ["Chênh lệch web - lịch sử", summary.diff],
+        ["Mặt hàng ghi còn nhiều/còn ít", summary.estimatedCount],
+        ["Kết luận", summary.label]
+      ].map(([label, value], index) => `
+        <Row ss:AutoFitHeight="1">
+          <Cell ss:StyleID="${index === 7 ? "Header" : "Cell"}"><Data ss:Type="String">${xmlEscape(label)}</Data></Cell>
+          <Cell ss:StyleID="${typeof value === "number" ? "CellNumber" : "Cell"}"><Data ss:Type="${typeof value === "number" ? "Number" : "String"}">${xmlEscape(value)}</Data></Cell>
+        </Row>
+      `).join("");
+      const week = currentInventoryWeek();
+      const weeklyMovements = movementsForRange(week.start, week.end);
+      const weekTitle = `${formatDateOnly(week.start)} - ${formatDateOnly(week.end)}`;
+      const weeklyHeaders = ["Ngày", "Thứ", "Người thao tác", "Loại", "Mặt hàng", "Đơn vị", "Số lượng", "Tồn trước", "Tồn sau", "Chi tiết đối chiếu"];
+      const weeklyLastRow = Math.max(3, weeklyMovements.length + 3);
+      const weeklyHeaderRow = weeklyHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const weeklyRows = weeklyMovements.map((entry, index) => {
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const movementAmount = `${entry.quantity}${entry.unit ? " " + entry.unit : ""}`;
+        const note = entry.type === "out"
+          ? `${entry.actor} xuất ${entry.itemName}, số lượng ${movementAmount}, còn ${entry.newQty}.`
+          : entry.type === "in"
+            ? `${entry.actor} nhập ${entry.itemName}, số lượng ${movementAmount}, tồn mới ${entry.newQty}.`
+            : `${entry.actor} chốt/ghi tồn ${entry.itemName}: ${entry.oldQty} -> ${entry.newQty}.`;
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(formatDateTime(entry.at))}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(dayName(entry.at))}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.actor)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.typeLabel)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.itemName)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.unit || "")}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.quantity}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.oldQty}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.newQty}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(note)}</Data></Cell>
+          </Row>
+        `;
+      }).join("") || '<Row><Cell ss:MergeAcross="9" ss:StyleID="Cell"><Data ss:Type="String">Tuần này chưa có nhập/xuất/chốt kiểm kho.</Data></Cell></Row>';
+      const weeklyReconciliation = buildWeeklyReconciliation(weeklyMovements, week);
+      const reconcileHeaders = ["Mặt hàng", "Đơn vị", "Nhóm", "Tồn đầu T4", "Nhập trong chu kỳ", "Xuất T5-T7", "Tồn tự tính CN", "Xuất T2-T3", "Tồn trước T4 mới", "Tồn hiện tại", "Lệch", "Kết luận", "Cảnh báo"];
+      const reconcileLastRow = Math.max(3, weeklyReconciliation.rows.length + 3);
+      const reconcileHeaderRow = reconcileHeaders.map(text => `<Cell ss:StyleID="Header"><Data ss:Type="String">${xmlEscape(text)}</Data></Cell>`).join("");
+      const reconcileRows = weeklyReconciliation.rows.map((entry, index) => {
+        const rowStyle = index % 2 === 0 ? "Cell" : "CellAlt";
+        const conclusionStyle = entry.diff === 0 && !entry.risk ? "StatusOk" : entry.diff < 0 ? "StatusOut" : "StatusLow";
+        return `
+          <Row ss:AutoFitHeight="1">
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.name)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.unit || "")}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}"><Data ss:Type="String">${xmlEscape(entry.category)}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.opening}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.inTotal}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.outThuSat}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.sundayExpected}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.outMonTue}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.expected}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.checked}</Data></Cell>
+            <Cell ss:StyleID="${rowStyle}Number"><Data ss:Type="Number">${entry.diff}</Data></Cell>
+            <Cell ss:StyleID="${conclusionStyle}"><Data ss:Type="String">${xmlEscape(entry.label)}</Data></Cell>
+            <Cell ss:StyleID="${conclusionStyle}"><Data ss:Type="String">${xmlEscape(entry.warning)}</Data></Cell>
+          </Row>
+        `;
+      }).join("");
+      const reconcileSummaryRows = [
+        ["Tổng tồn trước T4 mới", weeklyReconciliation.expectedTotal],
+        ["Tổng tồn hiện tại", weeklyReconciliation.checkedTotal],
+        ["Tổng lệch", weeklyReconciliation.diffTotal],
+        ["Mặt hàng bị thiếu", weeklyReconciliation.shortCount],
+        ["Mặt hàng bị dư", weeklyReconciliation.overCount],
+        ["Mặt hàng cần kiểm", weeklyReconciliation.riskCount]
+      ].map(([label, value]) => `
+        <Row ss:AutoFitHeight="1">
+          <Cell ss:StyleID="Cell"><Data ss:Type="String">${xmlEscape(label)}</Data></Cell>
+          <Cell ss:MergeAcross="11" ss:StyleID="CellNumber"><Data ss:Type="Number">${value}</Data></Cell>
+        </Row>
+      `).join("");
+
+      const workbook = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="Default" ss:Name="Normal">
+      <Alignment ss:Vertical="Center" ss:WrapText="1"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Color="#10233F"/>
+    </Style>
+    <Style ss:ID="Title">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="18" ss:Bold="1" ss:Color="#FFFFFF"/>
+      <Interior ss:Color="#1D73C9" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Subtitle">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#0F2B46"/>
+      <Interior ss:Color="#EAF6FF" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="Header">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#0F2B46"/>
+      <Interior ss:Color="#DCEEFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="Cell">
+      <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellAlt">
+      <Interior ss:Color="#F4FAFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellText">
+      <NumberFormat ss:Format="@"/>
+      <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellAltText">
+      <NumberFormat ss:Format="@"/>
+      <Interior ss:Color="#F4FAFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellNumber">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#10233F"/>
+      <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="CellAltNumber">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#10233F"/>
+      <Interior ss:Color="#F4FAFF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="StatusOk">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#155C35"/>
+      <Interior ss:Color="#E9F8D9" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="StatusLow">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#8C4E00"/>
+      <Interior ss:Color="#FFF6CF" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+    <Style ss:ID="StatusOut">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Font ss:FontName="Times New Roman" ss:Size="12" ss:Bold="1" ss:Color="#C63B3B"/>
+      <Interior ss:Color="#FFF0F0" ss:Pattern="Solid"/>
+      <Borders>${excelBorders()}</Borders>
+    </Style>
+  </Styles>
+  <Worksheet ss:Name="${xmlAttribute(safeSheetName(warehouse.shortName || "Tồn kho"))}">
+    <Table>
+      <Column ss:Width="42"/>
+      <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="150"/>
+      <Column ss:Width="78"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="105"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="6" ss:StyleID="Title"><Data ss:Type="String">${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="6" ss:StyleID="Subtitle"><Data ss:Type="String">Xuất lúc: ${xmlEscape(exportedAt)} - Tổng mặt hàng: ${items.length} - Lọc bằng mũi tên ở dòng tiêu đề</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${headerRow}</Row>
+      ${itemRows}
+    </Table>
+    <AutoFilter x:Range="${autoFilterRange}" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+  <Worksheet ss:Name="Nhập xuất hôm nay">
+    <Table>
+      <Column ss:Width="120"/>
+      <Column ss:Width="135"/>
+      <Column ss:Width="105"/>
+      <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="82"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="7" ss:StyleID="Title"><Data ss:Type="String">NHẬP / XUẤT TRONG NGÀY - ${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="7" ss:StyleID="Subtitle"><Data ss:Type="String">Chỉ tính các thao tác phát sinh trong ngày xuất file.</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${movementHeaderRow}</Row>
+      ${movementRows}
+    </Table>
+    <AutoFilter x:Range="R3C1:R${movementLastRow}C8" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+  <Worksheet ss:Name="Theo dõi chu kỳ">
+    <Table>
+      <Column ss:Width="120"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="135"/>
+      <Column ss:Width="120"/>
+      <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="82"/>
+      <Column ss:Width="310"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="9" ss:StyleID="Title"><Data ss:Type="String">THEO DÕI NHẬP / XUẤT THEO CHU KỲ - ${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="9" ss:StyleID="Subtitle"><Data ss:Type="String">Chu kỳ kho: Thứ 4 ${xmlEscape(weekTitle)}. Tự tính tồn Chủ Nhật, xuất tiếp T2-T3 và tồn trước kỳ nhập Thứ 4 mới.</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${weeklyHeaderRow}</Row>
+      ${weeklyRows}
+    </Table>
+    <AutoFilter x:Range="R3C1:R${weeklyLastRow}C10" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+  <Worksheet ss:Name="Chu kỳ kho">
+    <Table>
+      <Column ss:Width="220"/>
+      <Column ss:Width="86"/>
+      <Column ss:Width="150"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="110"/>
+      <Column ss:Width="118"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="90"/>
+      <Column ss:Width="90"/>
+      <Column ss:Width="125"/>
+      <Column ss:Width="155"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="12" ss:StyleID="Title"><Data ss:Type="String">ĐỐI CHIẾU CHU KỲ KHO - ${xmlEscape(warehouse.name)}</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="12" ss:StyleID="Subtitle"><Data ss:Type="String">Công thức: tồn đầu Thứ 4 + nhập - xuất = tồn trước kỳ nhập Thứ 4 mới. Không chốt CN thì dòng khớp hiện TỰ TÍNH OK; chỉ món rủi ro mới hiện CẦN KIỂM.</Data></Cell>
+      </Row>
+      <Row ss:Height="26">${reconcileHeaderRow}</Row>
+      ${reconcileRows}
+      <Row ss:Height="8"></Row>
+      ${reconcileSummaryRows}
+    </Table>
+    <AutoFilter x:Range="R3C1:R${reconcileLastRow}C13" xmlns="urn:schemas-microsoft-com:office:excel"/>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <FreezePanes/>
+      <FrozenNoSplit/>
+      <SplitHorizontal>3</SplitHorizontal>
+      <TopRowBottomPane>3</TopRowBottomPane>
+      <ActivePane>2</ActivePane>
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+  <Worksheet ss:Name="Tổng kết">
+    <Table>
+      <Column ss:Width="220"/>
+      <Column ss:Width="170"/>
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="1" ss:StyleID="Title"><Data ss:Type="String">TỔNG KẾT ĐỐI CHIẾU</Data></Cell>
+      </Row>
+      <Row ss:Height="24">
+        <Cell ss:MergeAcross="1" ss:StyleID="Subtitle"><Data ss:Type="String">${xmlEscape(warehouse.name)} - ${xmlEscape(exportedAt)}</Data></Cell>
+      </Row>
+      ${summaryRows}
+    </Table>
+    <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+      <ProtectObjects>False</ProtectObjects>
+      <ProtectScenarios>False</ProtectScenarios>
+    </WorksheetOptions>
+  </Worksheet>
+</Workbook>`;
+
+      const blob = new Blob(["\ufeff" + workbook], { type: "application/vnd.ms-excel;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ton-kho-${activeWarehouseId}-${new Date().toISOString().slice(0, 10)}.xls`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Đã xuất file Excel.");
+    }
+
+    function exportJson() {
+      syncActiveWarehouse();
+      const backup = {
+        app: "chicken-plus-inventory",
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        activeWarehouseId,
+        warehouses: appState.warehouses
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ton-kho-chicken-plus-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Đã xuất file sao lưu JSON.");
+    }
+
+    function openImportJson() {
+      els.importJson.value = "";
+      els.importJson.click();
+    }
+
+    async function importJsonFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text.replace(/^\uFEFF/, ""));
+        if (!hasWarehouseData(parsed)) throw new Error("File không có dữ liệu kho.");
+
+        const importedState = normalizeAppState(parsed);
+        const hauNghiaCount = importedState.warehouses["hau-nghia"].items.length;
+        const ducHoaCount = importedState.warehouses["duc-hoa"].items.length;
+        const confirmed = confirm(`Nhập dữ liệu từ "${file.name}"?\n\nKho Hậu Nghĩa: ${hauNghiaCount} mặt hàng\nKho Đức Hòa: ${ducHoaCount} mặt hàng\n\nDữ liệu hiện tại sẽ được thay bằng file này.`);
+        if (!confirmed) return;
+
+        if (hasActivatedWarehouse) syncActiveWarehouse();
+        appState = importedState;
+        activeWarehouseId = importedState.warehouses[importedState.activeWarehouseId]
+          ? importedState.activeWarehouseId
+          : "hau-nghia";
+        hasActivatedWarehouse = false;
+        selectWarehouse(activeWarehouseId);
+        pushAudit("Nhập dữ liệu sao lưu", `${file.name} đã được nhập lại. Hậu Nghĩa ${hauNghiaCount} mặt hàng, Đức Hòa ${ducHoaCount} mặt hàng.`, currentOperator() || "NHẬP DỮ LIỆU");
+        render();
+        if (syncMode === "server") await saveRemoteNow();
+        showToast("Đã nhập dữ liệu sao lưu.");
+      } catch (error) {
+        showToast("File sao lưu không hợp lệ hoặc không đọc được.");
+      } finally {
+        els.importJson.value = "";
+      }
+    }
+
+    function todayMovements() {
+      return audit
+        .map(parseAuditMovement)
+        .filter(Boolean)
+        .filter(entry => isToday(entry.at))
+        .sort((a, b) => new Date(a.at) - new Date(b.at));
+    }
+
+    function movementsForRange(start, end) {
+      return audit
+        .map(parseAuditMovement)
+        .filter(Boolean)
+        .filter(entry => {
+          const date = new Date(entry.at);
+          return date >= start && date <= end;
+        })
+        .sort((a, b) => new Date(a.at) - new Date(b.at));
+    }
+
+    function parseAuditMovement(entry) {
+      const title = String(entry.title || "");
+      const isMovementTitle = /nhập|xuất|chốt kiểm|cập nhật mặt hàng/i.test(title);
+      const structured = Number.isFinite(Number(entry.oldQty)) && Number.isFinite(Number(entry.newQty));
+      let itemName = normalizeText(entry.itemName || "");
+      let oldQty = structured ? Number(entry.oldQty) : null;
+      let newQty = structured ? Number(entry.newQty) : null;
+
+      if (!structured) {
+        const detailText = String(entry.detail || "");
+        const match = detailText.match(/^(.+?):.*?tồn:\s*([\d.,]+)\s*→\s*([\d.,]+)/i)
+          || detailText.match(/^(.+?):\s*([\d.,]+)\s*→\s*([\d.,]+)/);
+        if (!match || !isMovementTitle) return null;
+        itemName = normalizeText(match[1]);
+        oldQty = parseAuditNumber(match[2]);
+        newQty = parseAuditNumber(match[3]);
+      }
+
+      if (!Number.isFinite(oldQty) || !Number.isFinite(newQty)) return null;
+      const qtyChange = Number.isFinite(Number(entry.qtyChange)) ? Number(entry.qtyChange) : newQty - oldQty;
+      const type = entry.type || (/xuất/i.test(title) ? "out" : /nhập/i.test(title) ? "in" : /cập nhật mặt hàng/i.test(title) && qtyChange !== 0 ? (qtyChange > 0 ? "in" : "out") : "count");
+      const quantity = Number.isFinite(Number(entry.quantity)) ? Math.abs(Number(entry.quantity)) : Math.abs(qtyChange);
+      if (!itemName) itemName = normalizeText(String(entry.detail || "").split(":", 1)[0]);
+      const matchedItem = items.find(item => item.id === entry.itemId || normalizeText(item.name) === itemName);
+      const unit = normalizeText(entry.unit || (matchedItem && matchedItem.unit) || "");
+      return {
+        at: entry.at || new Date().toISOString(),
+        timeText: new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(entry.at || Date.now())),
+        actor: normalizeText(entry.actor || "CHƯA GHI TÊN"),
+        type,
+        typeLabel: movementTypeLabel(type, qtyChange),
+        itemName,
+        unit,
+        oldQty,
+        newQty,
+        quantity,
+        qtyChange
+      };
+    }
+
+    function movementTypeLabel(type, qtyChange) {
+      if (type === "estimate") return "GHI TỒN ƯỚC LƯỢNG";
+      if (type === "in" || qtyChange > 0) return "NHẬP KHO";
+      if (type === "out" || qtyChange < 0) return "XUẤT KHO";
+      return "CHỐT KIỂM";
+    }
+
+    function parseAuditNumber(value) {
+      return Number(String(value || "").replace(/\./g, "").replace(/,/g, ""));
+    }
+
+    function currentInventoryWeek() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(today);
+      start.setHours(0, 0, 0, 0);
+      const wednesdayOffset = (today.getDay() - 3 + 7) % 7;
+      start.setDate(today.getDate() - wednesdayOffset);
+      const sunday = new Date(start);
+      sunday.setDate(start.getDate() + 4);
+      sunday.setHours(23, 59, 59, 999);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+      return { start, sunday, end };
+    }
+
+    function formatDateOnly(value) {
+      return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short" }).format(new Date(value));
+    }
+
+    function formatDateTime(value) {
+      return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+    }
+
+    function dayName(value) {
+      const date = new Date(value);
+      const names = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+      return names[date.getDay()];
+    }
+
+    function isSameDate(left, right) {
+      const a = new Date(left);
+      const b = new Date(right);
+      return a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth()
+        && a.getDate() === b.getDate();
+    }
+
+    function isToday(value) {
+      const date = new Date(value || Date.now());
+      const today = new Date();
+      return date.getFullYear() === today.getFullYear()
+        && date.getMonth() === today.getMonth()
+        && date.getDate() === today.getDate();
+    }
+
+    function buildDailySummary(movements) {
+      const movementByItem = new Map();
+      movements.forEach(entry => {
+        if (!movementByItem.has(entry.itemName)) movementByItem.set(entry.itemName, []);
+        movementByItem.get(entry.itemName).push(entry);
+      });
+
+      let startTotal = 0;
+      let inTotal = 0;
+      let outTotal = 0;
+      let estimatedCount = 0;
+      items.forEach(item => {
+        if (!isCountedItem(item)) {
+          estimatedCount += 1;
+          return;
+        }
+        const itemMovements = movementByItem.get(item.name) || [];
+        if (itemMovements.length) {
+          startTotal += itemMovements[0].oldQty;
+          itemMovements.forEach(entry => {
+            if (entry.type === "in") inTotal += entry.quantity;
+            if (entry.type === "out") outTotal += entry.quantity;
+          });
+        } else {
+          startTotal += item.qty;
+        }
+      });
+
+      const expectedTotal = startTotal + inTotal - outTotal;
+      const webTotal = expectedTotal;
+      const diff = 0;
+      const label = "ĐANG THEO DÕI";
+      return { startTotal, inTotal, outTotal, expectedTotal, webTotal, diff, label, estimatedCount };
+    }
+
+    function buildWeeklyReconciliation(movements, week) {
+      const movementByItem = new Map();
+      movements.forEach(entry => {
+        if (entry.type === "estimate") return;
+        if (!movementByItem.has(entry.itemName)) movementByItem.set(entry.itemName, []);
+        movementByItem.get(entry.itemName).push(entry);
+      });
+
+      let expectedTotal = 0;
+      let checkedTotal = 0;
+      let diffTotal = 0;
+      let shortCount = 0;
+      let overCount = 0;
+      let riskCount = 0;
+      const rows = items
+        .filter(isCountedItem)
+        .map(item => {
+          const itemMovements = movementByItem.get(item.name) || [];
+          const startCounts = itemMovements.filter(entry => entry.type === "count" && isSameDate(entry.at, week.start));
+          const opening = startCounts.length
+            ? startCounts[startCounts.length - 1].newQty
+            : itemMovements.length
+              ? itemMovements[0].oldQty
+              : item.qty;
+          const inTotal = itemMovements
+            .filter(entry => entry.type === "in")
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const outThuSat = itemMovements
+            .filter(entry => entry.type === "out" && [4, 5, 6].includes(new Date(entry.at).getDay()))
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const outMonTue = itemMovements
+            .filter(entry => entry.type === "out" && [1, 2].includes(new Date(entry.at).getDay()))
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const outTotal = itemMovements
+            .filter(entry => entry.type === "out")
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const inToSunday = itemMovements
+            .filter(entry => entry.type === "in" && new Date(entry.at) <= week.sunday)
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const outToSunday = itemMovements
+            .filter(entry => entry.type === "out" && new Date(entry.at) <= week.sunday)
+            .reduce((sum, entry) => sum + entry.quantity, 0);
+          const sundayExpected = opening + inToSunday - outToSunday;
+          const expected = opening + inTotal - outTotal;
+          const checked = item.qty;
+          const diff = checked - expected;
+          const status = getStatus(item);
+          const riskReasons = [];
+          if (status === "out") riskReasons.push("HẾT HÀNG");
+          if (status === "low") riskReasons.push("SẮP HẾT");
+          if (outTotal > 0 && expected <= item.min) riskReasons.push("XUẤT NHIỀU, NÊN KIỂM");
+          const risk = diff === 0 && riskReasons.length > 0;
+          const label = diff === 0 ? (risk ? "CẦN KIỂM" : "TỰ TÍNH OK") : diff < 0 ? "THIẾU HÀNG" : "DƯ HÀNG";
+          const warning = diff === 0 ? (riskReasons.join("; ") || "Tự tính theo nhập/xuất, không cần đếm") : "Có lệch, cần kiểm thực tế";
+          expectedTotal += expected;
+          checkedTotal += checked;
+          diffTotal += diff;
+          if (diff < 0) shortCount += 1;
+          if (diff > 0) overCount += 1;
+          if (risk || diff !== 0) riskCount += 1;
+          return {
+            name: item.name,
+            unit: item.unit || "",
+            category: item.category,
+            opening,
+            inTotal,
+            outThuSat,
+            sundayExpected,
+            outMonTue,
+            expected,
+            checked,
+            diff,
+            label,
+            warning,
+            risk
+          };
+        })
+        .sort((a, b) => {
+          if (a.diff !== b.diff) return a.diff - b.diff;
+          return a.name.localeCompare(b.name, "vi");
+        });
+
+      return { rows, expectedTotal, checkedTotal, diffTotal, shortCount, overCount, riskCount };
+    }
+
+    function resetSampleData() {
+      const actor = requireOperator("khôi phục dữ liệu mẫu");
+      if (!actor) return;
+      const confirmed = confirm("Khôi phục dữ liệu mẫu và ghi đè danh sách hiện tại?");
+      if (!confirmed) return;
+      items = sampleItems.map(item => ({ ...item, id: makeId() }));
+      audit = [{ title: "Khôi phục dữ liệu mẫu", detail: "Danh sách mẫu đã được nạp lại.", actor, at: new Date().toISOString() }];
+      clearForm();
+      render();
+      showToast(`${actor} đã khôi phục dữ liệu mẫu.`);
+    }
+
+    function hasWarehouseData(value) {
+      if (!value) return false;
+      if (value.warehouses) {
+        return Object.values(value.warehouses).some(warehouse => Array.isArray(warehouse.items) && warehouse.items.length);
+      }
+      return Array.isArray(value.items) && value.items.length;
+    }
+
+    function normalizeAppState(value) {
+      if (value && value.warehouses) {
+        document.body.dataset.rawHauNghiaCount = String(Array.isArray(value.warehouses["hau-nghia"] && value.warehouses["hau-nghia"].items) ? value.warehouses["hau-nghia"].items.length : -1);
+        document.body.dataset.rawDucHoaCount = String(Array.isArray(value.warehouses["duc-hoa"] && value.warehouses["duc-hoa"].items) ? value.warehouses["duc-hoa"].items.length : -1);
+        const hauNghia = normalizeWarehouse("hau-nghia", value.warehouses["hau-nghia"]);
+        const hadDucHoa = Boolean(value.warehouses["duc-hoa"]);
+        let ducHoa = hadDucHoa
+          ? normalizeWarehouse("duc-hoa", value.warehouses["duc-hoa"])
+          : cloneWarehouse("duc-hoa", hauNghia);
+        let restoredHauNghia = hauNghia;
+        if (!restoredHauNghia.items.length && ducHoa.items.length) {
+          restoredHauNghia = cloneWarehouse("hau-nghia", ducHoa);
+        }
+        if (!ducHoa.items.length && restoredHauNghia.items.length) {
+          ducHoa = cloneWarehouse("duc-hoa", restoredHauNghia);
+        }
+        document.body.dataset.normalizedHauNghiaCount = String(restoredHauNghia.items.length);
+        document.body.dataset.normalizedDucHoaCount = String(ducHoa.items.length);
+        return {
+          version: 2,
+          activeWarehouseId: value.activeWarehouseId || "hau-nghia",
+          copiedHauNghiaToDucHoa: value.copiedHauNghiaToDucHoa || !hadDucHoa,
+          warehouses: {
+            "hau-nghia": restoredHauNghia,
+            "duc-hoa": ducHoa
+          }
+        };
+      }
+      return buildStateFromSingleWarehouse(value && value.items ? value.items : [], value && value.audit ? value.audit : []);
+    }
+
+    function buildStateFromSingleWarehouse(sourceItems, sourceAudit) {
+      const hauNghia = normalizeWarehouse("hau-nghia", { items: sourceItems, audit: sourceAudit });
+      const ducHoa = cloneWarehouse("duc-hoa", hauNghia);
+      return {
+        version: 2,
+        activeWarehouseId: "hau-nghia",
+        copiedHauNghiaToDucHoa: true,
+        warehouses: {
+          "hau-nghia": hauNghia,
+          "duc-hoa": ducHoa
+        }
+      };
+    }
+
+    function normalizeWarehouse(id, value) {
+      const warehouse = value || {};
+      const normalizedItems = scopeItemIds(normalizeItems(warehouse.items), id);
+      return {
+        ...warehouseConfigs[id],
+        items: normalizedItems,
+        audit: normalizeAudit(warehouse.audit),
+        categoryOptions: mergeOptions(warehouse.categoryOptions, normalizedItems.map(item => item.category)),
+        locationOptions: mergeOptions(warehouse.locationOptions, normalizedItems.map(item => item.location)),
+        unitOptions: mergeOptions(warehouse.unitOptions, normalizedItems.map(item => item.unit))
+      };
+    }
+
+    function cloneWarehouse(id, sourceWarehouse) {
+      const clonedItems = scopeItemIds(normalizeItems(sourceWarehouse.items).map(item => ({ ...item })), id);
+      return {
+        ...warehouseConfigs[id],
+        items: clonedItems,
+        audit: [
+          {
+            title: "Sao chép mặt hàng ban đầu",
+            detail: `Đã sao chép ${clonedItems.length} mặt hàng từ kho Hậu Nghĩa.`,
+            actor: "HỆ THỐNG",
+            at: new Date().toISOString()
+          }
+        ],
+        categoryOptions: mergeOptions(sourceWarehouse.categoryOptions, clonedItems.map(item => item.category)),
+        locationOptions: mergeOptions(sourceWarehouse.locationOptions, clonedItems.map(item => item.location)),
+        unitOptions: mergeOptions(sourceWarehouse.unitOptions, clonedItems.map(item => item.unit))
+      };
+    }
+
+    function scopeItemIds(sourceItems, warehouseId) {
+      return sourceItems.map(item => {
+        const rawId = String(item.id || makeId());
+        const baseId = rawId.replace(/^(hau-nghia|duc-hoa)__/, "");
+        return { ...item, id: `${warehouseId}__${baseId}` };
+      });
+    }
+
+    function mergeOptions(existing, values) {
+      const set = new Set((Array.isArray(existing) ? existing : []).map(normalizeText).filter(Boolean));
+      (Array.isArray(values) ? values : []).forEach(value => {
+        const text = normalizeText(value);
+        if (text) set.add(text);
+      });
+      return [...set].sort((a, b) => a.localeCompare(b, "vi"));
+    }
+
+    function normalizeItems(value) {
+      return Array.isArray(value) ? value.map(normalizeItem) : [];
+    }
+
+    function normalizeItem(item) {
+      return {
+        id: item.id || makeId(),
+        name: normalizeText(item.name),
+        sku: normalizeText(item.sku),
+        category: normalizeText(item.category),
+        stockMode: normalizeStockMode(item.stockMode),
+        stockText: normalizeText(item.stockText),
+        qty: Math.max(0, Number(item.qty) || 0),
+        min: Math.max(0, Number(item.min) || 0),
+        price: Math.max(0, Number(item.price) || 0),
+        location: normalizeText(item.location),
+        unit: normalizeText(item.unit)
+      };
+    }
+
+    function normalizeStockMode(value) {
+      const mode = String(value || "count").toLowerCase();
+      return ["count", "many", "few", "text"].includes(mode) ? mode : "count";
+    }
+
+    function normalizeAudit(value) {
+      return Array.isArray(value) ? value.slice(0, 500).map(entry => ({
+        title: String(entry.title || "Cập nhật"),
+        detail: String(entry.detail || ""),
+        actor: normalizeText(entry.actor || entry.user || entry.by || "CHƯA GHI TÊN"),
+        at: entry.at || new Date().toISOString(),
+        type: entry.type ? String(entry.type) : "",
+        itemId: entry.itemId ? String(entry.itemId) : "",
+        itemName: entry.itemName ? normalizeText(entry.itemName) : "",
+        unit: entry.unit ? normalizeText(entry.unit) : "",
+        oldQty: Number.isFinite(Number(entry.oldQty)) ? Number(entry.oldQty) : null,
+        newQty: Number.isFinite(Number(entry.newQty)) ? Number(entry.newQty) : null,
+        quantity: Number.isFinite(Number(entry.quantity)) ? Number(entry.quantity) : null,
+        qtyChange: Number.isFinite(Number(entry.qtyChange)) ? Number(entry.qtyChange) : null,
+        warehouseId: entry.warehouseId ? String(entry.warehouseId) : ""
+      })) : [];
+    }
+
+    function normalizeText(value) {
+      return String(value || "").trim().toLocaleUpperCase("vi-VN");
+    }
+
+    function uppercaseInput(input) {
+      const upper = String(input.value || "").toLocaleUpperCase("vi-VN");
+      if (input.value === upper) return;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = upper;
+      if (typeof start === "number" && typeof end === "number") {
+        input.setSelectionRange(start, end);
+      }
+    }
+
+    function setSyncStatus(message) {
+      els.syncStatus.textContent = message;
+    }
+
+    function makeId() {
+      if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+      return "item-" + Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    function excelBorders() {
+      return '<Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9BC9EE"/>';
+    }
+
+    function safeSheetName(value) {
+      return String(value || "Tồn kho").replace(/[\\\/?*\[\]:]/g, " ").slice(0, 31) || "Tồn kho";
+    }
+
+    function xmlAttribute(value) {
+      return xmlEscape(value).replace(/"/g, "&quot;");
+    }
+
+    function xmlEscape(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    window.inventoryDebugState = () => ({
+      activeWarehouseId,
+      itemsCount: items.length,
+      warehouseCounts: Object.fromEntries(Object.entries(appState.warehouses).map(([id, warehouse]) => [id, warehouse.items.length])),
+      syncMode
+    });
+  </script>
+</body>
+</html>
